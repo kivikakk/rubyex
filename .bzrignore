@@ -1,7 +1,7 @@
 rubyex.ko
 rubyex.mod.c
 rubyex.mod.o
-test
+minor_*
 .*.ko.cmd
 .*.o.cmd
 .tmp_versions

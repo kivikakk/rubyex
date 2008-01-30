@@ -28,6 +28,7 @@ int rubyex_open(struct inode *inode, struct file *file)
     return -EBUSY;
 
   Device_Open++;
+  printk(KERN_INFO "Looks like minor #%d.\n", inode->i_rdev & 0xFF);
   sprintf(msg, "I already told you %d times Hello world!\n", counter++);
   msg_Ptr = msg;
   try_module_get(THIS_MODULE);
