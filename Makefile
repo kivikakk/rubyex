@@ -1,4 +1,6 @@
 
+CCFLAGS = -Wall -ansi -pedantic
+
 obj-m += rubyex.o
 rubyex-objs := main.o setup.o globals.o
 
