@@ -1,6 +1,6 @@
-rubyex.ko
-rubyex.mod.c
-rubyex.mod.o
+rubyex*.ko
+rubyex*.mod.c
+rubyex*.mod.o
 minor_*
 .*.ko.cmd
 .*.o.cmd

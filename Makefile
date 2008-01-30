@@ -1,8 +1,8 @@
 
 CCFLAGS = -Wall -ansi -pedantic
 
-obj-m += rubyex.o
-rubyex-objs := main.o setup.o globals.o
+obj-m += rubyexa.o
+rubyexa-objs := main.o setup.o globals.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

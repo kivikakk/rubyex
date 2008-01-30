@@ -13,8 +13,6 @@ static int __init rubyex_init(void)
   }
 
   printk(KERN_INFO "rubyex: created with major %d. fops at %p.\n", rubyex_major, &rubyex_fops);
-  printk(KERN_INFO "rubyex: %p, %p, %p, %p\n", rubyex_fops.read, rubyex_fops.write, rubyex_fops.open, rubyex_fops.release);
-  printk(KERN_INFO "rubyex: %p\n", rubyex_init);
 
   return SUCCESS;
 }
