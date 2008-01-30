@@ -1,0 +1,8 @@
+rubyex.ko
+rubyex.mod.c
+rubyex.mod.o
+test
+.*.ko.cmd
+.*.o.cmd
+.tmp_versions
+Module.symvers
