@@ -1,16 +1,10 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>			// fs
-#include <linux/init.h>			// module macros
 #include <asm/uaccess.h>		// put_user
 #include "globals.h"
 
-#define BUF_LEN 80
-
-static int Device_Open = 0;
-
-static char msg[BUF_LEN];
-static char *msg_Ptr;
+static int control_open = 0;
 
 struct file_operations rubyex_fops = {
   .read = rubyex_read,
@@ -22,34 +16,42 @@ struct file_operations rubyex_fops = {
 
 int rubyex_open(struct inode *inode, struct file *file)
 {
-  static int counter = 0;
+  int minor = inode->i_rdev & 0xff;	// obviously.
 
-  if (Device_Open)
-    return -EBUSY;
+  if (minor == 0) // `Control' port.
+  {
+    if (control_open) return -EBUSY;
 
-  Device_Open++;
-  printk(KERN_INFO "Looks like minor #%d.\n", inode->i_rdev & 0xFF);
-  sprintf(msg, "I already told you %d times Hello world!\n", counter++);
-  msg_Ptr = msg;
-  try_module_get(THIS_MODULE);
+    ++control_open;
+    try_module_get(THIS_MODULE);
+    return SUCCESS;
+  }
 
-  return SUCCESS;
+  return -1;	// ??
 }
 
 int rubyex_release(struct inode *inode, struct file *file)
 {
-  Device_Open--;
+  int minor = inode->i_rdev & 0xff;
 
-  module_put(THIS_MODULE);
+  if (minor == 0)
+  {
+    if (control_open == 0)
+      printk(KERN_ALERT "rubyex: what? Trying to close control (minor 0), but already closed.\n");
+    control_open = 0;
 
-  return 0;
+    module_put(THIS_MODULE);
+    return SUCCESS;
+  }
+
+  return -1;	 // confused.
 }
 
 ssize_t rubyex_read(struct file *filp, // see include/linux/fs.h
 			    char *buffer, size_t length, loff_t *offset)
 {
   int bytes_read = 0;
-  if (*msg_Ptr == 0)	// NUL, i.e. EOF
+/*  if (*msg_Ptr == 0)	// NUL, i.e. EOF
     return 0;
 
   while (length && *msg_Ptr) {
@@ -57,7 +59,7 @@ ssize_t rubyex_read(struct file *filp, // see include/linux/fs.h
 
     length--;
     bytes_read++;
-  }
+  } */
 
   return bytes_read;
 }
@@ -65,6 +67,5 @@ ssize_t rubyex_read(struct file *filp, // see include/linux/fs.h
 ssize_t
 rubyex_write(struct file *filp, const char *buff, size_t len, loff_t *off)
 {
-  printk(KERN_ALERT "Can't write to me.\n");
   return -EINVAL;
 }
