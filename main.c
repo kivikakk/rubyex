@@ -18,8 +18,9 @@ struct file_operations rubyex_fops = {
   .release = rubyex_release
 };
 
-static char state[80];
+static char state[160], command[80];
 static char *state_read;
+static int command_written = 0;
 
 int rubyex_open(struct inode *inode, struct file *file)
 {
@@ -29,8 +30,13 @@ int rubyex_open(struct inode *inode, struct file *file)
   if (minor == 0) { // `Control' port.
     if (control_open) return -EBUSY;
 
-    sprintf(state, "no. of cells: %d\n", cell_list_length(rubyex_cells));
+    if (command_written > 0)
+      sprintf(state, "no. of cells: %d\ncommand: %s\n", cell_list_length(rubyex_cells), command);
+    else
+      sprintf(state, "no. of cells: %d\n", cell_list_length(rubyex_cells));
+
     state_read = state;
+    command_written = 0;
     printk(KERN_INFO "%s\n", state);
 
     ++control_open;
@@ -74,7 +80,19 @@ ssize_t rubyex_read(struct file *filp, char *buffer, size_t length, loff_t *offs
   return bytes_read;
 }
 
-ssize_t rubyex_write(struct file *filp, const char *buff, size_t len, loff_t *off)
+ssize_t rubyex_write(struct file *filp, const char *buffer, size_t length, loff_t *offset)
 {
-  return -EINVAL;
+  long not_copied, copied;
+  
+  printk(KERN_INFO "command_write, buffer, length: %d, %p, %d\n", command_written, buffer, length);
+  
+  not_copied = copy_from_user(command + command_written, buffer, length);
+  copied = length - not_copied;
+
+  printk(KERN_INFO "copied: %ld\n", copied);
+  command_written += copied;
+
+  command[command_written] = (char)0;
+
+  return copied;
 }
