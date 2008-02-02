@@ -12,7 +12,7 @@ static int __init rubyex_init(void)
     return rubyex_major;
   }
 
-  printk(KERN_INFO "rubyex: created with major %d. fops at %p.\n", rubyex_major, &rubyex_fops);
+  printk(KERN_INFO "rubyex: created with major %d.\n", rubyex_major);
 
   return SUCCESS;
 }
@@ -22,6 +22,7 @@ static void __exit rubyex_exit(void)
   int ret = unregister_chrdev(rubyex_major, DEVICE_NAME);
   if (ret < 0)
     printk(KERN_ALERT "rubyex: error in unregister_chrdev: %d\n", ret);
+  printk(KERN_INFO "rubyex: removed from kernel.\n");
 }
 
 module_init(rubyex_init);
