@@ -14,6 +14,8 @@ static int __init rubyex_init(void)
 
   printk(KERN_INFO "rubyex: created with major %d.\n", rubyex_major);
 
+  rubyex_cells = cell_list_allocate(NULL);
+
   return SUCCESS;
 }
 

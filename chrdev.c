@@ -40,10 +40,7 @@ int rubyex_open(struct inode *inode, struct file *file)
   if (minor == 0) { // `Control' port.
     if (control_open) return -EBUSY;
 
-    if (command_written > 0)
-      sprintf(state, "no. of cells: %d\ncommand: %s\n", cell_list_length(rubyex_cells), command);
-    else
-      sprintf(state, "no. of cells: %d\n", cell_list_length(rubyex_cells));
+    sprintf(state, "no. of cells: %d\n", cell_list_length(rubyex_cells));
 
     state_read = state;
     command_written = 0;

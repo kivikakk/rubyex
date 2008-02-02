@@ -25,7 +25,7 @@ void evaluate_command(const char *command)
 
 void cell_new(char **ssptr)
 {
-  struct cell_list *it;
+  struct cell_list_node *it;
   struct cell *cell;
   char *token = get_next_nonblank_token(ssptr);
 
@@ -35,7 +35,7 @@ void cell_new(char **ssptr)
   }
 
   // make sure the cell name isn't in use.
-  it = rubyex_cells;
+  it = rubyex_cells->head;
   while (it) {
     cell = it->cell;
     if (strcmp(cell->name, token) == 0) {
@@ -46,7 +46,7 @@ void cell_new(char **ssptr)
   }
 
   cell = cell_allocate(token);
-  cell_list_append(&rubyex_cells, cell);
+  cell_list_append(rubyex_cells, cell);
 }
 
 char *get_next_nonblank_token(char **ssptr)
