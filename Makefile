@@ -1,8 +1,8 @@
 
-CCFLAGS = -Wall -ansi -pedantic
+CFLAGS := $(CFLAGS) -Wall -Werror
 
 obj-m += rubyexa.o
-rubyexa-objs := chrdev.o command.o setup.o globals.o
+rubyexa-objs := chrdev.o command.o setup.o globals.o cell.o class.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

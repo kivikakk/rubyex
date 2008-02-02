@@ -5,11 +5,12 @@
 #include "list.h"
 
 struct cell {
+  char *name;
   struct class_list *classes;
-  int id;
 };
 
 list_define(cell);
+struct cell *cell_allocate(const char *);
 
 #endif
 

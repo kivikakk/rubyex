@@ -4,7 +4,7 @@
 #include "list.h"
 
 struct class {
-
+  
 };
 
 list_define(class);
