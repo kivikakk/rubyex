@@ -7,10 +7,12 @@
 struct cell {
   char *name;
   struct class_list *classes;
+  int minor;
 };
 
 list_define(cell);
 struct cell *cell_allocate(const char *);
+int cell_select_minor(struct cell *);
 
 #endif
 
