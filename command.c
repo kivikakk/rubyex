@@ -37,7 +37,6 @@ void evaluate_command(const char *command)
 
 void cell_new(char **ssptr)
 {
-  struct cell_list_node *it;
   struct cell *cell;
   char *token = get_next_nonblank_token(ssptr);
 
@@ -47,14 +46,10 @@ void cell_new(char **ssptr)
   }
 
   // make sure the cell name isn't in use.
-  it = rubyex_cells->head;
-  while (it) {
-    cell = it->cell;
-    if (strcmp(cell->name, token) == 0) {
-      puts(KERN_WARNING, "cell.new", "name \"%s\" already in use (minor %d)\n", token, cell->minor);
-      return;
-    }
-    it = it->next;
+  
+  if ((cell = cell_get_by_name(token))) {
+    puts(KERN_WARNING, "cell.new", "name \"%s\" already in use (minor %d)\n", token, cell->minor);
+    return;
   }
 
   cell = cell_allocate(token);
