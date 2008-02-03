@@ -3,8 +3,6 @@
 #include <linux/init.h>			// module macros
 #include "globals.h"
 
-#define DEVICE_NAME "rubyexa"
-
 static int __init rubyex_init(void)
 {
   rubyex_major = register_chrdev(0, DEVICE_NAME, &rubyex_fops);

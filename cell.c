@@ -22,6 +22,11 @@ void cell_deallocate(struct cell *cell)
   vfree(cell);	// goodbye, sweet one
 }
 
+void cell_reallocate_data(struct cell *cell)
+{
+  // reallocate classes.
+}
+
 struct cell *cell_get_by_name(const char *name)
 {
   struct cell_list_node *it;

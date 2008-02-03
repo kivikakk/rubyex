@@ -102,7 +102,7 @@ void cell_reset(char **ssptr)
     return;
   }
 
-  // ..
+  cell_reallocate_data(cell);
 }
 
 char *get_next_nonblank_token(char **ssptr)
