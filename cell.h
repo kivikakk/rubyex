@@ -15,6 +15,7 @@ struct cell *cell_allocate(const char *);
 void cell_deallocate(struct cell *);
 void cell_reallocate_data(struct cell *);
 struct cell *cell_get_by_name(const char *);
+struct cell *cell_get_by_minor(int);
 int cell_select_minor(struct cell *);
 
 #endif

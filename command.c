@@ -41,14 +41,14 @@ void cell_new(char **ssptr)
   char *token = get_next_nonblank_token(ssptr);
 
   if (!token) {
-    puts(KERN_WARNING, "cell.new", "requires argument (the name of the new cell)\n");
+    puts(KERN_WARNING, "requires argument (the name of the new cell)\n");
     return;
   }
 
   // make sure the cell name isn't in use.
   
   if ((cell = cell_get_by_name(token))) {
-    puts(KERN_WARNING, "cell.new", "name \"%s\" already in use (minor %d)\n", token, cell->minor);
+    puts(KERN_WARNING, "name \"%s\" already in use (minor %d)\n", token, cell->minor);
     return;
   }
 
@@ -60,12 +60,12 @@ void cell_new(char **ssptr)
 void cell_list(char **ssptr)
 {
   struct cell_list_node *it = rubyex_cells->head;
-  puts(KERN_INFO, "cell.list", "begin\n");
+  puts(KERN_INFO, "begin\n");
   while (it) {
-    puts(KERN_INFO, "cell.list", "{:name => \"%s\", :minor => %d}\n", it->cell->name, it->cell->minor);
+    puts(KERN_INFO, "{:name => \"%s\", :minor => %d}\n", it->cell->name, it->cell->minor);
     it = it->next;
   }
-  puts(KERN_INFO, "cell.list", "end\n");
+  puts(KERN_INFO, "end\n");
 }
 
 void cell_remove(char **ssptr)
@@ -74,12 +74,12 @@ void cell_remove(char **ssptr)
   char *token = get_next_nonblank_token(ssptr);
 
   if (!token) {
-    puts(KERN_WARNING, "cell.remove", "requires argument (the name of the cell to remove)\n");
+    puts(KERN_WARNING, "requires argument (the name of the cell to remove)\n");
     return;
   }
 
   if (!(cell = cell_get_by_name(token))) {
-    puts(KERN_WARNING, "cell.remove", "could not find cell named \"%s\"\n", token);
+    puts(KERN_WARNING, "could not find cell named \"%s\"\n", token);
     return;
   }
 
@@ -93,12 +93,12 @@ void cell_reset(char **ssptr)
   char *token = get_next_nonblank_token(ssptr);
 
   if (!token) {
-    puts(KERN_WARNING, "cell.reset", "requires argument (the name of the cell to reset)\n");
+    puts(KERN_WARNING, "requires argument (the name of the cell to reset)\n");
     return;
   }
 
   if (!(cell = cell_get_by_name(token))) {
-    puts(KERN_WARNING, "cell.reset", "could not find cell named \"%s\"\n", token);
+    puts(KERN_WARNING, "could not find cell named \"%s\"\n", token);
     return;
   }
 

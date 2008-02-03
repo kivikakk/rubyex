@@ -43,6 +43,22 @@ struct cell *cell_get_by_name(const char *name)
   return NULL;
 }
 
+struct cell *cell_get_by_minor(int minor)
+{
+  struct cell_list_node *it;
+
+  it = rubyex_cells->head;
+  while (it) {
+    if (it->cell->minor == minor) {
+      return it->cell;
+      break;
+    }
+    it = it->next;
+  }
+
+  return NULL;
+}
+
 // Select a minor, avoiding ones used in rubyex_cells.
 int cell_select_minor(struct cell *cell)
 {

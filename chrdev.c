@@ -11,6 +11,8 @@ int rubyex_release(struct inode *, struct file *);
 ssize_t rubyex_read(struct file *, char *, size_t, loff_t *);
 ssize_t rubyex_write(struct file *, const char *, size_t, loff_t *);
 
+static ssize_t rubyex_write_command(struct file *, const char *, size_t, loff_t *);
+static ssize_t rubyex_write_cell(int, struct file *, const char *, size_t, loff_t *);
 static void prepare_state(void);
 
 static inline int get_minor(struct inode *inode)
@@ -28,7 +30,6 @@ struct file_operations rubyex_fops = {
   .release = rubyex_release
 };
 
-#define STATE_BUF_LENGTH 80
 #define COMMAND_BUF_LENGTH 80
 
 static char *state, command[COMMAND_BUF_LENGTH];
@@ -59,7 +60,7 @@ int rubyex_release(struct inode *inode, struct file *file)
 
   if (minor == 0) {
     if (control_open == 0)
-      puts(KERN_ALERT, "rubyex_release", "trying to close control (minor 0), but already closed.\n");
+      puts(KERN_ALERT, "trying to close control (minor 0), but already closed.\n");
 
     vfree(state);
     control_open = 0;
@@ -95,42 +96,61 @@ ssize_t rubyex_read(struct file *filp, char *buffer, size_t length, loff_t *offs
 
 ssize_t rubyex_write(struct file *filp, const char *buffer, size_t length, loff_t *offset)
 {
-  char *c, *nl_start; int c_len;
-  long not_copied, copied = 0;
   int minor = get_minor(filp->f_dentry->d_inode);
 
-  size_t to_copy = length;
-
-  if (minor == 0) {
-    if (command_written + to_copy >= COMMAND_BUF_LENGTH) {
-      to_copy = COMMAND_BUF_LENGTH - command_written - 1;	// max
-      if (to_copy == 0)
-	return -EINVAL;		// too long!
-    }
-
-    not_copied = copy_from_user(command + command_written, buffer, to_copy);
-    copied = to_copy - not_copied;
-
-    command_written += copied;
-    command[command_written] = (char)0;
-
-    nl_start = strchr(command, '\n');
-    if (nl_start) {
-      c_len = nl_start - command;
-      c = vmalloc(c_len + 1);
-      strlcpy(c, command, c_len + 1);
-      // now we have everything (except the \n) in `c'. note that the following memmove
-      // starts at nl_start+1, to avoid taking it with us.
-      memmove(command, nl_start + 1, strlen(nl_start + 1));
-      command_written -= c_len + 1;
-      evaluate_command(c);
-      vfree(c);
-    }
-
-    return copied;
-  }
+  if (minor == 0)
+    return rubyex_write_command(filp, buffer, length, offset);
+  else 
+    return rubyex_write_cell(minor, filp, buffer, length, offset);
 
   return -EINVAL;
+}
+
+static ssize_t rubyex_write_command(struct file *filp, const char *buffer, size_t length, loff_t *offset)
+{
+  char *c, *nl_start; int c_len;
+  long not_copied, copied = 0;
+  size_t to_copy = length;
+
+  if (command_written + to_copy >= COMMAND_BUF_LENGTH) {
+    to_copy = COMMAND_BUF_LENGTH - command_written - 1;	// max
+    if (to_copy == 0)
+      return -EINVAL;		// too long!
+  }
+
+  not_copied = copy_from_user(command + command_written, buffer, to_copy);
+  copied = to_copy - not_copied;
+
+  command_written += copied;
+  command[command_written] = (char)0;
+
+  nl_start = strchr(command, '\n');
+  if (nl_start) {
+    c_len = nl_start - command;
+    c = vmalloc(c_len + 1);
+    strlcpy(c, command, c_len + 1);
+    // now we have everything (except the \n) in `c'. note that the following memmove
+    // starts at nl_start+1, to avoid taking it with us.
+    memmove(command, nl_start + 1, strlen(nl_start + 1));
+    command_written -= c_len + 1;
+    evaluate_command(c);
+    vfree(c);
+  }
+
+  return copied;
+}
+
+static ssize_t rubyex_write_cell(int minor, struct file *filp, const char *buffer, size_t length, loff_t *offset)
+{
+  struct cell *cell;
+
+  if (!(cell = cell_get_by_minor(minor))) {
+    puts(KERN_WARNING, "Hi\n");
+  }
+
+  puts(KERN_WARNING, "There.\n");
+
+  return 0;
 }
 
 static void prepare_state(void)
