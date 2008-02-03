@@ -1,2 +1,77 @@
 
 grammar Rubyex
+  rule file
+    terminated_lines:((line:line_unit) "\n")* line_unit {
+      def terminated_lines
+	super.map {|n| n.line}
+      end
+
+      def line_units
+	termianted_lines + [line_unit]
+      end
+    }
+  end
+
+  rule line_unit
+    whitespace* statement? whitespace*
+    /
+    whitespace*
+  end
+
+  rule statement
+    (assignment whitespace*)? expression
+  end
+
+  rule expression
+    string_literal
+    /
+    method_call
+  end
+
+  rule keyword
+    "if"
+  end
+
+  rule variable_name
+    [a-zA-Z_] [a-zA-Z0-9_]*
+  end
+
+  rule function_name
+    # Anything that looks like a function name.
+    variable_name [?!]?
+  end
+
+  rule string_literal
+    '"' (!'"' . / '\"')* '"'
+  end
+
+  rule method_call
+    function_name method_arguments?
+  end
+
+  rule method_arguments
+    whitespace* "(" method_arguments_inside ")"
+    /
+    whitespace* method_arguments_inside
+  end
+
+  rule method_arguments_inside
+    (&method_argument method_argument)
+    (whitespace* "," whitespace* method_argument)*
+  end
+
+  rule method_argument
+    string_literal / variable_name / function_name
+  end
+
+  rule whitespace
+    # Space, tab.
+    [ \t]
+  end
+
+  rule assignment
+    # This only supports single assignment for now.
+    keyword whitespace* "="
+  end
+end
+
