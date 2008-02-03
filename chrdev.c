@@ -59,7 +59,7 @@ int rubyex_release(struct inode *inode, struct file *file)
 
   if (minor == 0) {
     if (control_open == 0)
-      printk(KERN_ALERT "rubyex: what? Trying to close control (minor 0), but already closed.\n");
+      puts(KERN_ALERT, "rubyex_release", "trying to close control (minor 0), but already closed.\n");
 
     vfree(state);
     control_open = 0;

@@ -3,10 +3,11 @@
 #include "globals.h"
 #include "command.h"
 
-char *get_next_nonblank_token(char **);
 void cell_new(char **);
 void cell_list(char **);
 void cell_remove(char **);
+void cell_reset(char **);
+char *get_next_nonblank_token(char **);
 
 void evaluate_command(const char *command)
 {
@@ -19,6 +20,7 @@ void evaluate_command(const char *command)
   ssptr = our_command;
   token = get_next_nonblank_token(&ssptr);
 
+  // XXX: do something CircleMUD commandish with this
   if (!token)
     ;
   else if (strcmp(token, "cell.new") == 0)
@@ -27,6 +29,8 @@ void evaluate_command(const char *command)
     cell_list(&ssptr);
   else if (strcmp(token, "cell.remove") == 0)
     cell_remove(&ssptr);
+  else if (strcmp(token, "cell.reset") == 0)
+    cell_reset(&ssptr);
     
   vfree(our_command);
 }
@@ -38,7 +42,7 @@ void cell_new(char **ssptr)
   char *token = get_next_nonblank_token(ssptr);
 
   if (!token) {
-    printk(KERN_WARNING "rubyex: cell.new: requires argument (the name of the new cell)\n");
+    puts(KERN_WARNING, "cell.new", "requires argument (the name of the new cell)\n");
     return;
   }
 
@@ -47,7 +51,7 @@ void cell_new(char **ssptr)
   while (it) {
     cell = it->cell;
     if (strcmp(cell->name, token) == 0) {
-      printk(KERN_WARNING "rubyex: cell.new: name \"%s\" already in use (minor %d)\n", token, cell->minor);
+      puts(KERN_WARNING, "cell.new", "name \"%s\" already in use (minor %d)\n", token, cell->minor);
       return;
     }
     it = it->next;
@@ -61,41 +65,49 @@ void cell_new(char **ssptr)
 void cell_list(char **ssptr)
 {
   struct cell_list_node *it = rubyex_cells->head;
-  printk(KERN_INFO "rubyex: cell.list begins\n");
+  puts(KERN_INFO, "cell.list", "begin\n");
   while (it) {
-    printk(KERN_INFO "rubyex: cell.list: {:name => \"%s\", :minor => %d}\n", it->cell->name, it->cell->minor);
+    puts(KERN_INFO, "cell.list", "{:name => \"%s\", :minor => %d}\n", it->cell->name, it->cell->minor);
     it = it->next;
   }
-  printk(KERN_INFO "rubyex: cell.list ends\n");
+  puts(KERN_INFO, "cell.list", "end\n");
 }
 
 void cell_remove(char **ssptr)
 {
-  struct cell_list_node *it;
   struct cell *cell = NULL;
   char *token = get_next_nonblank_token(ssptr);
 
   if (!token) {
-    printk(KERN_WARNING "rubyex: cell.remove: requires argument (the name of the cell to remove)\n");
+    puts(KERN_WARNING, "cell.remove", "requires argument (the name of the cell to remove)\n");
     return;
   }
 
-  it = rubyex_cells->head;
-  while (it) {
-    if (strcmp(it->cell->name, token) == 0) {
-      cell = it->cell;
-      break;
-    }
-    it = it->next;
-  }
-
-  if (!cell) {
-    printk(KERN_WARNING "rubyex: cell.remove: could not find cell named \"%s\"\n", token);
+  if (!(cell = cell_get_by_name(token))) {
+    puts(KERN_WARNING, "cell.remove", "could not find cell named \"%s\"\n", token);
     return;
   }
 
   cell_list_remove(rubyex_cells, cell);
   cell_deallocate(cell);
+}
+
+void cell_reset(char **ssptr)
+{
+  struct cell *cell = NULL;
+  char *token = get_next_nonblank_token(ssptr);
+
+  if (!token) {
+    puts(KERN_WARNING, "cell.reset", "requires argument (the name of the cell to reset)\n");
+    return;
+  }
+
+  if (!(cell = cell_get_by_name(token))) {
+    puts(KERN_WARNING, "cell.reset", "could not find cell named \"%s\"\n", token);
+    return;
+  }
+
+  // ..
 }
 
 char *get_next_nonblank_token(char **ssptr)

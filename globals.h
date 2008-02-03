@@ -6,7 +6,8 @@
 
 #define SUCCESS 0
 
-#define DEVICE_NAME "rubydev"
+int puts(const char *, const char *, const char *, ...)
+     __attribute__ ((__format__ (__printf__, 3, 4))); // ensure checking is done on 4th argument [or something. it works.]
 
 extern int rubyex_major;
 extern struct file_operations rubyex_fops;

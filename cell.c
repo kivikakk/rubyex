@@ -22,6 +22,22 @@ void cell_deallocate(struct cell *cell)
   vfree(cell);	// goodbye, sweet one
 }
 
+struct cell *cell_get_by_name(const char *name)
+{
+  struct cell_list_node *it;
+
+  it = rubyex_cells->head;
+  while (it) {
+    if (strcmp(it->cell->name, name) == 0) {
+      return it->cell;
+      break;
+    }
+    it = it->next;
+  }
+
+  return NULL;
+}
+
 // Select a minor, avoiding ones used in rubyex_cells.
 int cell_select_minor(struct cell *cell)
 {
