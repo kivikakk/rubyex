@@ -145,7 +145,8 @@ static ssize_t rubyex_write_cell(int minor, struct file *filp, const char *buffe
   struct cell *cell;
 
   if (!(cell = cell_get_by_minor(minor))) {
-    puts(KERN_WARNING, "Hi\n");
+    puts(KERN_ALERT, "trying to write with minor %d, but no recorded cell with that minor exists!\n", minor);
+    return -EINVAL;
   }
 
   puts(KERN_WARNING, "There.\n");
