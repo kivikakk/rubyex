@@ -13,6 +13,15 @@ struct cell *cell_allocate(const char *name)
   return cell;
 }
 
+void cell_deallocate(struct cell *cell)
+{
+  vfree(cell->name);
+
+  // TODO: free classes
+
+  vfree(cell);	// goodbye, sweet one
+}
+
 // Select a minor, avoiding ones used in rubyex_cells.
 int cell_select_minor(struct cell *cell)
 {

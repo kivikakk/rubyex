@@ -46,7 +46,18 @@
       search = &(*search)->next; \
     *search = node; \
   } \
-
+  \
+  static inline void x##_list_remove(struct x##_list *list, struct x *item) \
+  { \
+    struct x##_list_node **search = &list->head; \
+    while (*search) { \
+      if ((*search)->x == item) { \
+	*search = (*search)->next; \
+	break; \
+      } \
+      search = &(*search)->next; \
+    } \
+  }
 
 #endif
 

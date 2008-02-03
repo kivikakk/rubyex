@@ -72,7 +72,7 @@ void cell_list(char **ssptr)
 void cell_remove(char **ssptr)
 {
   struct cell_list_node *it;
-  struct cell *cell;
+  struct cell *cell = NULL;
   char *token = get_next_nonblank_token(ssptr);
 
   if (!token) {
@@ -95,6 +95,7 @@ void cell_remove(char **ssptr)
   }
 
   cell_list_remove(rubyex_cells, cell);
+  cell_deallocate(cell);
 }
 
 char *get_next_nonblank_token(char **ssptr)

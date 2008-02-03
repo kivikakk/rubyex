@@ -12,6 +12,7 @@ struct cell {
 
 list_define(cell);
 struct cell *cell_allocate(const char *);
+void cell_deallocate(struct cell *);
 int cell_select_minor(struct cell *);
 
 #endif

@@ -11,7 +11,9 @@ int rubyex_release(struct inode *, struct file *);
 ssize_t rubyex_read(struct file *, char *, size_t, loff_t *);
 ssize_t rubyex_write(struct file *, const char *, size_t, loff_t *);
 
-inline int get_minor(struct inode *inode)
+static void prepare_state(void);
+
+static inline int get_minor(struct inode *inode)
 {
   // sometimes I wonder why I bother to write a helper function for something this obvious.
   return inode->i_rdev & 0xff;
@@ -29,7 +31,7 @@ struct file_operations rubyex_fops = {
 #define STATE_BUF_LENGTH 80
 #define COMMAND_BUF_LENGTH 80
 
-static char state[STATE_BUF_LENGTH], command[COMMAND_BUF_LENGTH];
+static char *state, command[COMMAND_BUF_LENGTH];
 static char *state_read;
 static int command_written = 0;
 
@@ -40,9 +42,7 @@ int rubyex_open(struct inode *inode, struct file *file)
   if (minor == 0) { // `Control' port.
     if (control_open) return -EBUSY;
 
-    sprintf(state, "no. of cells: %d\n", cell_list_length(rubyex_cells));
-
-    state_read = state;
+    prepare_state();
     command_written = 0;
 
     ++control_open;
@@ -60,6 +60,8 @@ int rubyex_release(struct inode *inode, struct file *file)
   if (minor == 0) {
     if (control_open == 0)
       printk(KERN_ALERT "rubyex: what? Trying to close control (minor 0), but already closed.\n");
+
+    vfree(state);
     control_open = 0;
 
     module_put(THIS_MODULE);
@@ -131,3 +133,36 @@ ssize_t rubyex_write(struct file *filp, const char *buffer, size_t length, loff_
   return -EINVAL;
 }
 
+static void prepare_state(void)
+{
+  int written, position, size, list_length;
+  struct cell_list_node *n;
+
+  list_length = cell_list_length(rubyex_cells);
+
+  size = 80;
+  
+  while (true) {
+    state = vmalloc(size); position = 0;
+
+    written = snprintf(state + position, size - position, "%d\n", list_length);
+    position += written;
+  
+    n = rubyex_cells->head;
+    while (n) {
+      written = snprintf(state + position, size - position, "%d %s\n", n->cell->minor, n->cell->name);
+      if (written >= size - position) {
+	size += 60; goto _retry;
+      }
+      position += written;
+      n = n->next;
+    }
+
+    break;
+
+_retry:
+    vfree(state);
+  }
+
+  state_read = state;
+}
