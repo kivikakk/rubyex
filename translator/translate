@@ -1,0 +1,33 @@
+#!/usr/bin/ruby
+
+begin
+  require 'commandline'
+rescue LoadError
+  require 'rubygems'
+  retry
+end
+
+require 'ex_parser'
+
+class App < CommandLine::Application
+  def initialize
+    version		"0.1"
+    author		"Arlen Christian Mart Cuss <celtic@sairyx.org>"
+    copyright		"Copyright (c) 2008, Arlen Cuss"
+    synopsis		"[-Vh] in_file out_file"
+    short_description	"Translates Ruby source code into rubyex bytecode"
+    # long_description
+
+    option 	:version, :names => %w(--version -V)
+    option 	:help
+
+    expected_args	:in_file, :out_file
+  end
+
+  def main
+    in_file, out_file = *args
+    
+# Now we have to process Ruby. Fuck.
+  end
+end
+
