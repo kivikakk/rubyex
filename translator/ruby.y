@@ -18,6 +18,12 @@
 
 %token <string> STRING_LITERAL 
 %token <integer> INTEGER_LITERAL
+%token <floating> FLOATING_LITERAL
+
+%left '+' '-'
+%left '*' '/'
+%left NEG
+%right '^'
 
 %%
 
@@ -35,10 +41,18 @@ statement:	IDENTIFIER '=' expr
 
 expr:		IDENTIFIER
 	      | literal
+	      | expr '+' expr
+	      | expr '-' expr
+	      | expr '*' expr
+	      | expr '/' expr
+	      | '-' expr %prec NEG
+	      | expr '^' expr
+	      | '(' expr ')'
 ;
 
-literal:	STRING_LITERAL { printf("I understood a string literal: \"%s\".\n", $1); }
+literal:	STRING_LITERAL { free($1); /* for now. to stop our test cases leaking everywhere */ }
 	      |	INTEGER_LITERAL
+	      | FLOATING_LITERAL
 ;
 
 %%
