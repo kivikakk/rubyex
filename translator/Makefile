@@ -9,7 +9,7 @@ out/lex.yy.o: out/lex.yy.c out/ruby.tab.c
 	gcc -c -o $@ out/lex.yy.c
 
 out/ruby.tab.c: ruby.y
-	bison -d $<
+	bison --report=state -d $<
 	mv ruby.tab.? out/
 
 out/lex.yy.c: ruby.lex

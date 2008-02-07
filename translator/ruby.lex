@@ -20,27 +20,24 @@
 		  BEGIN(str);
 		}
 <str>\"			{ /* all done */
-		  BEGIN(INITIAL); // XXX TODO: fix the below lines to use the function
-		  printf("We're done here. NUL-terminating string.\n");
+		  BEGIN(INITIAL);
 		  *string_buf_ptr = '\0';
 		  yylval.string = string_buf;
 		  return STRING_LITERAL;
 		}
-<str>\n			{
-		  /* unterminated string over line */
-		}
-<str>\\n	*string_buf_ptr++ = '\n';
-<str>\\t	*string_buf_ptr++ = '\t';
-<str>\\r	*string_buf_ptr++ = '\r';
-<str>\\b	*string_buf_ptr++ = '\b';
-<str>\\f	*string_buf_ptr++ = '\f';
+<str>\n		append_string_buf('\n');
+<str>\\n	append_string_buf('\n');
+<str>\\t	append_string_buf('\t');
+<str>\\r	append_string_buf('\r');
+<str>\\b	append_string_buf('\b');
+<str>\\f	append_string_buf('\f');
 
-<str>\\(.|\n)	*string_buf_ptr++ = yytext[1];
+<str>\\(.|\n)	append_string_buf(yytext[1]);
 
 <str>[^\\\n\"]+		{
 		  char *yptr = yytext;
 		  while (*yptr)
-		    *string_buf_ptr++ = *yptr++;
+		    append_string_buf(*yptr++);
 		}
 
 [0-9]+		{ yylval.integer = atoi(yytext); return INTEGER_LITERAL; }
@@ -56,7 +53,6 @@ void append_string_buf(char c)
 {
   char *new_ptr;
   if (string_consumed >= string_size - 1) {
-    printf("Used %d out of %d, resizing to %d.\n", string_consumed, string_size, string_size * 2);
     new_ptr = realloc(string_buf, string_size * 2);
     if (!new_ptr) {
       fprintf(stderr, "Ran out of memory in append_string_buf?!\n");
@@ -65,9 +61,8 @@ void append_string_buf(char c)
     string_size *= 2;
     string_buf_ptr = new_ptr + (string_buf_ptr - string_buf);
     string_buf = new_ptr;
-    printf("Done.\n");
   }
-  printf("Appending '%c' to string.\n", c);
+  string_consumed++;
   *string_buf_ptr++ = c;
 }
 
