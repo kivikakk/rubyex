@@ -1,12 +1,15 @@
 
-ruby: out/ruby.tab.o out/lex.yy.o
-	gcc -lm -o $@ out/ruby.tab.o out/lex.yy.o
+ruby: out/ruby.tab.o out/lex.yy.o out/expr.o
+	$(CXX) -lm -o $@ out/ruby.tab.o out/lex.yy.o out/expr.o
+
+out/expr.o: expr.cpp
+	$(CXX) -c -o $@ $<
 
 out/ruby.tab.o: out/ruby.tab.c
-	gcc -c -o $@ $<
+	$(CXX) -c -I. -o $@ $<
 
 out/lex.yy.o: out/lex.yy.c out/ruby.tab.c
-	gcc -c -o $@ out/lex.yy.c
+	$(CXX) -c -I. -o $@ out/lex.yy.c
 
 out/ruby.tab.c: ruby.y
 	bison --report=state -d $<

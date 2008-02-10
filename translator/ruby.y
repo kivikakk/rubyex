@@ -1,26 +1,28 @@
 
 %{
+  #include "global.h"
+
   #include <stdio.h>
   #include <math.h>
+  #include <string>
 
   int yylex (void);
   void yyerror (char const *);
 %}
 
-%union {
-  int integer;
-  double floating;
-  char *string;
-}
-
 %expect 14
 
 %token NL
-%token <string> IDENTIFIER
+%token <identifier> IDENTIFIER
 
-%token <string> STRING_LITERAL 
-%token <integer> INTEGER_LITERAL
-%token <floating> FLOATING_LITERAL
+%token <string_literal> STRING_LITERAL 
+%token <integer_literal> INTEGER_LITERAL
+%token <floating_literal> FLOATING_LITERAL
+
+%type <arglist> arglist
+%type <expr> expr
+%type <literal> literal
+%type <funccall> funccall
 
 %left '<' '>' '=' NE LE GE
 %left '+' '-'
@@ -42,16 +44,16 @@ statement:	IDENTIFIER '=' expr
 	      |	expr
 ;
 
-expr:		funccall
-	      |	IDENTIFIER
-	      | literal
+expr:		funccall	{ $$ = static_cast<Expr *>($1); }
+	      |	IDENTIFIER	{ $$ = static_cast<Expr *>($1); }
+	      | literal	{ $$ = static_cast<Expr *>($1); }
 	      | expr '+' expr
 	      | expr '-' expr
 	      | expr '*' expr
 	      | expr '/' expr
-	      | '-' expr %prec NEG
+	      | '-' expr %prec NEG	{ $$ = new UnaryOpExpr(NEGATE, $2); }
 	      | expr '^' expr
-	      | '(' expr ')'
+	      | '(' expr ')'	{ $$ = $2; }
 ;
 
 /* An explicit function call, i.e. that has specified no parameters,
@@ -64,13 +66,13 @@ funccall:	IDENTIFIER '(' ')'
 ;
 
 /* arglist is one or more, in line with funccall. */
-arglist:	expr			{ printf("arglist: expr\n"); }
-	      |	arglist ',' expr	{ printf("arglist: arglist,expr\n"); }
+arglist:	expr			{ $$ = new ArgListExpr($1); }
+	      |	arglist ',' expr	{ $$ = new ArgListExpr($1, $3); delete $1; }
 ;
 
-literal:	STRING_LITERAL { free($1); /* for now. to stop our test cases leaking everywhere */ }
-	      |	INTEGER_LITERAL
-	      | FLOATING_LITERAL
+literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
+	      |	INTEGER_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
+	      | FLOATING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
 ;
 
 %%
