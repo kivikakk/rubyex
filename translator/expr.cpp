@@ -25,7 +25,14 @@ void ArgListExpr::p(int tabs) const {
   std::cout << p_tabs(tabs) << "ArgListExpr -- XXX: this should never be seen." << std::endl;
 }
 
-FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args): target(_target) {
+void BlockExpr::p(int tabs) const { 
+  std::cout << p_tabs(tabs) << "BlockExpr: " << this->expressions.size() << " expression(s)." << std::endl;
+
+  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
+    (*it)->p(tabs + 1);
+}
+
+FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block) {
   this->name = _name->id;
   if (_args)
     this->args = _args->args;	// we take responsibility here.
@@ -37,11 +44,17 @@ void FuncCallExpr::p(int tabs) const {
   std::cout << p_tabs(tabs) << "FuncCallExpr: ";
   if (target)
     std::cout << "Expr.";
-  std::cout << this->name << "(arguments)" << std::endl;
+  std::cout << this->name << "(arguments)";
+  if (block)
+    std::cout << " { BlockExpr }";
+  std::cout << std::endl;
+
   if (target)
     target->p(tabs + 1);
   for (std::list<Expr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it)
     (*it)->p(tabs + 1);
+  if (block)
+    block->p(tabs + 1);
 }
 
 AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
@@ -62,7 +75,7 @@ void Program::add_expression(Expr *expression) {
 }
 
 void Program::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "Program has " << this->expressions.size() << " expression(s)." << std::endl;
+  std::cout << p_tabs(tabs) << "Program: " << this->expressions.size() << " expression(s)." << std::endl;
 
   for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
     (*it)->p(tabs + 1);

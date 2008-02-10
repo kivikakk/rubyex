@@ -7,6 +7,7 @@
 typedef union {
   Expr *expr;
   ArgListExpr *arglist;
+  BlockExpr *block;
 
   LiteralTypedExpr<std::string> *string_literal;
   LiteralTypedExpr<int> *integer_literal;

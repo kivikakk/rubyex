@@ -58,16 +58,27 @@ class ArgListExpr : public Expr
     std::list<Expr *> args;
 };
 
+class BlockExpr : public Expr
+{
+  public:
+    BlockExpr() { }
+
+    void p(int) const;
+
+    std::list<Expr *> expressions;
+};
+
 class FuncCallExpr : public Expr
 {
   public:
-    FuncCallExpr(Expr *, IdentifierExpr *, ArgListExpr *);
+    FuncCallExpr(Expr *, IdentifierExpr *, ArgListExpr *, BlockExpr *);
 
     void p(int) const;
 
     Expr *target;
     std::string name;
     std::list<Expr *> args;
+    BlockExpr *block;
 };
 
 class AssignmentExpr : public Expr

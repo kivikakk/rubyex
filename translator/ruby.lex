@@ -45,6 +45,9 @@
 		    string_buf += *yptr++;
 		}
 
+"do"		{ return DO; }
+"end"		{ return END; }
+
 [0-9]+			{ yylval.integer_literal = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
 
 [a-zA-Z][a-zA-Z0-9_]*[!?]?	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
