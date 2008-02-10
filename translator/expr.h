@@ -23,6 +23,16 @@ class IdentifierExpr : public Expr
     std::string id;
 };
 
+class SymbolExpr : public Expr
+{
+  public:
+    SymbolExpr(const std::string &_symbol): symbol(_symbol) { }
+
+    void p(int) const;
+
+    std::string symbol;
+};
+
 class LiteralExpr : public Expr { };
 
 template <typename T> class LiteralTypedExpr : public LiteralExpr

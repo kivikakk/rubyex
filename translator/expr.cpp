@@ -4,6 +4,10 @@ void IdentifierExpr::p(int tabs) const {
   std::cout << p_tabs(tabs) << "IdentifierExpr: " << this->id << std::endl;
 }
 
+void SymbolExpr::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "SymbolExpr: :" << this->symbol << std::endl;
+}
+
 ArgListExpr::ArgListExpr(Expr *first) {
   this->args.push_back(first);
   // FuncCallExpr will be responsible for this->args' members later.

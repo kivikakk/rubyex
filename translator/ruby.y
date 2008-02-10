@@ -16,6 +16,7 @@
 
 %token NL
 %token <identifier> IDENTIFIER
+%token <symbol> SYMBOL
 
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
@@ -52,6 +53,7 @@ statement:	IDENTIFIER '=' expr	{ $$ = new AssignmentStatement($1, $3); }
 
 expr:		funccall	{ $$ = static_cast<Expr *>($1); }
 	      |	IDENTIFIER	{ $$ = static_cast<Expr *>($1); }
+	      |	SYMBOL	{ $$ = static_cast<Expr *>($1); }
 	      | literal	{ $$ = static_cast<Expr *>($1); }
 	      | expr '.' funccall { $$ = $3; dynamic_cast<FuncCallExpr *>($$)->target = $1; }
 	      | expr '.' IDENTIFIER { $$ = new FuncCallExpr($1, $3, NULL); }

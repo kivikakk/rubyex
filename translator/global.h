@@ -15,6 +15,7 @@ typedef union {
   LiteralTypedExpr<double> *floating_literal;
 
   IdentifierExpr *identifier;
+  SymbolExpr *symbol;
   LiteralExpr *literal;
   FuncCallExpr *funccall;
 } expu;
