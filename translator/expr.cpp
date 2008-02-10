@@ -44,32 +44,27 @@ void FuncCallExpr::p(int tabs) const {
     (*it)->p(tabs + 1);
 }
 
-AssignmentStatement::AssignmentStatement(IdentifierExpr *_name, Expr *_value) {
+AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
   this->name = _name->id;
   this->value = _value;
 
   delete _name;
 }
 
-void AssignmentStatement::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "AssignmentStatement: " << this->name << " = Expr" << std::endl;
+void AssignmentExpr::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "AssignmentExpr: " << this->name << " = Expr" << std::endl;
   this->value->p(tabs + 1);
 }
 
-void ExprStatement::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "ExprStatement: Expr" << std::endl;
-  this->value->p(tabs + 1);
-}
-
-void Program::add_statement(Statement *statement) {
-  if (statement)
-    this->statements.push_back(statement);
+void Program::add_expression(Expr *expression) {
+  if (expression)
+    this->expressions.push_back(expression);
 }
 
 void Program::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "Program has " << this->statements.size() << " statement(s)." << std::endl;
+  std::cout << p_tabs(tabs) << "Program has " << this->expressions.size() << " expression(s)." << std::endl;
 
-  for (std::list<Statement *>::const_iterator it = this->statements.begin(); it != this->statements.end(); ++it)
+  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
     (*it)->p(tabs + 1);
 }
 

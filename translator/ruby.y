@@ -22,7 +22,7 @@
 %token <integer_literal> INTEGER_LITERAL
 %token <floating_literal> FLOATING_LITERAL
 
-%type <statement> statement line
+%type <expr> line
 
 %type <arglist> arglist
 %type <expr> expr
@@ -40,19 +40,16 @@
 %%
 
 input:  	/* empty */
-	      | input line	{ if ($2) program->add_statement($2); }
+	      | input line	{ if ($2) program->add_expression($2); }
 ;
 
 line: 		NL	{ $$ = NULL; }
-	      | statement NL	{ $$ = $1; }
-;
-
-statement:	IDENTIFIER '=' expr	{ $$ = new AssignmentStatement($1, $3); }
-	      |	expr	{ $$ = new ExprStatement($1); }
+	      | expr NL	{ $$ = $1; }
 ;
 
 expr:		funccall	{ $$ = static_cast<Expr *>($1); }
 	      |	IDENTIFIER	{ $$ = static_cast<Expr *>($1); }
+	      | IDENTIFIER '=' expr { $$ = new AssignmentExpr($1, $3); }
 	      |	SYMBOL	{ $$ = static_cast<Expr *>($1); }
 	      | literal	{ $$ = static_cast<Expr *>($1); }
 	      | expr '.' funccall { $$ = $3; dynamic_cast<FuncCallExpr *>($$)->target = $1; }
@@ -86,9 +83,6 @@ literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
 ;
 
 %%
-
-void tabs_i(std::string &t) { t += "  "; }
-void tabs_d(std::string &t) { t = t.substr(0, t.length() - 2); }
 
 int main()
 {

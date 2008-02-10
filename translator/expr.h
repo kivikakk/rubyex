@@ -70,31 +70,14 @@ class FuncCallExpr : public Expr
     std::list<Expr *> args;
 };
 
-class Statement : public PrettyPrint
+class AssignmentExpr : public Expr
 {
   public:
-    Statement() { }
-    virtual ~Statement() { }
-};
-
-class AssignmentStatement : public Statement
-{
-  public:
-    AssignmentStatement(IdentifierExpr *, Expr *);
+    AssignmentExpr(IdentifierExpr *, Expr *);
 
     void p(int) const;
 
     std::string name;
-    Expr *value;
-};
-
-class ExprStatement : public Statement
-{
-  public:
-    ExprStatement(Expr *_value): value(_value) { }
-
-    void p(int) const;
-
     Expr *value;
 };
 
@@ -103,11 +86,11 @@ class Program : public PrettyPrint
   public:
     Program() { }
 
-    void add_statement(Statement *);
+    void add_expression(Expr *);
 
     void p(int) const;
 
-    std::list<Statement *> statements;
+    std::list<Expr *> expressions;
 };
 
 #endif
