@@ -5,6 +5,8 @@
 #include <string>
 
 typedef union {
+  Statement *statement;
+
   Expr *expr;
   ArgListExpr *arglist;
 

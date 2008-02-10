@@ -1,3 +1,91 @@
 #include "expr.h"
 
+const char *UnaryOpStrings[] = {
+  "NEGATE"
+};
+
+const char *BinaryOpStrings[] = {
+  "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "POWER"
+};
+
+
+void IdentifierExpr::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "IdentifierExpr: " << this->id << std::endl;
+}
+
+ArgListExpr::ArgListExpr(Expr *first) {
+  this->args.push_back(first);
+  // FuncCallExpr will be responsible for this->args' members later.
+}
+
+ArgListExpr::ArgListExpr(ArgListExpr *combine, Expr *also) {
+  for (std::list<Expr *>::iterator it = combine->args.begin(); it != combine->args.end(); ++it)
+    this->args.push_back(*it);
+  this->args.push_back(also);
+
+  delete combine;
+}
+
+void ArgListExpr::p(int tabs) const { 
+  std::cout << p_tabs(tabs) << "ArgListExpr -- XXX: this should never be seen." << std::endl;
+}
+
+void UnaryOpExpr::p(int tabs) const { 
+  std::cout << p_tabs(tabs) << "UnaryOpExpr: " << UnaryOpStrings[(unsigned int)this->op] << " Expr" << std::endl;
+  this->expr->p(tabs + 1);
+}
+
+void BinaryOpExpr::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "BinaryOpExpr: Expr " << BinaryOpStrings[(unsigned int)this->op] << " Expr" << std::endl;
+  this->left->p(tabs + 1);
+  this->right->p(tabs + 1);
+}
+
+FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args): target(_target) {
+  this->name = _name->id;
+  if (_args)
+    this->args = _args->args;	// we take responsibility here.
+
+  delete _name;
+}
+
+void FuncCallExpr::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "FuncCallExpr: ";
+  if (target)
+    std::cout << "Expr.";
+  std::cout << this->name << "(arguments)" << std::endl;
+  if (target)
+    target->p(tabs + 1);
+  for (std::list<Expr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it)
+    (*it)->p(tabs + 1);
+}
+
+AssignmentStatement::AssignmentStatement(IdentifierExpr *_name, Expr *_value) {
+  this->name = _name->id;
+  this->value = _value;
+
+  delete _name;
+}
+
+void AssignmentStatement::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "AssignmentStatement: " << this->name << " = Expr" << std::endl;
+  this->value->p(tabs + 1);
+}
+
+void ExprStatement::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "ExprStatement: Expr" << std::endl;
+  this->value->p(tabs + 1);
+}
+
+void Program::add_statement(Statement *statement) {
+  if (statement)
+    this->statements.push_back(statement);
+}
+
+void Program::p(int tabs) const {
+  std::cout << p_tabs(tabs) << "Program has " << this->statements.size() << " statement(s)." << std::endl;
+
+  for (std::list<Statement *>::const_iterator it = this->statements.begin(); it != this->statements.end(); ++it)
+    (*it)->p(tabs + 1);
+}
 

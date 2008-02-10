@@ -21,7 +21,7 @@
 		}
 <str>\"			{ /* all done */
 		  BEGIN(INITIAL);
-		  yylval = new LiteralTypedExpr<std::string>(string_buf);
+		  yylval.string_literal = new LiteralTypedExpr<std::string>(string_buf);
 		  return STRING_LITERAL;
 		}
 <str>\n		string_buf += '\n';
@@ -39,9 +39,9 @@
 		    string_buf += *yptr++;
 		}
 
-[0-9]+			{ yylval = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
+[0-9]+			{ yylval.integer_literal = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
 
-[a-zA-Z][a-zA-Z0-9_]*	{ yylval = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
+[a-zA-Z][a-zA-Z0-9_]*	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
 
 [\t ]+		{ }
 .		{ return yytext[0]; }

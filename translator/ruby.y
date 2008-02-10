@@ -7,10 +7,12 @@
   #include <string>
 
   int yylex (void);
-  void yyerror (char const *);
+  void yyerror (Program *, char const *);
 %}
 
-%expect 14
+//%expect 14
+
+%parse-param {Program *program}
 
 %token NL
 %token <identifier> IDENTIFIER
@@ -18,6 +20,8 @@
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
 %token <floating_literal> FLOATING_LITERAL
+
+%type <statement> statement line
 
 %type <arglist> arglist
 %type <expr> expr
@@ -30,29 +34,33 @@
 %left NEG
 %right '^'
 
+%nonassoc IDENTIFIER
+
 %%
 
 input:  	/* empty */
-	      | input line
+	      | input line	{ if ($2) program->add_statement($2); }
 ;
 
-line: 		NL
-	      | statement NL
+line: 		NL	{ $$ = NULL; }
+	      | statement NL	{ $$ = $1; }
 ;
 
-statement:	IDENTIFIER '=' expr
-	      |	expr
+statement:	IDENTIFIER '=' expr	{ $$ = new AssignmentStatement($1, $3); }
+	      |	expr	{ $$ = new ExprStatement($1); }
 ;
 
 expr:		funccall	{ $$ = static_cast<Expr *>($1); }
 	      |	IDENTIFIER	{ $$ = static_cast<Expr *>($1); }
 	      | literal	{ $$ = static_cast<Expr *>($1); }
-	      | expr '+' expr
-	      | expr '-' expr
-	      | expr '*' expr
-	      | expr '/' expr
+	      | expr '.' funccall { $$ = $3; dynamic_cast<FuncCallExpr *>($$)->target = $1; }
+	      | expr '.' IDENTIFIER { $$ = new FuncCallExpr($1, $3, NULL); }
+	      | expr '+' expr	{ $$ = new BinaryOpExpr(ADD, $1, $3); }
+	      | expr '-' expr	{ $$ = new BinaryOpExpr(SUBTRACT, $1, $3); }
+	      | expr '*' expr	{ $$ = new BinaryOpExpr(MULTIPLY, $1, $3); }
+	      | expr '/' expr	{ $$ = new BinaryOpExpr(DIVIDE, $1, $3); }
 	      | '-' expr %prec NEG	{ $$ = new UnaryOpExpr(NEGATE, $2); }
-	      | expr '^' expr
+	      | expr '^' expr	{ $$ = new BinaryOpExpr(POWER, $1, $3); }
 	      | '(' expr ')'	{ $$ = $2; }
 ;
 
@@ -60,14 +68,14 @@ expr:		funccall	{ $$ = static_cast<Expr *>($1); }
  * or has some parameters. Any inferred function call (e.g. 'gets')
  * will be treated like an IDENTIFIER in `expr', and we work it out
  * later. */
-funccall:	IDENTIFIER '(' ')'
-	      | IDENTIFIER '(' arglist ')'
-	      |	IDENTIFIER arglist
+funccall:	IDENTIFIER '(' ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL); }
+	      | IDENTIFIER '(' arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3); }
+	      |	IDENTIFIER arglist	{ $$ = new FuncCallExpr(NULL, $1, $2); }
 ;
 
 /* arglist is one or more, in line with funccall. */
 arglist:	expr			{ $$ = new ArgListExpr($1); }
-	      |	arglist ',' expr	{ $$ = new ArgListExpr($1, $3); delete $1; }
+	      |	arglist ',' expr	{ $$ = new ArgListExpr($1, $3); }
 ;
 
 literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
@@ -77,14 +85,24 @@ literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
 
 %%
 
-int
-main (void)
+void tabs_i(std::string &t) { t += "  "; }
+void tabs_d(std::string &t) { t = t.substr(0, t.length() - 2); }
+
+int main()
 {
-  return yyparse ();
+  Program p;
+
+  int r = yyparse(&p);
+  if (r != 0)
+    return r;
+
+  printf("parse success. Program object %p.\n", &p);
+  p.p(0);
+
+  return 0;
 }
 
-void
-yyerror (char const *s)
+void yyerror(Program *p, char const *s)
 {
   fprintf (stderr, "%s\n", s);
 }
