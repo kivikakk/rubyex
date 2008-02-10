@@ -55,12 +55,12 @@ expr:		funccall	{ $$ = static_cast<Expr *>($1); }
 	      | literal	{ $$ = static_cast<Expr *>($1); }
 	      | expr '.' funccall { $$ = $3; dynamic_cast<FuncCallExpr *>($$)->target = $1; }
 	      | expr '.' IDENTIFIER { $$ = new FuncCallExpr($1, $3, NULL); }
-	      | expr '+' expr	{ $$ = new BinaryOpExpr(ADD, $1, $3); }
-	      | expr '-' expr	{ $$ = new BinaryOpExpr(SUBTRACT, $1, $3); }
-	      | expr '*' expr	{ $$ = new BinaryOpExpr(MULTIPLY, $1, $3); }
-	      | expr '/' expr	{ $$ = new BinaryOpExpr(DIVIDE, $1, $3); }
-	      | '-' expr %prec NEG	{ $$ = new UnaryOpExpr(NEGATE, $2); }
-	      | expr '^' expr	{ $$ = new BinaryOpExpr(POWER, $1, $3); }
+	      | expr '+' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ArgListExpr($3)); }
+	      | expr '-' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ArgListExpr($3)); }
+	      | expr '*' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ArgListExpr($3)); }
+	      | expr '/' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ArgListExpr($3)); }
+	      | '-' expr %prec NEG	{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL); }
+	      | expr '^' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ArgListExpr($3)); }
 	      | '(' expr ')'	{ $$ = $2; }
 ;
 
