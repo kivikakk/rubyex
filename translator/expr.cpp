@@ -1,14 +1,5 @@
 #include "expr.h"
 
-const char *UnaryOpStrings[] = {
-  "NEGATE"
-};
-
-const char *BinaryOpStrings[] = {
-  "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "POWER"
-};
-
-
 void IdentifierExpr::p(int tabs) const {
   std::cout << p_tabs(tabs) << "IdentifierExpr: " << this->id << std::endl;
 }
@@ -28,17 +19,6 @@ ArgListExpr::ArgListExpr(ArgListExpr *combine, Expr *also) {
 
 void ArgListExpr::p(int tabs) const { 
   std::cout << p_tabs(tabs) << "ArgListExpr -- XXX: this should never be seen." << std::endl;
-}
-
-void UnaryOpExpr::p(int tabs) const { 
-  std::cout << p_tabs(tabs) << "UnaryOpExpr: " << UnaryOpStrings[(unsigned int)this->op] << " Expr" << std::endl;
-  this->expr->p(tabs + 1);
-}
-
-void BinaryOpExpr::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "BinaryOpExpr: Expr " << BinaryOpStrings[(unsigned int)this->op] << " Expr" << std::endl;
-  this->left->p(tabs + 1);
-  this->right->p(tabs + 1);
 }
 
 FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args): target(_target) {

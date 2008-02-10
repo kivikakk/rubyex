@@ -48,40 +48,6 @@ class ArgListExpr : public Expr
     std::list<Expr *> args;
 };
 
-typedef enum {
-  NEGATE
-} UnaryOp;
-
-extern const char *UnaryOpStrings[];
-
-class UnaryOpExpr : public Expr
-{
-  public:
-    UnaryOpExpr(UnaryOp _op, Expr *_expr): op(_op), expr(_expr) { }
-
-    void p(int) const;
-
-    UnaryOp op;
-    Expr *expr;
-};
-
-typedef enum {
-  ADD, SUBTRACT, MULTIPLY, DIVIDE, POWER
-} BinaryOp;
-
-extern const char *BinaryOpStrings[];
-
-class BinaryOpExpr : public Expr
-{
-  public:
-    BinaryOpExpr(BinaryOp _op, Expr *_left, Expr *_right): op(_op), left(_left), right(_right) { }
-
-    void p(int) const;
-
-    BinaryOp op;
-    Expr *left, *right;
-};
-
 class FuncCallExpr : public Expr
 {
   public:
