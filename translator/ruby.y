@@ -15,7 +15,7 @@
 
 %token NL DO END BLOCK_FINISH
 %token END_OF_FILE 0 "end of file"
-%token <identifier> IDENTIFIER
+%token <identifier> IDENTIFIER FUNCTION_CALL
 %token <symbol> SYMBOL
 
 %token <string_literal> STRING_LITERAL 
@@ -29,13 +29,14 @@
 %type <literal> literal
 %type <funccall> funccall
 
+%nonassoc IDENTIFIER FUNCTION_CALL
+%nonassoc DO END '{' '}'
+
 %left '<' '>' '=' NE LE GE
 %left '+' '-'
 %left '*' '/'
 %left NEG
 %right '^'
-
-%nonassoc IDENTIFIER
 
 %%
 
@@ -53,13 +54,17 @@ line: 		NL	{ $$ = NULL; }
 
 expr:		funccall	{ $$ = static_cast<Expr *>($1); }
 	      |	IDENTIFIER	{ $$ = static_cast<Expr *>($1); }
+	      |	FUNCTION_CALL	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      |	IDENTIFIER block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
+	      |	FUNCTION_CALL block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      | IDENTIFIER '=' expr { $$ = new AssignmentExpr($1, $3); }
 	      |	SYMBOL	{ $$ = static_cast<Expr *>($1); }
 	      | literal	{ $$ = static_cast<Expr *>($1); }
 	      | expr '.' funccall { $$ = $3; dynamic_cast<FuncCallExpr *>($$)->target = $1; }
 	      | expr '.' IDENTIFIER { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
+	      | expr '.' FUNCTION_CALL { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
 	      | expr '.' IDENTIFIER block { $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '.' FUNCTION_CALL block { $$ = new FuncCallExpr($1, $3, NULL, $4); }
 	      | expr '+' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ArgListExpr($3), NULL); }
 	      | expr '-' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ArgListExpr($3), NULL); }
 	      | expr '*' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ArgListExpr($3), NULL); }
@@ -79,6 +84,12 @@ funccall:	IDENTIFIER '(' ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      | IDENTIFIER '(' arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
 	      |	IDENTIFIER arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
 	      |	IDENTIFIER arglist block	{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+	      | FUNCTION_CALL '(' ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
+	      | FUNCTION_CALL '(' ')' block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
+	      | FUNCTION_CALL '(' arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
+	      | FUNCTION_CALL '(' arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+	      |	FUNCTION_CALL arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
+	      |	FUNCTION_CALL arglist block	{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
 ;
 
 /* arglist is one or more, in line with funccall. */

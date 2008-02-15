@@ -82,7 +82,8 @@ end			{
 
 [0-9]+			{ yylval.integer_literal = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
 
-[a-zA-Z][a-zA-Z0-9_]*[!?]?	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
+[a-zA-Z][a-zA-Z0-9_]*[!?]	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return FUNCTION_CALL; }
+[a-zA-Z][a-zA-Z0-9_]*	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
 
 :[a-zA-Z][a-zA-Z0-9_]*[!?]?	{ yylval.symbol = new SymbolExpr(std::string(yytext + 1)); return SYMBOL; }
 :\"			{
