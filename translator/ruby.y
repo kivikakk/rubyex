@@ -13,8 +13,10 @@
 //%expect 14
 
 %parse-param {Program *program}
+%error-verbose
 
-%token NL DO END
+%token NL DO END BLOCK_FINISH
+%token END_OF_FILE 0 "end of file"
 %token <identifier> IDENTIFIER
 %token <symbol> SYMBOL
 
@@ -23,7 +25,7 @@
 %token <floating_literal> FLOATING_LITERAL
 
 %type <expr> line
-%type <block> block block_inside
+%type <block> block block_content block_line
 %type <arglist> arglist
 %type <expr> expr
 %type <literal> literal
@@ -40,13 +42,15 @@
 %%
 
 input:  	/* empty */
-	      | input line	{ if ($2) program->add_expression($2); }
+	      | input line { if ($2) program->add_expression($2); }
 ;
 
 line: 		NL	{ $$ = NULL; }
 	      | expr NL	{ $$ = $1; }
 	      | ';' { $$ = NULL; }
 	      | expr ';' { $$ = $1; }
+	      | expr BLOCK_FINISH { $$ = $1; IF_DEBUG printf("BLOCK_FINISH\n"); }
+	      | expr END_OF_FILE { $$ = $1; }
 ;
 
 expr:		funccall	{ $$ = static_cast<Expr *>($1); }
@@ -84,12 +88,15 @@ arglist:	expr			{ $$ = new ArgListExpr($1); }
 	      |	arglist ',' expr	{ $$ = new ArgListExpr($1, $3); }
 ;
 
-block:		DO block_inside END	{ $$ = $2; }
-	      |	'{' block_inside '}'	{ $$ = $2; }
+block:		DO block_content END	{ $$ = $2; }
+	      |	'{' block_content '}'	{ $$ = $2; }
 ;
 
-block_inside:	/* empty */		{ $$ = new BlockExpr(); }
-	      |	block_inside line	{ if ($2) $1->expressions.push_back($2); $$ = $1; }
+block_content:	{ enter_block(); } block_line { exit_block(); } { $$ = $2; }
+;
+
+block_line:	/* empty */		{ $$ = new BlockExpr(); }
+	      |	block_line { enter_block_line(); } line { exit_block_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
 ;
 
 literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }

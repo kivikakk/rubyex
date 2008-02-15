@@ -1,13 +1,13 @@
 CXXFLAGS := -enable-rtti -I.
 LDFLAGS := 
 
-ruby: out/ruby.tab.o out/lex.yy.o out/expr.o out/pretty.o
-	$(CXX) $(LDFLAGS) -o $@ out/ruby.tab.o out/lex.yy.o out/expr.o out/pretty.o
+CPPS := $(wildcard *.cpp)
+OBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
 
-out/expr.o: expr.cpp expr.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+ruby: out/ruby.tab.o out/lex.yy.o $(OBJS)
+	$(CXX) $(LDFLAGS) -o $@ out/ruby.tab.o out/lex.yy.o $(OBJS)
 
-out/pretty.o: pretty.cpp pretty.h
+out/%.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 out/ruby.tab.o: out/ruby.tab.c

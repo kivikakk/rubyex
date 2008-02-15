@@ -1,6 +1,12 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#ifndef DEBUG
+#define DEBUG false
+#endif
+
+#define IF_DEBUG if (DEBUG)
+
 #include "expr.h"
 #include <string>
 
@@ -20,6 +26,12 @@ typedef union {
 } expu;
 
 #define YYSTYPE expu
+
+extern int block_depths, block_lines;
+
+void enter_block(); void enter_block_line();
+void exit_block(); void exit_block_line();
+bool in_block();
 
 #endif
 
