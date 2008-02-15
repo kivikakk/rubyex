@@ -7,9 +7,9 @@
 #define TEST(name) new Test (#name, _##name)
 #define BEGIN(name, code, length) Program name = parse_code(code, __LINE__, length)
 #define ASSERT(exp) assert_throw(__LINE__, #exp, (exp))
-#define ASSERT_LEN(program, line, lines) assert_throw((line), #program " expression count mismatch ", (program).expressions.size() == (lines))
-#define ASSERT_TYPE(type, exp) (assert_throw(__LINE__, "Expression " #exp " not of type " #type, dynamic_cast<type*>(exp)), dynamic_cast<type*>(exp))
-#define $(type, name, exp) type *name = (assert_throw(__LINE__, "Expression " #exp " not of type " #type, dynamic_cast<type*>(exp)), dynamic_cast<type*>(exp))
+#define ASSERT_LEN(program, line, lines) assert_throw((line), #program " expression count match", (program).expressions.size() == (lines))
+#define ASSERT_TYPE(type, exp) (assert_throw(__LINE__, "Expression " #exp " of type " #type, dynamic_cast<type*>(exp)), dynamic_cast<type*>(exp))
+#define $(type, name, exp) type *name = (assert_throw(__LINE__, "Expression " #exp " of type " #type, dynamic_cast<type*>(exp)), dynamic_cast<type*>(exp))
 // TEST(n) defines a new test, giving the name as `n', pointing to a function named `_n'
 // BEGIN(n,c,l) creates a Program object `n', with code `c', and asserts it contains `l' expressions.
 // ASSERT(e) calls assert_throw with the current line, the textual code `e' and the expression `e'

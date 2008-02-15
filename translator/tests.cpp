@@ -17,6 +17,7 @@ int tests_all()
     bool success = true;
     std::string failure_message;
 
+    std::cout << "test: \"" << test.name << "\"" << std::endl;
     try {
       (*test.test)();
     } catch (std::exception &e) {
@@ -48,6 +49,7 @@ int tests_all()
 void assert_throw(int line, const char *exp, bool eval)
 {
   ++assertions;
+  std::cout << "asserting: " << exp << std::endl;
   if (!eval)
     throw AssertionFailureException(line, exp);
   ++assertion_successes;
@@ -61,11 +63,15 @@ void _literals()
 
   BEGIN(floating, "93.12", 1);
   $(LiteralTypedExpr<double>, floating_expr, floating[0]);
-  ASSERT(floating_expr->value == 93.12);
+  ASSERT(floating_expr->value == 93.12);	// this is quite brittle. what if it's 93.11999...?
 
   BEGIN(dbl_string, "\"hi!\"", 1);
   $(LiteralTypedExpr<std::string>, dbl_string_expr, dbl_string[0]);
   ASSERT(dbl_string_expr->value == "hi!");
+
+  BEGIN(dbl_string_nl, "\"hi!\nhow are you?\"", 1);
+  $(LiteralTypedExpr<std::string>, dbl_string_nl_expr, dbl_string_nl[0]);
+  ASSERT(dbl_string_nl_expr->value == "hi!\nhow are you?");
 }
 
 void _identifier()
@@ -90,11 +96,18 @@ void _symbol()
   ASSERT(sym_nl->symbol == "with\nnewline");
 }
 
-
+void _call()
+{
+  BEGIN(p_explicit, "joe()", 1);
+  $(FuncCallExpr, func_explicit, p_explicit[0]);
+  ASSERT(func_explicit->name == "joe");
+  ASSERT(func_explicit->args.size() == 0);
+}
 
 Test *tests[] = {
   TEST(literals),
   TEST(identifier),
   TEST(symbol),
+  TEST(call),
   NULL
 };
