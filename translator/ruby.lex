@@ -47,7 +47,11 @@
 
 do		{ return DO; }
 end			{
-		  if (in_block()) {
+		  if (in_block() && block_lines == block_depths) {
+		    IF_DEBUG printf("Going to block_finish (end).");
+		    BEGIN(block_finish);
+		    yyless(0);
+		    return BLOCK_FINISH;
 		  }
 		  return END;
 		}
@@ -55,12 +59,18 @@ end			{
 \{		{ return '{'; }
 \}			{
 		  if (in_block() && block_lines == block_depths) {
-		    IF_DEBUG printf("Going to block_finish.");
+		    IF_DEBUG printf("Going to block_finish (}).");
 		    BEGIN(block_finish);
 		    yyless(0);	// whoops. yyless returns all BUT first `n' chars.
 		    return BLOCK_FINISH;
 		  }
 		  return '}';
+		}
+
+<block_finish>end	{
+		  IF_DEBUG printf("Hear `end', returning to initial.\n");
+		  BEGIN(INITIAL);
+		  return END;
 		}
 <block_finish>\}	{
 		  IF_DEBUG printf("Hear }, returning to initial.\n");
