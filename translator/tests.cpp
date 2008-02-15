@@ -323,7 +323,7 @@ void _block()
   ASSERT(one_nl_boo->id == "boo");
 
   BEGIN(p_nested, "call do nesting { well_this {}; that {}; the_other {\nthat\nthen};; }; done end", 1);
-  // what a joke to test.
+  // what a joke to test. Just watch this:
   $(FuncCallExpr, nested, p_nested[0]);
   ASSERT(nested->target == NULL);
   ASSERT(nested->name == "call");
