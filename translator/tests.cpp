@@ -284,7 +284,102 @@ void _operations()
 
 void _block()
 {
+  BEGIN(p_empty, "call {}", 1);
+  $(FuncCallExpr, empty, p_empty[0]);
+  ASSERT(empty->target == NULL);
+  ASSERT(empty->name == "call");
+  ASSERT(empty->args.size() == 0);
+  ASSERT(empty->block);
+  ASSERT(empty->block->expressions.size() == 0);
+
+  BEGIN(p_one, "call {boo}", 1);
+  $(FuncCallExpr, one, p_one[0]);
+  ASSERT(one->target == NULL);
+  ASSERT(one->name == "call");
+  ASSERT(one->args.size() == 0);
+  ASSERT(one->block);
+  ASSERT(one->block->expressions.size() == 1);
+  $(IdentifierExpr, one_boo, *one->block->expressions.begin());
+  ASSERT(one_boo->id == "boo");
+
+  BEGIN(p_one_do, "call do boo end", 1);
+  $(FuncCallExpr, one_do, p_one[0]);
+  ASSERT(one_do->target == NULL);
+  ASSERT(one_do->name == "call");
+  ASSERT(one_do->args.size() == 0);
+  ASSERT(one_do->block);
+  ASSERT(one_do->block->expressions.size() == 1);
+  $(IdentifierExpr, one_do_boo, *one->block->expressions.begin());
+  ASSERT(one_do_boo->id == "boo");
+
+  BEGIN(p_one_nl, "call {\n\tboo\n}\n", 1);
+  $(FuncCallExpr, one_nl, p_one[0]);
+  ASSERT(one_nl->target == NULL);
+  ASSERT(one_nl->name == "call");
+  ASSERT(one_nl->args.size() == 0);
+  ASSERT(one_nl->block);
+  ASSERT(one_nl->block->expressions.size() == 1);
+  $(IdentifierExpr, one_nl_boo, *one->block->expressions.begin());
+  ASSERT(one_nl_boo->id == "boo");
+
+  BEGIN(p_nested, "call do nesting { well_this {}; that {}; the_other {\nthat\nthen};; }; done end", 1);
+  // what a joke to test.
+  $(FuncCallExpr, nested, p_nested[0]);
+  ASSERT(nested->target == NULL);
+  ASSERT(nested->name == "call");
+  ASSERT(nested->args.size() == 0);
+  ASSERT(nested->block);
+  ASSERT(nested->block->expressions.size() == 2);
   
+  std::list<Expr *>::iterator it = nested->block->expressions.begin();
+  {
+    $(FuncCallExpr, nesting, *it);
+    ASSERT(nesting->target == NULL);
+    ASSERT(nesting->name == "nesting");
+    ASSERT(nesting->args.size() == 0);
+    ASSERT(nesting->block);
+    ASSERT(nesting->block->expressions.size() == 3);
+    std::list<Expr *>::iterator sit = nesting->block->expressions.begin();
+    {
+      $(FuncCallExpr, well_this, *sit);
+      ASSERT(well_this->name == "well_this");
+      ASSERT(well_this->args.size() == 0);
+      ASSERT(well_this->block);
+      ASSERT(well_this->block->expressions.size() == 0);
+    }
+    ++sit;
+    {
+      $(FuncCallExpr, that, *sit);
+      ASSERT(that->name == "that");
+      ASSERT(that->args.size() == 0);
+      ASSERT(that->block);
+      ASSERT(that->block->expressions.size() == 0);
+    }
+    ++sit;
+    {
+      $(FuncCallExpr, the_other, *sit);
+      ASSERT(the_other->name == "the_other");
+      ASSERT(the_other->args.size() == 0);
+      ASSERT(the_other->block);
+      ASSERT(the_other->block->expressions.size() == 2);
+
+      std::list<Expr *>::iterator tsit = the_other->block->expressions.begin();
+      {
+	$(IdentifierExpr, that, *tsit);
+	ASSERT(that->id == "that");
+      }
+      ++tsit;
+      {
+	$(IdentifierExpr, then, *tsit);
+	ASSERT(then->id == "then");
+      }
+    }
+  }
+  ++it;
+  {
+    $(IdentifierExpr, done, *it);
+    ASSERT(done->id == "done");
+  }
 }
 
 Test *tests[] = {

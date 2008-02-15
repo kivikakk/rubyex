@@ -6,6 +6,7 @@ OBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
 
 ruby: out/ruby.tab.o out/lex.yy.o $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ out/ruby.tab.o out/lex.yy.o $(OBJS)
+	@./test 1> /dev/null
 
 out/%.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
