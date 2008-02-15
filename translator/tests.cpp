@@ -116,6 +116,41 @@ void _call()
   ASSERT(func_explicit->target == NULL);
   ASSERT(func_explicit->block == NULL);
 
+  BEGIN(p_questioning, "krista? why", 1);
+  $(FuncCallExpr, func_questioning, p_questioning[0]);
+  ASSERT(func_questioning->name == "krista?");
+  ASSERT(func_questioning->args.size() == 1);
+  $(IdentifierExpr, func_questioning_why, *func_questioning->args.begin());
+  ASSERT(func_questioning_why->id == "why");
+  ASSERT(func_questioning->target == NULL);
+  ASSERT(func_questioning->block == NULL);
+
+  BEGIN(p_exclaiming, "nicolas! hey", 1);
+  $(FuncCallExpr, func_exclaiming, p_exclaiming[0]);
+  ASSERT(func_exclaiming->name == "nicolas!");
+  ASSERT(func_exclaiming->args.size() == 1);
+  $(IdentifierExpr, func_exclaiming_why, *func_exclaiming->args.begin());
+  ASSERT(func_exclaiming_why->id == "hey");
+  ASSERT(func_exclaiming->target == NULL);
+  ASSERT(func_exclaiming->block == NULL);
+
+  BEGIN(p_mixing, "a!b?c!", 1);
+  $(FuncCallExpr, m_a, p_mixing[0]);
+  ASSERT(m_a->target == NULL);
+  ASSERT(m_a->block == NULL);
+  ASSERT(m_a->name == "a!");
+  ASSERT(m_a->args.size() == 1);
+  $(FuncCallExpr, m_b, *m_a->args.begin());
+  ASSERT(m_b->target == NULL);
+  ASSERT(m_b->block == NULL);
+  ASSERT(m_b->name == "b?");
+  ASSERT(m_b->args.size() == 1);
+  $(FuncCallExpr, m_c, *m_b->args.begin());
+  ASSERT(m_c->target == NULL);
+  ASSERT(m_c->block == NULL);
+  ASSERT(m_c->name == "c!");
+  ASSERT(m_c->args.size() == 0);
+
   BEGIN(p_one_implicit, "alex hybrid", 1);
   $(FuncCallExpr, func_one_implicit, p_one_implicit[0]);
   ASSERT(func_one_implicit->name == "alex");
@@ -170,7 +205,8 @@ void _call()
   ++itp;
   { $(LiteralTypedExpr<int>, integer, *itp); ASSERT(integer->value == 92); }
 
-  ASSERT_NOPARSE("lorraine(joker");
+  ASSERT_NOPARSE("baked!?");
+  ASSERT_NOPARSE("fried(joker");
 }
 
 void _assignment()
@@ -182,6 +218,8 @@ void _assignment()
   ASSERT(rval->id == "b");
 
   ASSERT_NOPARSE("4 = b");
+  ASSERT_NOPARSE("nox! = pox");
+  ASSERT_NOPARSE("tipsy? = turvy");
 }
 
 void _method_call()
