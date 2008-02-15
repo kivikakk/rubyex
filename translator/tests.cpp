@@ -102,6 +102,54 @@ void _call()
   $(FuncCallExpr, func_explicit, p_explicit[0]);
   ASSERT(func_explicit->name == "joe");
   ASSERT(func_explicit->args.size() == 0);
+
+  BEGIN(p_one_implicit, "alex hybrid", 1);
+  $(FuncCallExpr, func_one_implicit, p_one_implicit[0]);
+  ASSERT(func_one_implicit->name == "alex");
+  ASSERT(func_one_implicit->args.size() == 1);
+  $(IdentifierExpr, func_one_implicit_arg, *func_one_implicit->args.begin());
+  ASSERT(func_one_implicit_arg->id == "hybrid");
+
+  BEGIN(p_one_explicit, "morgan(ipsicle)", 1);
+  $(FuncCallExpr, func_one_explicit, p_one_explicit[0]);
+  ASSERT(func_one_explicit->name == "morgan");
+  ASSERT(func_one_explicit->args.size() == 1);
+  $(IdentifierExpr, func_one_explicit_arg, *func_one_explicit->args.begin());
+  ASSERT(func_one_explicit_arg->id == "ipsicle");
+
+  BEGIN(p_many_nested, "lorraine hamster(wilfred, (enigma), murray(darling, basin, river), peacock), 92", 1);
+  $(FuncCallExpr, func_many_nested, p_many_nested[0]);
+  ASSERT(func_many_nested->name == "lorraine");
+  ASSERT(func_many_nested->args.size() == 2);
+  std::list<Expr *>::iterator itp = func_many_nested->args.begin();
+  {
+    // First argument.
+    $(FuncCallExpr, fce, *itp);
+    ASSERT(fce->name == "hamster");
+    ASSERT(fce->args.size() == 4);
+
+    std::list<Expr *>::iterator sub_itp = fce->args.begin();
+    { $(IdentifierExpr, idx, *sub_itp); ASSERT(idx->id == "wilfred"); }
+    ++sub_itp;
+    { $(IdentifierExpr, idx, *sub_itp); ASSERT(idx->id == "enigma"); }
+    ++sub_itp;
+    {
+      $(FuncCallExpr, fcx, *sub_itp);
+      ASSERT(fcx->name == "murray");
+      ASSERT(fcx->args.size() == 3);
+
+      std::list<Expr *>::iterator murray_itp = fcx->args.begin();
+      { $(IdentifierExpr, idx, *murray_itp); ASSERT(idx->id == "darling"); }
+      ++murray_itp;
+      { $(IdentifierExpr, idx, *murray_itp); ASSERT(idx->id == "basin"); }
+      ++murray_itp;
+      { $(IdentifierExpr, idx, *murray_itp); ASSERT(idx->id == "river"); }
+    }
+    ++sub_itp;
+    { $(IdentifierExpr, idx, *sub_itp); ASSERT(idx->id == "peacock"); }
+  }
+  ++itp;
+  { $(LiteralTypedExpr<int>, integer, *itp); ASSERT(integer->value == 92); }
 }
 
 Test *tests[] = {
