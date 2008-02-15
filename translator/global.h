@@ -10,6 +10,8 @@
 #include "expr.h"
 #include <string>
 
+int yylex (void);
+
 typedef union {
   Expr *expr;
   ArgListExpr *arglist;
