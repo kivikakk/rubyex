@@ -74,6 +74,13 @@ void Program::add_expression(Expr *expression) {
     this->expressions.push_back(expression);
 }
 
+Expr *Program::operator[](int index) {
+  std::list<Expr *>::iterator it = expressions.begin();
+  while (index > 0)
+    ++it, --index;
+  return *it;
+}
+
 void Program::p(int tabs) const {
   std::cout << p_tabs(tabs) << "Program: " << this->expressions.size() << " expression(s)." << std::endl;
 

@@ -96,6 +96,7 @@ class Program : public PrettyPrint
 {
   public:
     Program() { }
+    Expr *operator[](int);
 
     void add_expression(Expr *);
 

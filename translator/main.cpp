@@ -1,7 +1,9 @@
 #include "main.h"
+#include "global.h"
+#include "tests.h"
 #include <list>
 #include <string>
-#include <cassert>
+#include <exception>
 
 int main_parser(std::list<std::string> &);
 int main_test(std::list<std::string> &);
@@ -38,10 +40,19 @@ int main_parser(std::list<std::string> &arguments)
 
 int main_test(std::list<std::string> &arguments)
 {
+  return tests_all();
+}
+
+Program parse_code(const char *code)
+{
   Program p;
 
+  yy_scan_string(code);
   int r = yyparse(&p);
-  assert(r == 0);
+  if (r != 0)
+    throw ParseFailureException();
+
+  return p;
 }
 
 void yyerror(Program *p, char const *s)
