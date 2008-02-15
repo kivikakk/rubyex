@@ -4,6 +4,8 @@
 #include "expr.h"
 #include <exception>
 
+extern bool omit_errors;
+
 int yyparse(Program *program);
 void yyerror(Program *, char const *);
 Program parse_code(const char *);

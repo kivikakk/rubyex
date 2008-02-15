@@ -10,6 +10,7 @@
 #define ASSERT_LEN(program, line, lines) assert_throw((line), #program " expression count match", (program).expressions.size() == (lines))
 #define ASSERT_TYPE(type, exp) (assert_throw(__LINE__, "Expression " #exp " of type " #type, dynamic_cast<type*>(exp)), dynamic_cast<type*>(exp))
 #define $(type, name, exp) type *name = (assert_throw(__LINE__, "Expression " #exp " of type " #type, dynamic_cast<type*>(exp)), dynamic_cast<type*>(exp))
+#define ASSERT_NOPARSE(code) do { bool __anp = false, __anp_op = omit_errors; omit_errors = true; try { parse_code(code); } catch (...) { __anp = true; } omit_errors = __anp_op; assert_throw(__LINE__, "Code is unable to be parsed: \"" code "\"", __anp); } while (false)
 // TEST(n) defines a new test, giving the name as `n', pointing to a function named `_n'
 // BEGIN(n,c,l) creates a Program object `n', with code `c', and asserts it contains `l' expressions.
 // ASSERT(e) calls assert_throw with the current line, the textual code `e' and the expression `e'

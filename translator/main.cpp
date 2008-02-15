@@ -5,6 +5,8 @@
 #include <string>
 #include <exception>
 
+bool omit_errors = false;
+
 int main_parser(std::list<std::string> &);
 int main_test(std::list<std::string> &);
 
@@ -32,7 +34,6 @@ int main_parser(std::list<std::string> &arguments)
   if (r != 0)
     return r;
 
-  printf("parse success. Program object %p.\n", &p);
   p.p(0);
 
   return 0;
@@ -65,6 +66,7 @@ Program parse_code(const char *code, int line, int length)
 
 void yyerror(Program *p, char const *s)
 {
-  fprintf (stderr, "%s\n", s);
+  if (!omit_errors)
+    std::cerr << s << std::endl;
 }
 

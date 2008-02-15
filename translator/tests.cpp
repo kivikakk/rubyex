@@ -87,6 +87,14 @@ void _symbol()
   $(SymbolExpr, sym_regular, p_regular[0]);
   ASSERT(sym_regular->symbol == "bob");
 
+  BEGIN(p_question, ":bob?", 1);
+  $(SymbolExpr, sym_question, p_question[0]);
+  ASSERT(sym_question->symbol == "bob?");
+
+  BEGIN(p_exclaim, ":bob!", 1);
+  $(SymbolExpr, sym_exclaim, p_exclaim[0]);
+  ASSERT(sym_exclaim->symbol == "bob!");
+
   BEGIN(p_dbq, ":\"double quoted string\"", 1);
   $(SymbolExpr, sym_dbq, p_dbq[0]);
   ASSERT(sym_dbq->symbol == "double quoted string");
@@ -94,6 +102,9 @@ void _symbol()
   BEGIN(p_nl, ":\"with\nnewline\"", 1);
   $(SymbolExpr, sym_nl, p_nl[0]);
   ASSERT(sym_nl->symbol == "with\nnewline");
+
+  ASSERT_NOPARSE(":1one");
+  ASSERT_NOPARSE(":!jelly");
 }
 
 void _call()
@@ -102,11 +113,15 @@ void _call()
   $(FuncCallExpr, func_explicit, p_explicit[0]);
   ASSERT(func_explicit->name == "joe");
   ASSERT(func_explicit->args.size() == 0);
+  ASSERT(func_explicit->target == NULL);
+  ASSERT(func_explicit->block == NULL);
 
   BEGIN(p_one_implicit, "alex hybrid", 1);
   $(FuncCallExpr, func_one_implicit, p_one_implicit[0]);
   ASSERT(func_one_implicit->name == "alex");
   ASSERT(func_one_implicit->args.size() == 1);
+  ASSERT(func_one_implicit->target == NULL);
+  ASSERT(func_one_implicit->block == NULL);
   $(IdentifierExpr, func_one_implicit_arg, *func_one_implicit->args.begin());
   ASSERT(func_one_implicit_arg->id == "hybrid");
 
@@ -114,6 +129,8 @@ void _call()
   $(FuncCallExpr, func_one_explicit, p_one_explicit[0]);
   ASSERT(func_one_explicit->name == "morgan");
   ASSERT(func_one_explicit->args.size() == 1);
+  ASSERT(func_one_explicit->target == NULL);
+  ASSERT(func_one_explicit->block == NULL);
   $(IdentifierExpr, func_one_explicit_arg, *func_one_explicit->args.begin());
   ASSERT(func_one_explicit_arg->id == "ipsicle");
 
@@ -121,6 +138,8 @@ void _call()
   $(FuncCallExpr, func_many_nested, p_many_nested[0]);
   ASSERT(func_many_nested->name == "lorraine");
   ASSERT(func_many_nested->args.size() == 2);
+  ASSERT(func_many_nested->target == NULL);
+  ASSERT(func_many_nested->block == NULL);
   std::list<Expr *>::iterator itp = func_many_nested->args.begin();
   {
     // First argument.
@@ -150,6 +169,122 @@ void _call()
   }
   ++itp;
   { $(LiteralTypedExpr<int>, integer, *itp); ASSERT(integer->value == 92); }
+
+  ASSERT_NOPARSE("lorraine(joker");
+}
+
+void _assignment()
+{
+  BEGIN(p, "a = b", 1);
+  $(AssignmentExpr, assign, p[0]);
+  ASSERT(assign->name == "a");
+  $(IdentifierExpr, rval, assign->value);
+  ASSERT(rval->id == "b");
+
+  ASSERT_NOPARSE("4 = b");
+}
+
+void _method_call()
+{
+  BEGIN(p_regular, "abc.def", 1);
+  $(FuncCallExpr, regular, p_regular[0]);
+  $(IdentifierExpr, lval, regular->target);
+  ASSERT(lval->id == "abc");
+  ASSERT(regular->name == "def");
+  ASSERT(regular->args.size() == 0);
+  ASSERT(regular->block == NULL);
+
+  BEGIN(p_left_exp, "(norman.expose).friedlich", 1);
+  $(FuncCallExpr, left_exp, p_left_exp[0]);
+  $(FuncCallExpr, left_call, left_exp->target);
+  $(IdentifierExpr, left_lval, left_call->target);
+  ASSERT(left_lval->id == "norman");
+  ASSERT(left_call->name == "expose");
+  ASSERT(left_call->args.size() == 0);
+  ASSERT(left_call->block == NULL);
+  ASSERT(left_exp->name == "friedlich");
+  ASSERT(left_exp->args.size() == 0);
+  ASSERT(left_exp->block == NULL);
+
+  BEGIN(p_the_lot, "(joe.wilfred tsonga()).sucked at the_open, today", 1);
+  $(FuncCallExpr, tennis, p_the_lot[0]);
+  $(FuncCallExpr, player, tennis->target);
+  $(IdentifierExpr, first, player->target);
+  ASSERT(first->id == "joe");
+  ASSERT(player->name == "wilfred");
+  ASSERT(player->block == NULL);
+  ASSERT(player->args.size() == 1);
+  $(FuncCallExpr, lastname, *player->args.begin());
+  ASSERT(lastname->target == NULL);
+  ASSERT(lastname->name == "tsonga");
+  ASSERT(lastname->args.size() == 0);
+  ASSERT(lastname->block == NULL);
+  ASSERT(tennis->name == "sucked");
+  ASSERT(tennis->args.size() == 1);
+  $(FuncCallExpr, whence, *tennis->args.begin());
+  ASSERT(whence->target == NULL);
+  ASSERT(whence->name == "at");
+  ASSERT(whence->block == NULL);
+  ASSERT(whence->args.size() == 2);
+
+  std::list<Expr *>::iterator it = whence->args.begin();
+  $(IdentifierExpr, location, *it);
+  ASSERT(location->id == "the_open");
+  ++it;
+  $(IdentifierExpr, time, *it);
+  ASSERT(time->id == "today");
+
+  ASSERT_NOPARSE("abc.!def");
+  ASSERT_NOPARSE("abc.(ghi)");
+  ASSERT_NOPARSE("abc.4");
+}
+
+void _operations()
+{
+  // Operations are in fact method calls, so we'll test them afterward.
+  BEGIN(p_simple, "1 + 2", 1);
+  $(FuncCallExpr, simple, p_simple[0]);
+  $(LiteralTypedExpr<int>, simple_1, simple->target);
+  ASSERT(simple_1->value == 1);
+  ASSERT(simple->name == "+");
+  ASSERT(simple->args.size() == 1);
+  $(LiteralTypedExpr<int>, simple_2, *simple->args.begin());
+  ASSERT(simple_2->value == 2);
+
+  BEGIN(p_complex, "(9 - 3 / (5 * -2)) + 0", 1);
+  // (9.-(3./(5.*(2.-@)))).+(0)
+  // parentheses inserted above as leaving 1 + 2 + 3 has ambiguous result:
+  // 1.+(2.+(3)) or (1.+(2)).+(3) or .. etc.
+  $(FuncCallExpr, expr_plus_0, p_complex[0]);
+  $(FuncCallExpr, nine_minus_expr, expr_plus_0->target);
+  $(LiteralTypedExpr<int>, nine, nine_minus_expr->target);
+  ASSERT(nine->value == 9);
+  ASSERT(nine_minus_expr->name == "-");
+  ASSERT(nine_minus_expr->args.size() == 1);
+  $(FuncCallExpr, three_divides_expr, *nine_minus_expr->args.begin());
+  $(LiteralTypedExpr<int>, three, three_divides_expr->target);
+  ASSERT(three->value == 3);
+  ASSERT(three_divides_expr->name == "/");
+  ASSERT(three_divides_expr->args.size() == 1);
+  $(FuncCallExpr, five_times_expr, *three_divides_expr->args.begin());
+  $(LiteralTypedExpr<int>, five, five_times_expr->target);
+  ASSERT(five->value == 5);
+  ASSERT(five_times_expr->name == "*");
+  ASSERT(five_times_expr->args.size() == 1);
+  $(FuncCallExpr, negative_two_expr, *five_times_expr->args.begin());
+  $(LiteralTypedExpr<int>, two, negative_two_expr->target);
+  ASSERT(two->value == 2);
+  ASSERT(negative_two_expr->name == "-@");
+  ASSERT(negative_two_expr->args.size() == 0);
+  ASSERT(expr_plus_0->name == "+");
+  ASSERT(expr_plus_0->args.size() == 1);
+  $(LiteralTypedExpr<int>, zero, *expr_plus_0->args.begin());
+  ASSERT(zero->value == 0);
+}
+
+void _block()
+{
+  
 }
 
 Test *tests[] = {
@@ -157,5 +292,9 @@ Test *tests[] = {
   TEST(identifier),
   TEST(symbol),
   TEST(call),
+  TEST(assignment),
+  TEST(method_call),
+  TEST(operations),
+  TEST(block),
   NULL
 };
