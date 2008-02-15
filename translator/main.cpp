@@ -45,12 +45,20 @@ int main_test(std::list<std::string> &arguments)
 
 Program parse_code(const char *code)
 {
+  return parse_code(code, 0, -1);
+}
+
+Program parse_code(const char *code, int line, int length)
+{
   Program p;
 
   yy_scan_string(code);
   int r = yyparse(&p);
   if (r != 0)
     throw ParseFailureException();
+
+  if (length != -1)
+    ASSERT_LEN(p, line, length);
 
   return p;
 }

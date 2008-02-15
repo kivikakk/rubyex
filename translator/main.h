@@ -7,6 +7,7 @@
 int yyparse(Program *program);
 void yyerror(Program *, char const *);
 Program parse_code(const char *);
+Program parse_code(const char *, int, int);
 
 class ParseFailureException : public std::exception
 {

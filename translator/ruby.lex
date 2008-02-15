@@ -78,6 +78,8 @@ end			{
 		  return '}';
 		}
 
+[0-9]+\.[0-9]+	{ yylval.floating_literal = new LiteralTypedExpr<double>(atof(yytext)); return FLOATING_LITERAL; }
+
 [0-9]+			{ yylval.integer_literal = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
 
 [a-zA-Z][a-zA-Z0-9_]*[!?]?	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
