@@ -10,7 +10,6 @@ m0
 m1
 m2
 .*.d
-rubyex.rb
 out
-ruby
+parser
 ruby.output

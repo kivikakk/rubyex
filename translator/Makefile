@@ -4,7 +4,7 @@ LDFLAGS :=
 CPPS := $(wildcard *.cpp)
 OBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
 
-ruby: out/ruby.tab.o out/lex.yy.o $(OBJS)
+parser: out/ruby.tab.o out/lex.yy.o $(OBJS)
 	$(CXX) $(LDFLAGS) -o $@ out/ruby.tab.o out/lex.yy.o $(OBJS)
 	@./test 1> /dev/null
 
@@ -25,4 +25,4 @@ out/lex.yy.c: ruby.lex
 	flex -t $< > $@
 
 clean:
-	-rm out/*.o out/*.tab.? out/lex.yy.c ruby
+	-rm out/*.o out/*.tab.? out/lex.yy.c parser
