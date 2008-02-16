@@ -1,4 +1,4 @@
-CXXFLAGS := -enable-rtti -I.
+CXXFLAGS := -enable-rtti -I. -g
 LDFLAGS := 
 
 CPPS := $(wildcard *.cpp)

@@ -59,7 +59,7 @@ Program parse_code(const char *code, int line, int length)
     throw ParseFailureException(code);
 
   if (length != -1)
-    ASSERT_LEN(p, line, length);
+    ASSERT_LEN_RETURN(p, line, length, p);
 
   return p;
 }

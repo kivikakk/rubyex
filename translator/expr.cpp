@@ -25,8 +25,31 @@ void ArgListExpr::p(int tabs) const {
   std::cout << p_tabs(tabs) << "ArgListExpr -- XXX: this should never be seen." << std::endl;
 }
 
+DefListExpr::DefListExpr(IdentifierExpr *first) {
+  this->args.push_back(first);
+}
+
+DefListExpr::DefListExpr(DefListExpr *combine, IdentifierExpr *also) {
+  for (std::list<IdentifierExpr *>::iterator it = combine->args.begin(); it != combine->args.end(); ++it)
+    this->args.push_back(*it);
+  this->args.push_back(also);
+
+  delete combine;
+}
+
+void DefListExpr::p(int tabs) const { 
+  std::cout << p_tabs(tabs) << "DefListExpr: " << this->args.size() << " identifier(s)." << std::endl;
+  for (std::list<IdentifierExpr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it)
+    (*it)->p(tabs + 1);
+}
+
 void BlockExpr::p(int tabs) const { 
-  std::cout << p_tabs(tabs) << "BlockExpr: " << this->expressions.size() << " expression(s)." << std::endl;
+  std::cout << p_tabs(tabs) << "BlockExpr: ";
+  if (args) std::cout << "|DefListExpr| ";
+  std::cout << this->expressions.size() << " expression(s)." << std::endl;
+
+  if (args)
+    args->p(tabs + 1);
 
   for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
     (*it)->p(tabs + 1);

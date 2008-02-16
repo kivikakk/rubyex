@@ -8,6 +8,7 @@
 #define BEGIN(name, code, length) Program name = parse_code(code, __LINE__, length)
 #define ASSERT(exp) do { if (!assert_throw(__LINE__, #exp, (exp))) return; } while(false)
 #define ASSERT_LEN(program, line, lines) do { if (!assert_throw((line), #program " expression count match", (program).expressions.size() == (lines))) return; } while (false)
+#define ASSERT_LEN_RETURN(program, line, lines, ret) do { if (!assert_throw((line), #program " expression count match", (program).expressions.size() == (lines))) return(ret); } while (false)
 #define ASSERT_TYPE(type, exp) do { if (!assert_throw(__LINE__, "Expression " #exp " of type " #type, dynamic_cast<type*>(exp))) return; } while (false)
 #define $(type, name, exp) do { if (!assert_throw(__LINE__, "Expression " #exp " of type " #type, dynamic_cast<type*>(exp))) return; } while(false); type *name = dynamic_cast<type*>(exp)
 #define ASSERT_NOPARSE(code) do { bool __anp = false, __anp_op = omit_errors; omit_errors = true; try { parse_code(code); } catch (...) { __anp = true; } omit_errors = __anp_op; if (!assert_throw(__LINE__, "Code is unable to be parsed: \"" code "\"", __anp)) return; } while (false)

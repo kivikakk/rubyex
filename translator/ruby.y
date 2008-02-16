@@ -13,6 +13,7 @@
 %parse-param {Program *program}
 %error-verbose
 
+%token BLOCK_ARGUMENT_START BLOCK_ARGUMENT_END
 %token NL DO END BLOCK_FINISH
 %token END_OF_FILE 0 "end of file"
 %token <identifier> IDENTIFIER FUNCTION_CALL
@@ -26,6 +27,7 @@
 %type <expr> line
 %type <block> block block_content block_line
 %type <arglist> arglist
+%type <deflist> deflist block_arguments block_argument_contents
 %type <expr> expr
 %type <literal> literal
 %type <funccall> funccall
@@ -99,8 +101,14 @@ arglist:	expr			{ $$ = new ArgListExpr($1); }
 	      |	arglist ',' expr	{ $$ = new ArgListExpr($1, $3); }
 ;
 
-block:		DO block_content END	{ $$ = $2; }
-	      |	'{' block_content '}'	{ $$ = $2; }
+/* deflist is for function/block argument definitions. one or more. */
+deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
+	      | deflist ',' IDENTIFIER	{ $$ = new DefListExpr($1, $3); }
+;
+
+block:		
+	      DO block_arguments block_content END	{ if ($3) $3->args = $2; $$ = $3; }
+	      |	'{' block_arguments block_content '}'	{ if ($3) $3->args = $2; $$ = $3; }
 ;
 
 block_content:	{ enter_block(); } block_line { exit_block(); } { $$ = $2; }
@@ -108,6 +116,17 @@ block_content:	{ enter_block(); } block_line { exit_block(); } { $$ = $2; }
 
 block_line:	/* empty */		{ $$ = new BlockExpr(); }
 	      |	block_line { enter_block_line(); } line { exit_block_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
+;
+
+block_arguments:
+	      BLOCK_ARGUMENT_START
+	      block_argument_contents
+	      BLOCK_ARGUMENT_END	{ $$ = $2; }
+;
+
+block_argument_contents:
+		/* empty */	{ $$ = NULL; }
+	      | deflist		{ $$ = $1; }
 ;
 
 literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }

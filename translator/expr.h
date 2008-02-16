@@ -58,13 +58,25 @@ class ArgListExpr : public Expr
     std::list<Expr *> args;
 };
 
+class DefListExpr : public Expr
+{
+  public:
+    DefListExpr(IdentifierExpr *);
+    DefListExpr(DefListExpr *, IdentifierExpr *);
+
+    void p(int) const; 
+
+    std::list<IdentifierExpr *> args;
+};
+
 class BlockExpr : public Expr
 {
   public:
-    BlockExpr() { }
+    BlockExpr(): args(NULL) { }
 
     void p(int) const;
 
+    DefListExpr *args;
     std::list<Expr *> expressions;
 };
 

@@ -7,10 +7,11 @@
 
 %option noyywrap
 
-%x dbstr block_finish
+%x dbstr block_finish starting_block_args
+%s block_args
 
 %{
-  std::string string_buf; bool doing_symbol;
+  std::string string_buf; bool doing_symbol = false;
 %}
 
 %%
@@ -48,7 +49,17 @@
 true		{ yylval.boolean_literal = new LiteralTypedExpr<bool>(true); return BOOLEAN_LITERAL; }
 false		{ yylval.boolean_literal = new LiteralTypedExpr<bool>(false); return BOOLEAN_LITERAL; }
 
-do		{ return DO; }
+do[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return DO; }
+\{[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return '{'; }
+
+
+do			{
+		  /* no args (by precendence). inject empty arglist into stream,
+		   * as the parser always sees the args coming. */
+		  unput('|'); unput('|');
+		  BEGIN(starting_block_args);
+		  return DO;
+		}
 end			{
 		  if (in_block() && block_lines == block_depths) {
 		    IF_DEBUG printf("Going to block_finish (end).");
@@ -59,7 +70,7 @@ end			{
 		  return END;
 		}
 
-\{		{ return '{'; }
+\{		{ /* see "do" */ unput('|'); unput('|'); BEGIN(starting_block_args); return '{'; }
 \}			{
 		  if (in_block() && block_lines == block_depths) {
 		    IF_DEBUG printf("Going to block_finish (}).");
@@ -69,6 +80,10 @@ end			{
 		  }
 		  return '}';
 		}
+
+<starting_block_args>\|	{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
+<block_args>\|	{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
+
 
 <block_finish>end	{
 		  IF_DEBUG printf("Hear `end', returning to initial.\n");
