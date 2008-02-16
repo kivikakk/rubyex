@@ -470,6 +470,56 @@ void _block()
   }
 }
 
+void _block_args()
+{
+  BEGIN(p, "simple {||}", 1);
+  $(FuncCallExpr, simple, p[0]);
+  ASSERT(simple->target == NULL);
+  ASSERT(simple->name == "simple");
+  $(BlockExpr, simple_block, simple->block);
+  ASSERT(!simple_block->args || simple_block->args->args.size() == 0);
+  ASSERT(simple_block->expressions.size() == 0);
+
+
+  BEGIN(p_one, "one {|a| pink}", 1);
+  $(FuncCallExpr, one, p_one[0]);
+  ASSERT(one->target == NULL);
+  ASSERT(one->name == "one");
+  $(BlockExpr, one_block, one->block);
+  $(DefListExpr, one_block_args, one_block->args);
+  ASSERT(one_block_args->args.size() == 1);
+  $(IdentifierExpr, a, *one_block_args->args.begin());
+  ASSERT(a->id == "a");
+  ASSERT(one_block->expressions.size() == 1);
+  $(IdentifierExpr, pink, *one_block->expressions.begin());
+  ASSERT(pink->id == "pink");
+
+  BEGIN(p_many, "many do |x, y, z|\n\tx * y - z\nend", 1);
+  $(FuncCallExpr, many, p_many[0]);
+  ASSERT(many->target == NULL);
+  ASSERT(many->name == "many");
+  $(BlockExpr, many_block, many->block);
+  $(DefListExpr, many_block_args, many_block->args);
+  ASSERT(many_block_args->args.size() == 3);
+  std::list<IdentifierExpr *>::const_iterator it = many_block_args->args.begin();
+  { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "x"); } ++it;
+  { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "y"); } ++it;
+  { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "z"); }
+  ASSERT(many_block->expressions.size() == 1);
+  $(FuncCallExpr, xyz, *many_block->expressions.begin());
+  $(FuncCallExpr, x_y, xyz->target);
+  $(IdentifierExpr, _x, x_y->target);
+  ASSERT(_x->id == "x");
+  ASSERT(x_y->name == "*");
+  ASSERT(x_y->args.size() == 1);
+  $(IdentifierExpr, _y, *x_y->args.begin());
+  ASSERT(_y->id == "y");
+  ASSERT(xyz->name == "-");
+  ASSERT(xyz->args.size() == 1);
+  $(IdentifierExpr, _z, *xyz->args.begin());
+  ASSERT(_z->id == "z");
+}
+
 Test *tests[] = {
   TEST(literals),
   TEST(identifier),
@@ -480,5 +530,6 @@ Test *tests[] = {
   TEST(operations),
   TEST(operator_precedence),
   TEST(block),
+  TEST(block_args),
   NULL
 };
