@@ -21,6 +21,7 @@
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
 %token <floating_literal> FLOATING_LITERAL
+%token <boolean_literal> BOOLEAN_LITERAL
 
 %type <expr> line
 %type <block> block block_content block_line
@@ -111,5 +112,6 @@ block_line:	/* empty */		{ $$ = new BlockExpr(); }
 literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
 	      |	INTEGER_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
 	      | FLOATING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
+	      | BOOLEAN_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
 ;
 

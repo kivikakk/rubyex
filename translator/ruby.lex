@@ -45,6 +45,9 @@
 		    string_buf += *yptr++;
 		}
 
+true		{ yylval.boolean_literal = new LiteralTypedExpr<bool>(true); return BOOLEAN_LITERAL; }
+false		{ yylval.boolean_literal = new LiteralTypedExpr<bool>(false); return BOOLEAN_LITERAL; }
+
 do		{ return DO; }
 end			{
 		  if (in_block() && block_lines == block_depths) {

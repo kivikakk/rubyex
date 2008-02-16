@@ -72,6 +72,14 @@ void _literals()
   BEGIN(dbl_string_nl, "\"hi!\nhow are you?\"", 1);
   $(LiteralTypedExpr<std::string>, dbl_string_nl_expr, dbl_string_nl[0]);
   ASSERT(dbl_string_nl_expr->value == "hi!\nhow are you?");
+
+  BEGIN(bool_true, "true", 1);
+  $(LiteralTypedExpr<bool>, bool_true_expr, bool_true[0]);
+  ASSERT(bool_true_expr->value == true);
+
+  BEGIN(bool_false, "false", 1);
+  $(LiteralTypedExpr<bool>, bool_false_expr, bool_false[0]);
+  ASSERT(bool_false_expr->value == false);
 }
 
 void _identifier()

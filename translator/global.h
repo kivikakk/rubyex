@@ -22,6 +22,7 @@ typedef union {
   LiteralTypedExpr<std::string> *string_literal;
   LiteralTypedExpr<int> *integer_literal;
   LiteralTypedExpr<double> *floating_literal;
+  LiteralTypedExpr<bool> *boolean_literal;
 
   IdentifierExpr *identifier;
   SymbolExpr *symbol;
