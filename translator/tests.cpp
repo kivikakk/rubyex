@@ -61,9 +61,17 @@ void _literals()
   $(LiteralTypedExpr<int>, integer_expr, integer[0]);
   ASSERT(integer_expr->value == 42);
 
+  BEGIN(negative_integer, "-19", 1);
+  $(LiteralTypedExpr<int>, negative_integer_expr, negative_integer[0]);
+  ASSERT(negative_integer_expr->value == -19);
+
   BEGIN(floating, "93.12", 1);
   $(LiteralTypedExpr<double>, floating_expr, floating[0]);
   ASSERT(floating_expr->value == 93.12);	// this is quite brittle. what if it's 93.11999...?
+
+  BEGIN(negative_floating, "-100.1", 1);
+  $(LiteralTypedExpr<double>, negative_floating_expr, negative_floating[0]);
+  ASSERT(negative_floating_expr->value == -100.1);	// also brittle
 
   BEGIN(dbl_string, "\"hi!\"", 1);
   $(LiteralTypedExpr<std::string>, dbl_string_expr, dbl_string[0]);
@@ -297,7 +305,7 @@ void _operations()
   $(LiteralTypedExpr<int>, simple_2, *simple->args.begin());
   ASSERT(simple_2->value == 2);
 
-  BEGIN(p_complex, "(9 - 3 / (5 * -2)) + 0", 1);
+  BEGIN(p_complex, "(9 - 3 / (5 * -negate_it)) + 0", 1);
   // (9.-(3./(5.*(2.-@)))).+(0)
   // parentheses inserted above as leaving 1 + 2 + 3 has ambiguous result:
   // 1.+(2.+(3)) or (1.+(2)).+(3) or .. etc.
@@ -317,11 +325,11 @@ void _operations()
   ASSERT(five->value == 5);
   ASSERT(five_times_expr->name == "*");
   ASSERT(five_times_expr->args.size() == 1);
-  $(FuncCallExpr, negative_two_expr, *five_times_expr->args.begin());
-  $(LiteralTypedExpr<int>, two, negative_two_expr->target);
-  ASSERT(two->value == 2);
-  ASSERT(negative_two_expr->name == "-@");
-  ASSERT(negative_two_expr->args.size() == 0);
+  $(FuncCallExpr, negative_negate_expr, *five_times_expr->args.begin());
+  $(IdentifierExpr, negate_it, negative_negate_expr->target);
+  ASSERT(negate_it->id == "negate_it");
+  ASSERT(negative_negate_expr->name == "-@");
+  ASSERT(negative_negate_expr->args.size() == 0);
   ASSERT(expr_plus_0->name == "+");
   ASSERT(expr_plus_0->args.size() == 1);
   $(LiteralTypedExpr<int>, zero, *expr_plus_0->args.begin());

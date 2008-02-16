@@ -13,10 +13,15 @@ Program parse_code(const char *, int, int);
 
 class ParseFailureException : public std::exception
 {
-  const char *what() const throw()
-  {
-    return "parsing failed";
-  }
+  public:
+    ParseFailureException();
+    ParseFailureException(const std::string &);
+    ~ParseFailureException() throw();
+
+    const char *what() const throw();
+
+  protected:
+    std::string code;
 };
 
 #endif
