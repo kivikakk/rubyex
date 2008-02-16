@@ -5,6 +5,7 @@
 Test::Test(const std::string &_name, const test_pointer &_test): name(_name), test(_test) { }
 
 int assertions, assertion_successes;
+bool test_succeeding;
 
 int tests_all()
 {
@@ -14,27 +15,22 @@ int tests_all()
 
   while (*ptr) {
     Test test = **ptr;
-    bool success = true;
-    std::string failure_message;
+    test_succeeding = true;
 
     std::cout << "test: \"" << test.name << "\"" << std::endl;
     try {
       (*test.test)();
     } catch (std::exception &e) {
-      failure_message = e.what();
-      success = false;
+      std::cerr << "exception failure: " << e.what() << std::endl;
+      test_succeeding = false;
     } catch (...) {
-      success = false;
+      test_succeeding = false;
     }
 
-    if (success)
+    if (test_succeeding)
       tests_succeed++;
-    else {
-      std::cerr << "test: \"" << test.name << "\": failure";
-      if (failure_message.length() > 0)
-	std::cerr << ": " << failure_message;
-      std::cerr << std::endl;
-    }
+    else
+      std::cerr << "test: \"" << test.name << "\": failure" << std::endl;
 
     ptr++, tests_run++;
   }
@@ -46,13 +42,17 @@ int tests_all()
   return 0;
 }
 
-void assert_throw(int line, const char *exp, bool eval)
+bool assert_throw(int line, const char *exp, bool eval)
 {
   ++assertions;
   std::cout << "asserting: " << exp << std::endl;
-  if (!eval)
-    throw AssertionFailureException(line, exp);
+  if (!eval) {
+    std::cerr << "assertion failure: line " << line << ": " << exp << std::endl;
+    test_succeeding = false;
+    return false;
+  }
   ++assertion_successes;
+  return true;
 }
 
 void _literals()
@@ -336,6 +336,38 @@ void _operations()
   ASSERT(zero->value == 0);
 }
 
+void _operator_precedence()
+{
+  // a - 5 		-> a.-(5)
+  // a -5		-> a(-5)
+  // a-5		-> a.-(5)
+
+  BEGIN(p1, "a - 5", 1);
+  $(FuncCallExpr, p1e, p1[0]);
+  $(IdentifierExpr, p1_a, p1e->target);
+  ASSERT(p1_a->id == "a");
+  ASSERT(p1e->name == "-");
+  ASSERT(p1e->args.size() == 1);
+  $(LiteralTypedExpr<int>, p1_5, *p1e->args.begin());
+  ASSERT(p1_5->value == 5);
+
+  BEGIN(p2, "a -5", 1);
+  $(FuncCallExpr, p2e, p2[0]);
+  ASSERT(p2e->name == "a");
+  ASSERT(p2e->args.size() == 1);
+  $(LiteralTypedExpr<int>, p2_n5, *p2e->args.begin());
+  ASSERT(p2_n5->value == -5);
+
+  BEGIN(p3, "a-5", 1);
+  $(FuncCallExpr, p3e, p3[0]);
+  $(IdentifierExpr, p3_a, p3e->target);
+  ASSERT(p3_a->id == "a");
+  ASSERT(p3e->name == "-");
+  ASSERT(p3e->args.size() == 1);
+  $(LiteralTypedExpr<int>, p3_5, *p3e->args.begin());
+  ASSERT(p3_5->value == 5);
+}
+
 void _block()
 {
   BEGIN(p_empty, "call {}", 1);
@@ -444,6 +476,7 @@ Test *tests[] = {
   TEST(assignment),
   TEST(method_call),
   TEST(operations),
+  TEST(operator_precedence),
   TEST(block),
   NULL
 };

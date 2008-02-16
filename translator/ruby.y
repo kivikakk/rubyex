@@ -30,14 +30,15 @@
 %type <literal> literal
 %type <funccall> funccall
 
-%nonassoc IDENTIFIER FUNCTION_CALL
-%nonassoc DO END '{' '}'
-
 %left '<' '>' '=' NE LE GE
 %left '+' '-'
 %left '*' '/'
 %left NEG
 %right '^'
+
+%nonassoc IDENTIFIER FUNCTION_CALL
+%nonassoc DO END 
+%nonassoc '{' '}'
 
 %%
 
