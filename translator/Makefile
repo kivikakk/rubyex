@@ -21,7 +21,7 @@ out/ruby.tab.c: ruby.y
 	bison -v --report=state -d $<
 	mv ruby.tab.? out/
 
-out/lex.yy.c: ruby.lex
+out/lex.yy.c: ruby.l
 	flex -t $< > $@
 
 clean:
