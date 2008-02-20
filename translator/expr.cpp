@@ -65,11 +65,10 @@ FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_a
 
 void FuncCallExpr::p(int tabs) const {
   std::cout << p_tabs(tabs) << "FuncCallExpr: ";
-  if (target)
-    std::cout << "Expr.";
-  std::cout << this->name << "(arguments)";
-  if (block)
-    std::cout << " { BlockExpr }";
+  if (target) std::cout << "Expr.";
+  std::cout << this->name;
+  if (this->args.size() > 0) std::cout << "(arguments)";
+  if (block) std::cout << " { BlockExpr }";
   std::cout << std::endl;
 
   if (target)

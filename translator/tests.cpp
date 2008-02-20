@@ -520,6 +520,26 @@ void _block_args()
   ASSERT(_z->id == "z");
 }
 
+void _multi_call()
+{
+  BEGIN(p_simple, "a.b.c", 1);
+  $(FuncCallExpr, ab_c, p_simple[0]);
+  $(FuncCallExpr, a_b, ab_c->target);
+  $(IdentifierExpr, a, a_b->target);
+  ASSERT(a->id == "a");
+  ASSERT(a_b->name == "b");
+  ASSERT(ab_c->name == "c");
+
+  BEGIN(p_args, "a(b).c", 1);
+  $(FuncCallExpr, args, p_args[0]);
+  $(FuncCallExpr, args_a_of_b, args->target);
+  ASSERT(args_a_of_b->name == "a");
+  ASSERT(args_a_of_b->args.size() == 1);
+  $(IdentifierExpr, args_b, *args_a_of_b->args.begin());
+  ASSERT(args_b->id == "b");
+  ASSERT(args->name == "c");
+}
+
 Test *tests[] = {
   TEST(literals),
   TEST(identifier),
@@ -531,5 +551,6 @@ Test *tests[] = {
   TEST(operator_precedence),
   TEST(block),
   TEST(block_args),
+  TEST(multi_call),
   NULL
 };

@@ -1,4 +1,4 @@
-CXXFLAGS := -enable-rtti -I. -g
+CXXFLAGS := -enable-rtti -I. -g -DYYDEBUG
 LDFLAGS := 
 
 CPPS := $(wildcard *.cpp)
@@ -18,7 +18,7 @@ out/lex.yy.o: out/lex.yy.c out/ruby.tab.c
 	$(CXX) $(CXXFLAGS) -c -o $@ out/lex.yy.c
 
 out/ruby.tab.c: ruby.y
-	bison --report=state -d $<
+	bison -v --report=state -d $<
 	mv ruby.tab.? out/
 
 out/lex.yy.c: ruby.lex

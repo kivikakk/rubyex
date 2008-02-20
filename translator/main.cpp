@@ -4,6 +4,7 @@
 #include <list>
 #include <string>
 #include <exception>
+#include <algorithm>
 
 bool omit_errors = false;
 
@@ -16,6 +17,12 @@ int main(int argc, char **argv)
   std::list<std::string> arguments;
   for (int i = 1; i < argc; ++i)
     arguments.push_back(argv[i]);
+
+  if (std::find(arguments.begin(), arguments.end(), "-t") != arguments.end()) {
+    yydebug = 1;
+    std::list<std::string>::iterator it = std::find(arguments.begin(), arguments.end(), "-t");
+    arguments.erase(it);
+  }
 
   if (invoked_as.find('/') != std::string::npos)
     invoked_as = invoked_as.substr(invoked_as.find('/') + 1);

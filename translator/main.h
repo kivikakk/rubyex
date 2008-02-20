@@ -5,6 +5,7 @@
 #include <exception>
 
 extern bool omit_errors;
+extern int yydebug;
 
 int yyparse(Program *program);
 void yyerror(Program *, char const *);
