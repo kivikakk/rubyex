@@ -57,15 +57,15 @@ line: 		NL	{ $$ = NULL; }
 	      | expr END_OF_FILE { $$ = $1; }
 ;
 
-expr:		funccall { $$ = static_cast<Expr *>($1); }
-	      |	IDENTIFIER	{ $$ = static_cast<Expr *>($1); }
+expr:		funccall { $$ = $1; }
+	      |	IDENTIFIER	{ $$ = $1; }
 	      |	FUNCTION_CALL { $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      |	IDENTIFIER block { $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      |	FUNCTION_CALL block { $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      | IDENTIFIER '=' expr { $$ = new AssignmentExpr($1, $3); }
-	      |	SYMBOL	{ $$ = static_cast<Expr *>($1); }
-	      | literal	{ $$ = static_cast<Expr *>($1); }
-	      | expr '.' funccall { $$ = $3; dynamic_cast<FuncCallExpr *>($$)->target = $1; }
+	      |	SYMBOL	{ $$ = $1; }
+	      | literal	{ $$ = $1; }
+	      | expr '.' funccall { $3->target = $1; $$ = $3; }
 	      | expr '.' IDENTIFIER  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
 	      | expr '.' FUNCTION_CALL  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
 	      | expr '.' IDENTIFIER block  { $$ = new FuncCallExpr($1, $3, NULL, $4); }
@@ -133,9 +133,9 @@ block_argument_contents:
 	      | deflist		{ $$ = $1; }
 ;
 
-literal:	STRING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
-	      |	INTEGER_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
-	      | FLOATING_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
-	      | BOOLEAN_LITERAL	{ $$ = static_cast<LiteralExpr *>($1); }
+literal:	STRING_LITERAL	{ $$ = $1; }
+	      |	INTEGER_LITERAL	{ $$ = $1; }
+	      | FLOATING_LITERAL	{ $$ = $1; }
+	      | BOOLEAN_LITERAL	{ $$ = $1; }
 ;
 
