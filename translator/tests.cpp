@@ -538,6 +538,10 @@ void _multi_call()
   $(IdentifierExpr, args_b, *args_a_of_b->args.begin());
   ASSERT(args_b->id == "b");
   ASSERT(args->name == "c");
+
+  BEGIN(p_spacer, "a b.c(d).e", 1);
+  $(FuncCallExpr, spacer, p_spacer[0]);
+  // TODO
 }
 
 Test *tests[] = {
