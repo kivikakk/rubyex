@@ -7,7 +7,7 @@
 
 %option noyywrap
 
-%x dbstr block_finish starting_block_args
+%x dbstr block_finish starting_block_args arglist_begins
 %s block_args
 
 %{
@@ -31,7 +31,7 @@
 		  yylval.string_literal = new LiteralTypedExpr<std::string>(string_buf);
 		  return STRING_LITERAL;
 		}
-<dbstr>\n		string_buf += '\n';
+<dbstr>\n	string_buf += '\n';
 <dbstr>\\n	string_buf += '\n';
 <dbstr>\\t	string_buf += '\t';
 <dbstr>\\r	string_buf += '\r';
@@ -100,7 +100,33 @@ end			{
 
 -?[0-9]+			{ yylval.integer_literal = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
 
-[a-zA-Z][a-zA-Z0-9_]*[!?]	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return FUNCTION_CALL; }
+
+
+
+[a-zA-Z][a-zA-Z0-9_]*[!?]\(?	{
+			  std::string s = yytext;
+			  if (s[s.length() - 1] == '(') {
+			    s = s.substr(0, s.length() - 1);
+			    BEGIN(arglist_begins);
+			    unput('(');
+			  }
+			  yylval.identifier = new IdentifierExpr(s);
+			  return FUNCTION_CALL;
+			}
+[a-zA-Z][a-zA-Z0-9_]*\(		{
+			  std::string s = yytext;
+			  s = s.substr(0, s.length() - 1);
+			  yylval.identifier = new IdentifierExpr(s);
+			  BEGIN(arglist_begins);
+			  unput('(');
+			  return FUNCTION_CALL;
+			}
+
+<arglist_begins>\(		{
+			  BEGIN(INITIAL);
+			  return ARG_BRACKET;
+			}
+
 [a-zA-Z][a-zA-Z0-9_]*	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
 
 :[a-zA-Z][a-zA-Z0-9_]*[!?]?	{ yylval.symbol = new SymbolExpr(std::string(yytext + 1)); return SYMBOL; }

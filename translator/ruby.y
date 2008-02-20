@@ -14,6 +14,7 @@
 %error-verbose
 
 %token BLOCK_ARGUMENT_START BLOCK_ARGUMENT_END
+%token ARG_BRACKET
 %token NL DO END BLOCK_FINISH
 %token END_OF_FILE 0 "end of file"
 %token <symbol> SYMBOL
@@ -40,7 +41,7 @@
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL
 %nonassoc DO END
 %nonassoc '.'
-%nonassoc '{' '}'
+%nonassoc '{' '}' '(' ')'
 
 %%
 
@@ -85,18 +86,18 @@ compiled_expr:	expr
  * or has some parameters. Any inferred function call (e.g. 'gets')
  * will be treated like an IDENTIFIER in `expr', and we work it out
  * later. */
-funccall:	IDENTIFIER arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); std::cout << "ID ar" << std::endl; }
+funccall:	IDENTIFIER arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL);  }
 	      |	IDENTIFIER arglist block	{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
-	      |	FUNCTION_CALL arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); std::cout << "FC ar" << std::endl; }
+	      |	FUNCTION_CALL arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL);  }
 	      |	FUNCTION_CALL arglist block	{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
 	      | IDENTIFIER '(' ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      | IDENTIFIER '(' ')' block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | IDENTIFIER '(' arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); std::cout << "ID(ar)" << std::endl; }
+	      | IDENTIFIER '(' arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL);  }
 	      | IDENTIFIER '(' arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
-	      | FUNCTION_CALL '(' ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      | FUNCTION_CALL '(' ')' block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | FUNCTION_CALL '(' arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); std::cout << "FC(ar)" << std::endl; }
-	      | FUNCTION_CALL '(' arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+	      | FUNCTION_CALL ARG_BRACKET ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
+	      | FUNCTION_CALL ARG_BRACKET ')' block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
+	      | FUNCTION_CALL ARG_BRACKET arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
+	      | FUNCTION_CALL ARG_BRACKET arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
 ;
 
 /* arglist is one or more, in line with funccall. */
