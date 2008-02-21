@@ -539,9 +539,38 @@ void _multi_call()
   ASSERT(args_b->id == "b");
   ASSERT(args->name == "c");
 
-  BEGIN(p_spacer, "a b.c(d).e", 1);
+  BEGIN(p_spacer, "a b.c(d{f(g)}).e(h){q{m()}}", 1);
   $(FuncCallExpr, spacer, p_spacer[0]);
-  // TODO
+  ASSERT(spacer->name == "a");
+  ASSERT(spacer->args.size() == 1);
+  $(FuncCallExpr, bc_e, *spacer->args.begin());
+  $(FuncCallExpr, b_c, bc_e->target);
+  $(IdentifierExpr, b, b_c->target);
+  ASSERT(b->id == "b");
+  ASSERT(b_c->name == "c");
+  ASSERT(b_c->args.size() == 1);
+  $(FuncCallExpr, d_fg, *b_c->args.begin());
+  ASSERT(d_fg->name == "d");
+  $(BlockExpr, _fg, d_fg->block);
+  ASSERT(_fg->expressions.size() == 1);
+  $(FuncCallExpr, f_g, *_fg->expressions.begin());
+  ASSERT(f_g->name == "f");
+  ASSERT(f_g->args.size() == 1);
+  $(IdentifierExpr, g, *f_g->args.begin());
+  ASSERT(g->id == "g");
+  ASSERT(bc_e->name == "e");
+  ASSERT(bc_e->args.size() == 1);
+  $(IdentifierExpr, h, *bc_e->args.begin());
+  ASSERT(h->id == "h");
+  $(BlockExpr, _qm, bc_e->block);
+  ASSERT(_qm->expressions.size() == 1);
+  $(FuncCallExpr, qm, *_qm->expressions.begin());
+  ASSERT(qm->name == "q");
+  $(BlockExpr, _m, qm->block);
+  ASSERT(_m->expressions.size() == 1);
+  $(FuncCallExpr, m, *_m->expressions.begin());
+  ASSERT(m->name == "m");
+  ASSERT(m->args.size() == 0);
 }
 
 Test *tests[] = {
