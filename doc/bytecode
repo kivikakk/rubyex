@@ -21,7 +21,10 @@ RubyEx Bytecode Design
 
 Now, we're tasked with converting this into bytecode. How do we handle the creation of classes, for instance? Or defining functions? We need to be aware of our "context", which is this strange `main` `Object`. MRI uses an internal variable, `ruby_class`/`ruby_cbase` (name changed) to keep track of this. It's important.
 
-ruby-talk:207801 and :173746, both care of Guy Decoux, help us here.
+[ruby-talk:207801][1] and [ruby-talk:173746][2], both care of Guy Decoux, help us here.
+
+  [1]: http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/207801
+  [2]: http://blade.nagaokaut.ac.jp/cgi-bin/scat.rb/ruby/ruby-talk/173746
 
 At the top-level, `ruby_cbase` apears to be `Kernel`. `methods(false)` returns singleton methods. Note that the `main` object has very few singleton methods - any top-level defined functions do *not* go into `main`; they go into `Kernel`. `Kernel` is included in `Object`, and of course `main` is a sort of `Object`, and thus those methods are available here.
 
@@ -31,4 +34,3 @@ At the top-level, `ruby_cbase` apears to be `Kernel`. `methods(false)` returns s
 * `class A` renders: `self` = `ruby_cbase` = `A` - methods defined on instances of `A`
 * `A#a` renders: `self` = `A` instance, `ruby_cbase` = `A` - methods defined on instances of `A`
 * `A = Class.new` renders: `self` = `ruby_cbase` = `A` - methods defined on instances of `A`
-
