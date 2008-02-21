@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+REJECT_LIST = ['generate', 'layout']
+
+layout = File.read "layout"
+
+Dir['*'].reject {|i| i =~ /\.html$/ or REJECT_LIST.include?(i)}.each do |e|
+  markd = `markdown #{e}`
+  File.open("#{e}.html", "w") do |f|
+    f.write(layout.gsub("CONTENT", markd))
+  end
+end
+

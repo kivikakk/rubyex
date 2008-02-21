@@ -13,3 +13,4 @@ m2
 out
 parser
 ruby.output
+doc/*.html

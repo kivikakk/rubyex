@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>RubyEx</title>
+    <style type="text/css">
+      code {
+	color: #044;
+	font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    CONTENT
+  </body>
+</html>
