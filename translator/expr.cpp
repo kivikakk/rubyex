@@ -8,6 +8,29 @@ void SymbolExpr::p() const {
   std::cout << ":" << this->symbol;
 }
 
+void IntegerLiteralExpr::p() const {
+  std::cout << value;
+}
+
+void FloatingLiteralExpr::p() const {
+  std::cout << value;
+}
+
+void BooleanLiteralExpr::p() const {
+  std::cout << (value ? "true" : "false");
+}
+
+void StringLiteralExpr::p() const {
+  std::cout << "\"";
+  for (int i = 0; i < value.length(); ++i) {
+    if (value[i] == '"')
+      std::cout << "\\\"";
+    else
+      std::cout << value[i];
+  }
+  std::cout << "\"";
+}
+
 ArgListExpr::ArgListExpr(Expr *first) {
   this->args.push_back(first);
   // FuncCallExpr will be responsible for this->args' members later.

@@ -28,7 +28,7 @@
 		    return SYMBOL;
 		  }
 
-		  yylval.string_literal = new LiteralTypedExpr<std::string>(string_buf);
+		  yylval.string_literal = new StringLiteralExpr(string_buf);
 		  return STRING_LITERAL;
 		}
 <dbstr>\n	string_buf += '\n';
@@ -46,8 +46,8 @@
 		    string_buf += *yptr++;
 		}
 
-true		{ yylval.boolean_literal = new LiteralTypedExpr<bool>(true); return BOOLEAN_LITERAL; }
-false		{ yylval.boolean_literal = new LiteralTypedExpr<bool>(false); return BOOLEAN_LITERAL; }
+true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }
+false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_LITERAL; }
 
 do[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return DO; }
 \{[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return '{'; }
@@ -96,9 +96,9 @@ end			{
 		  return '}';
 		}
 
--?[0-9]+\.[0-9]+	{ yylval.floating_literal = new LiteralTypedExpr<double>(atof(yytext)); return FLOATING_LITERAL; }
+-?[0-9]+\.[0-9]+	{ yylval.floating_literal = new FloatingLiteralExpr(atof(yytext)); return FLOATING_LITERAL; }
 
--?[0-9]+			{ yylval.integer_literal = new LiteralTypedExpr<int>(atoi(yytext)); return INTEGER_LITERAL; }
+-?[0-9]+			{ yylval.integer_literal = new IntegerLiteralExpr(atoi(yytext)); return INTEGER_LITERAL; }
 
 
 

@@ -20,10 +20,10 @@ typedef union {
   DefListExpr *deflist;
   BlockExpr *block;
 
-  LiteralTypedExpr<std::string> *string_literal;
-  LiteralTypedExpr<int> *integer_literal;
-  LiteralTypedExpr<double> *floating_literal;
-  LiteralTypedExpr<bool> *boolean_literal;
+  StringLiteralExpr *string_literal;
+  IntegerLiteralExpr *integer_literal;
+  FloatingLiteralExpr *floating_literal;
+  BooleanLiteralExpr *boolean_literal;
 
   IdentifierExpr *identifier;
   SymbolExpr *symbol;

@@ -47,8 +47,18 @@ template <typename T> class LiteralTypedExpr : public LiteralExpr
     T value;
 };
 
-class IntegerLiteralExpr : public LiteralTypedExpr<int>
-{ };
+#define TypedClassDefinition(name, type) \
+  class name : public LiteralTypedExpr<type> \
+  { \
+    public: \
+      name(type _value): LiteralTypedExpr<type>(_value) { } \
+      void p() const; \
+  }
+
+TypedClassDefinition(IntegerLiteralExpr, int);
+TypedClassDefinition(FloatingLiteralExpr, double);
+TypedClassDefinition(BooleanLiteralExpr, bool);
+TypedClassDefinition(StringLiteralExpr, std::string);
 
 class ArgListExpr : public Expr
 {

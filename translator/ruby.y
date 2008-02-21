@@ -41,7 +41,8 @@
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL
 %nonassoc DO END
 %nonassoc '.'
-%nonassoc '{' '}' '(' ')'
+%left '(' ')'
+%left '{' '}'
 
 %%
 
