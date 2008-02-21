@@ -1,5 +1,0 @@
-At the moment, the separation is that the `translator' package will convert Ruby source-code into byte-code, and then the `module' package will be loaded into the kernel, which can evaluate that byte-code.
-
-However, if the source-code contains an `eval'-like statement (which it probably will - this IS Ruby), then the `module' has no method for decoding it. Probably, the translator would either need to be called in user-space from kernel-space (ouch!), or perhaps the translator can also be loaded into the kernel.
-
-For the latter option, we would have to make our parser re-entrant (not so hard), and be fairly careful about freeing memory and so on when we're creating the AST.
