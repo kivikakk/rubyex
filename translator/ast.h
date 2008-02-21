@@ -5,8 +5,9 @@
 #include <string>
 #include <list>
 #include "pretty.h"
+#include "bytecode.h"
 
-class Expr : public PrettyPrint
+class Expr : public PrettyPrint, public Emitter
 {
   public:
     Expr() { }
@@ -19,6 +20,8 @@ class IdentifierExpr : public Expr
     IdentifierExpr(const std::string &_id): id(_id) { }
 
     void p() const;
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     std::string id;
 };
@@ -29,6 +32,8 @@ class SymbolExpr : public Expr
     SymbolExpr(const std::string &_symbol): symbol(_symbol) { }
 
     void p() const;
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     std::string symbol;
 };
@@ -40,10 +45,6 @@ template <typename T> class LiteralTypedExpr : public LiteralExpr
   public:
     LiteralTypedExpr<T>(T _value): value(_value) { }
 
-    void p() const {
-      std::cout << "(?)<" << typeid(T).name() << ">:" << value << std::endl;
-    }
-
     T value;
 };
 
@@ -53,6 +54,8 @@ template <typename T> class LiteralTypedExpr : public LiteralExpr
     public: \
       name(type _value): LiteralTypedExpr<type>(_value) { } \
       void p() const; \
+      void emit(std::ostream &) const; \
+      instruction_t instruction() const; \
   }
 
 TypedClassDefinition(IntegerLiteralExpr, int);
@@ -67,6 +70,8 @@ class ArgListExpr : public Expr
     ArgListExpr(ArgListExpr *, Expr *);
 
     void p() const; 
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     std::list<Expr *> args;
 };
@@ -78,6 +83,8 @@ class DefListExpr : public Expr
     DefListExpr(DefListExpr *, IdentifierExpr *);
 
     void p() const; 
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     std::list<IdentifierExpr *> args;
 };
@@ -88,6 +95,8 @@ class BlockExpr : public Expr
     BlockExpr(): args(NULL) { }
 
     void p() const;
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     DefListExpr *args;
     std::list<Expr *> expressions;
@@ -99,6 +108,8 @@ class FuncCallExpr : public Expr
     FuncCallExpr(Expr *, IdentifierExpr *, ArgListExpr *, BlockExpr *);
 
     void p() const;
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     Expr *target;
     std::string name;
@@ -112,12 +123,14 @@ class AssignmentExpr : public Expr
     AssignmentExpr(IdentifierExpr *, Expr *);
 
     void p() const;
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     std::string name;
     Expr *value;
 };
 
-class Program : public PrettyPrint
+class Program : public PrettyPrint, public Emitter
 {
   public:
     Program() { }
@@ -126,6 +139,8 @@ class Program : public PrettyPrint
     void add_expression(Expr *);
 
     void p() const;
+    void emit(std::ostream &) const;
+    instruction_t instruction() const;
 
     std::list<Expr *> expressions;
 };
