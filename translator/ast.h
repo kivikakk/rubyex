@@ -5,7 +5,7 @@
 #include <string>
 #include <list>
 #include "pretty.h"
-#include "bytecode.h"
+#include "emitter.h"
 
 class Expr : public PrettyPrint, public Emitter
 {
