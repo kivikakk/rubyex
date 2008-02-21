@@ -1,11 +1,11 @@
 #include "expr.h"
 
-void IdentifierExpr::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "IdentifierExpr: " << this->id << std::endl;
+void IdentifierExpr::p() const {
+  std::cout << this->id;
 }
 
-void SymbolExpr::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "SymbolExpr: :" << this->symbol << std::endl;
+void SymbolExpr::p() const {
+  std::cout << ":" << this->symbol;
 }
 
 ArgListExpr::ArgListExpr(Expr *first) {
@@ -21,8 +21,8 @@ ArgListExpr::ArgListExpr(ArgListExpr *combine, Expr *also) {
   delete combine;
 }
 
-void ArgListExpr::p(int tabs) const { 
-  std::cout << p_tabs(tabs) << "ArgListExpr -- XXX: this should never be seen." << std::endl;
+void ArgListExpr::p() const { 
+  std::cout << "<ArgListExpr -- XXX: this should never be seen.>";
 }
 
 DefListExpr::DefListExpr(IdentifierExpr *first) {
@@ -37,22 +37,24 @@ DefListExpr::DefListExpr(DefListExpr *combine, IdentifierExpr *also) {
   delete combine;
 }
 
-void DefListExpr::p(int tabs) const { 
-  std::cout << p_tabs(tabs) << "DefListExpr: " << this->args.size() << " identifier(s)." << std::endl;
-  for (std::list<IdentifierExpr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it)
-    (*it)->p(tabs + 1);
+void DefListExpr::p() const { 
+  for (std::list<IdentifierExpr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it) {
+    if (it != this->args.begin()) std::cout << ", ";
+    (*it)->p();
+  }
 }
 
-void BlockExpr::p(int tabs) const { 
-  std::cout << p_tabs(tabs) << "BlockExpr: ";
-  if (args) std::cout << "|DefListExpr| ";
-  std::cout << this->expressions.size() << " expression(s)." << std::endl;
+void BlockExpr::p() const { 
+  if (args) {
+    std::cout << "|";
+    args->p();
+    std::cout << "| ";
+  }
 
-  if (args)
-    args->p(tabs + 1);
-
-  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
-    (*it)->p(tabs + 1);
+  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it) {
+    if (it != this->expressions.begin()) std::cout << "; ";
+    (*it)->p();
+  }
 }
 
 FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block) {
@@ -63,20 +65,26 @@ FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_a
   delete _name;
 }
 
-void FuncCallExpr::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "FuncCallExpr: ";
-  if (target) std::cout << "Expr.";
+void FuncCallExpr::p() const {
+  if (target) {
+    target->p();
+    std::cout << ".";
+  }
   std::cout << this->name;
-  if (this->args.size() > 0) std::cout << "(arguments)";
-  if (block) std::cout << " { BlockExpr }";
-  std::cout << std::endl;
+  if (this->args.size() > 0) {
+    std::cout << "(";
+    for (std::list<Expr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it) {
+      if (it != this->args.begin()) std::cout << ", ";
+      (*it)->p();
+    }
+    std::cout << ")";
+  }
 
-  if (target)
-    target->p(tabs + 1);
-  for (std::list<Expr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it)
-    (*it)->p(tabs + 1);
-  if (block)
-    block->p(tabs + 1);
+  if (block) {
+    std::cout << " {";
+    block->p();
+    std::cout << "}";
+  }
 }
 
 AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
@@ -86,9 +94,9 @@ AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
   delete _name;
 }
 
-void AssignmentExpr::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "AssignmentExpr: " << this->name << " = Expr" << std::endl;
-  this->value->p(tabs + 1);
+void AssignmentExpr::p() const {
+  std::cout << this->name << " = ";
+  this->value->p();
 }
 
 void Program::add_expression(Expr *expression) {
@@ -103,10 +111,12 @@ Expr *Program::operator[](int index) {
   return *it;
 }
 
-void Program::p(int tabs) const {
-  std::cout << p_tabs(tabs) << "Program: " << this->expressions.size() << " expression(s)." << std::endl;
+void Program::p() const {
+  std::cout << "Program: " << this->expressions.size() << " expression(s)." << std::endl;
 
-  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
-    (*it)->p(tabs + 1);
+  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it) {
+    (*it)->p();
+    std::cout << std::endl;
+  }
 }
 

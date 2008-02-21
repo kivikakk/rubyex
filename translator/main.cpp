@@ -41,7 +41,7 @@ int main_parser(std::list<std::string> &arguments)
   if (r != 0)
     return r;
 
-  p.p(0);
+  p.p();
 
   return 0;
 }

@@ -18,7 +18,7 @@ class IdentifierExpr : public Expr
   public:
     IdentifierExpr(const std::string &_id): id(_id) { }
 
-    void p(int) const;
+    void p() const;
 
     std::string id;
 };
@@ -28,7 +28,7 @@ class SymbolExpr : public Expr
   public:
     SymbolExpr(const std::string &_symbol): symbol(_symbol) { }
 
-    void p(int) const;
+    void p() const;
 
     std::string symbol;
 };
@@ -40,12 +40,15 @@ template <typename T> class LiteralTypedExpr : public LiteralExpr
   public:
     LiteralTypedExpr<T>(T _value): value(_value) { }
 
-    void p(int tabs) const {
-      std::cout << p_tabs(tabs) << "LiteralTypedExpr<" << typeid(T).name() << ">: " << value << std::endl;
+    void p() const {
+      std::cout << "(?)<" << typeid(T).name() << ">:" << value << std::endl;
     }
 
     T value;
 };
+
+class IntegerLiteralExpr : public LiteralTypedExpr<int>
+{ };
 
 class ArgListExpr : public Expr
 {
@@ -53,7 +56,7 @@ class ArgListExpr : public Expr
     ArgListExpr(Expr *);
     ArgListExpr(ArgListExpr *, Expr *);
 
-    void p(int) const; 
+    void p() const; 
 
     std::list<Expr *> args;
 };
@@ -64,7 +67,7 @@ class DefListExpr : public Expr
     DefListExpr(IdentifierExpr *);
     DefListExpr(DefListExpr *, IdentifierExpr *);
 
-    void p(int) const; 
+    void p() const; 
 
     std::list<IdentifierExpr *> args;
 };
@@ -74,7 +77,7 @@ class BlockExpr : public Expr
   public:
     BlockExpr(): args(NULL) { }
 
-    void p(int) const;
+    void p() const;
 
     DefListExpr *args;
     std::list<Expr *> expressions;
@@ -85,7 +88,7 @@ class FuncCallExpr : public Expr
   public:
     FuncCallExpr(Expr *, IdentifierExpr *, ArgListExpr *, BlockExpr *);
 
-    void p(int) const;
+    void p() const;
 
     Expr *target;
     std::string name;
@@ -98,7 +101,7 @@ class AssignmentExpr : public Expr
   public:
     AssignmentExpr(IdentifierExpr *, Expr *);
 
-    void p(int) const;
+    void p() const;
 
     std::string name;
     Expr *value;
@@ -112,7 +115,7 @@ class Program : public PrettyPrint
 
     void add_expression(Expr *);
 
-    void p(int) const;
+    void p() const;
 
     std::list<Expr *> expressions;
 };
