@@ -1,3 +1,22 @@
-# RubyEx Bytecode Design
+RubyEx Bytecode Design
+======================
 
-The bytecode in RubyEx needs to be interpreted as sourcecode-like as it can be. What *am* I crapping on about? God knows.
+    class Frank
+      def initialize(name)
+        puts "Hi #{name}."
+      end
+
+      def kill
+        puts "I'm dead!"
+      end
+    end
+
+    def do_it name
+      f = Frank.new "Equinox"
+      f.kill
+      puts " -- #{name}"
+    end
+
+    do_it (rabid = "Forethought")
+
+Now, we're tasked with converting this into bytecode. How do we handle the creation of classes, for instance? Or defining functions? We need to be aware of our "context", which is this strange `main' Object.
