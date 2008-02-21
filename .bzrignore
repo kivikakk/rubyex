@@ -6,11 +6,9 @@ minor_*
 .*.o.cmd
 .tmp_versions
 Module.symvers
-m0
-m1
-m2
+m?
 .*.d
 out
 parser
 ruby.output
-doc/*.html
+program
