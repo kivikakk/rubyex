@@ -1,5 +1,5 @@
-#ifndef EXPR_H
-#define EXPR_H
+#ifndef AST_H
+#define AST_H
 
 #include <iostream>
 #include <string>

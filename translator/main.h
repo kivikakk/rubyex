@@ -1,7 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "expr.h"
+#include "ast.h"
 #include <exception>
 
 extern bool omit_errors;

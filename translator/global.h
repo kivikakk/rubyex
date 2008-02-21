@@ -7,7 +7,7 @@
 
 #define IF_DEBUG if (DEBUG)
 
-#include "expr.h"
+#include "ast.h"
 #include <string>
 
 int yylex (void);
