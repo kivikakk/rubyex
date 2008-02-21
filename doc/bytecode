@@ -1,0 +1,3 @@
+# RubyEx Bytecode Design
+
+The bytecode in RubyEx needs to be interpreted as sourcecode-like as it can be. What *am* I crapping on about? God knows.
