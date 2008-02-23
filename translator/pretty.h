@@ -8,7 +8,7 @@ class PrettyPrint
   public:
     virtual ~PrettyPrint();
 
-    virtual void p() const = 0;
+    virtual void p() const;
 };
 
 #endif

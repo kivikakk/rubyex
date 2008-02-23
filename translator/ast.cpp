@@ -5,11 +5,15 @@ void IdentifierExpr::p() const {
 }
 
 void IdentifierExpr::emit(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_IDENTIFIER);
   emit_string(o, id);
 }
 
-instruction_t IdentifierExpr::instruction() const {
-  return I_IDENTIFIER;
+void IdentifierExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_PUSH);
+  emit_type(o, T_IDENTIFIER);
+  emit_string(o, id);
 }
 
 void SymbolExpr::p() const {
@@ -17,11 +21,15 @@ void SymbolExpr::p() const {
 }
 
 void SymbolExpr::emit(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_SYMBOL);
   emit_string(o, symbol);
 }
 
-instruction_t SymbolExpr::instruction() const {
-  return I_SYMBOL;
+void SymbolExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_PUSH);
+  emit_type(o, T_SYMBOL);
+  emit_string(o, symbol);
 }
 
 void IntegerLiteralExpr::p() const {
@@ -29,11 +37,15 @@ void IntegerLiteralExpr::p() const {
 }
 
 void IntegerLiteralExpr::emit(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_INTEGER_LITERAL);
   emit_int32(o, value);
 }
 
-instruction_t IntegerLiteralExpr::instruction() const {
-  return I_INTEGER_LITERAL;
+void IntegerLiteralExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_PUSH);
+  emit_type(o, T_INTEGER_LITERAL);
+  emit_int32(o, value);
 }
 
 void FloatingLiteralExpr::p() const {
@@ -41,11 +53,15 @@ void FloatingLiteralExpr::p() const {
 }
 
 void FloatingLiteralExpr::emit(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_FLOATING_LITERAL);
   emit_float(o, value);
 }
 
-instruction_t FloatingLiteralExpr::instruction() const {
-  return I_FLOATING_LITERAL;
+void FloatingLiteralExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_PUSH);
+  emit_type(o, T_FLOATING_LITERAL);
+  emit_float(o, value);
 }
 
 void BooleanLiteralExpr::p() const {
@@ -53,11 +69,15 @@ void BooleanLiteralExpr::p() const {
 }
 
 void BooleanLiteralExpr::emit(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_BOOLEAN_LITERAL);
   emit_bool(o, value);
 }
 
-instruction_t BooleanLiteralExpr::instruction() const {
-  return I_BOOLEAN_LITERAL;
+void BooleanLiteralExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_BOOLEAN_LITERAL);
+  emit_bool(o, value);
 }
 
 void StringLiteralExpr::p() const {
@@ -72,11 +92,15 @@ void StringLiteralExpr::p() const {
 }
 
 void StringLiteralExpr::emit(std::ostream &o) const {
-  emit_text(o, value); // using emit_text; maybe we have a NUL?
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_STRING_LITERAL);
+  emit_text(o, value);	// maybe we have a NUL? -> use emit_text, not emit_string
 }
 
-instruction_t StringLiteralExpr::instruction() const {
-  return I_STRING_LITERAL;
+void StringLiteralExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_PUSH);
+  emit_type(o, T_STRING_LITERAL);
+  emit_text(o, value);
 }
 
 ArgListExpr::ArgListExpr(Expr *first) {
@@ -92,19 +116,6 @@ ArgListExpr::ArgListExpr(ArgListExpr *combine, Expr *also) {
   delete combine;
 }
 
-void ArgListExpr::p() const { 
-  std::cout << "<ArgListExpr -- XXX: this should never be seen.>";
-}
-
-void ArgListExpr::emit(std::ostream &o) const {
-  std::cerr << "<ArgListExpr -- XXX: I am being emitted! Whyyyy!?>" << std::endl;
-}
-
-instruction_t ArgListExpr::instruction() const {
-  std::cerr << "<ArgListExpr -- XXX: you may not have my instruction_t!>" << std::endl;
-  throw std::exception();
-}
-
 DefListExpr::DefListExpr(IdentifierExpr *first) {
   this->args.push_back(first);
 }
@@ -117,24 +128,16 @@ DefListExpr::DefListExpr(DefListExpr *combine, IdentifierExpr *also) {
   delete combine;
 }
 
-void DefListExpr::p() const { 
+void DefListExpr::p() const
+{
   for (std::list<IdentifierExpr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it) {
     if (it != this->args.begin()) std::cout << ", ";
     (*it)->p();
   }
 }
 
-void DefListExpr::emit(std::ostream &o) const {
-  emit_uint32(o, args.size());
-  for (std::list<IdentifierExpr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it)
-    (*it)->emit(o);
-}
-
-instruction_t DefListExpr::instruction() const {
-  return I_DEF_LIST;
-}
-
-void BlockExpr::p() const { 
+void BlockExpr::p() const
+{
   if (args) {
     std::cout << "|";
     args->p();
@@ -147,22 +150,24 @@ void BlockExpr::p() const {
   }
 }
 
-void BlockExpr::emit(std::ostream &o) const {
-  emit_bool(o, args);
+void BlockExpr::push(std::ostream &o) const
+{
+  emit_instruction(o, I_CONSTRUCT_BLOCK);
+
   if (args)
-    args->emit(o);
-  emit_uint32(o, expressions.size());
-  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it) {
-    emit_instruction(o, (*it)->instruction());
+    for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it)
+      emit_string(o, (*it)->id);	// we don't let the IdExpr emit, we don't want an I_EXECUTE
+
+  emit_instruction(o, I_END);
+
+  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
     (*it)->emit(o);
-  }
+
+  emit_instruction(o, I_END);
 }
 
-instruction_t BlockExpr::instruction() const {
-  return I_BLOCK;
-}
-
-FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block) {
+FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block)
+{
   this->name = _name->id;
   if (_args)
     this->args = _args->args;	// we take responsibility here.
@@ -170,7 +175,8 @@ FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_a
   delete _name;
 }
 
-void FuncCallExpr::p() const {
+void FuncCallExpr::p() const
+{
   if (target) {
     target->p();
     std::cout << ".";
@@ -192,23 +198,25 @@ void FuncCallExpr::p() const {
   }
 }
 
-void FuncCallExpr::emit(std::ostream &o) const {
-  emit_bool(o, target);
+void FuncCallExpr::emit(std::ostream &o) const
+{
+  for (std::list<Expr *>::const_reverse_iterator it = args.rbegin(); it != args.rend(); ++it)
+    (*it)->push(o);
+
+  if (block)
+    block->push(o);
+
   if (target)
-    target->emit(o);
+    target->push(o);
+  
+  emit_instruction(o, target ? (block ? I_TARGET_CALL_BLOCK : I_TARGET_CALL) : (block ? I_CALL_BLOCK : I_CALL));
   emit_string(o, name);
   emit_uint32(o, args.size());
-  for (std::list<Expr *>::const_iterator it = args.begin(); it != args.end(); ++it) {
-    emit_instruction(o, (*it)->instruction());
-    (*it)->emit(o);
-  }
-  emit_bool(o, block);
-  if (block)
-    block->emit(o);
 }
 
-instruction_t FuncCallExpr::instruction() const {
-  return I_FUNC_CALL;
+void FuncCallExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
 }
 
 AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
@@ -224,13 +232,9 @@ void AssignmentExpr::p() const {
 }
 
 void AssignmentExpr::emit(std::ostream &o) const {
-  emit_string(o, name);
-  emit_instruction(o, value->instruction());
   value->emit(o);
-}
-
-instruction_t AssignmentExpr::instruction() const {
-  return I_ASSIGNMENT;
+  emit_instruction(o, I_ASSIGNMENT);
+  emit_string(o, name);
 }
 
 void Program::add_expression(Expr *expression) {
@@ -255,15 +259,7 @@ void Program::p() const {
 }
 
 void Program::emit(std::ostream &o) const {
-  emit_uint32(o, expressions.size());
-  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it) {
-    emit_instruction(o, (*it)->instruction());
+  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
     (*it)->emit(o);
-  }
-}
-
-instruction_t Program::instruction() const {
-  std::cerr << "<Program -- XXX: you may not have my instruction_t!>" << std::endl;
-  throw std::exception();
 }
 

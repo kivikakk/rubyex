@@ -19,10 +19,11 @@ class Emitter
   public:
     virtual ~Emitter() { }
 
-    virtual void emit(std::ostream &) const = 0;
-    virtual instruction_t instruction() const = 0;
+    virtual void emit(std::ostream &) const;
+    virtual void push(std::ostream &) const;
 
   protected:
+    static void emit_type(std::ostream &, type_t);
     static void emit_instruction(std::ostream &, instruction_t);
     static void emit_uint8(std::ostream &, uint8);
     static void emit_uint32(std::ostream &, uint32);

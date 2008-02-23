@@ -1,6 +1,21 @@
 #include "emitter.h"
 #include <iostream>
 
+void Emitter::push(std::ostream &) const
+{
+  std::cerr << "Error! " << typeid(this).name() << " doesn't know how to push()." << std::endl;
+}
+
+void Emitter::emit(std::ostream &) const
+{
+  std::cerr << "Error! " << typeid(this).name() << " doesn't know how to emit()." << std::endl;
+}
+
+void Emitter::emit_type(std::ostream &o, type_t t)
+{
+  emit_uint8(o, (uint8)t);
+}
+
 void Emitter::emit_instruction(std::ostream &o, instruction_t i)
 {
   emit_uint8(o, (uint8)i);
