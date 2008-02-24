@@ -29,15 +29,18 @@ typedef union {
   SymbolExpr *symbol;
   LiteralExpr *literal;
   FuncCallExpr *funccall;
+  FuncDefExpr *funcdef;
+
+  Procedure *procedure;
 } expu;
 
 #define YYSTYPE expu
 
-extern int block_depths, block_lines;
+extern int context_depths, context_lines;
 
-void enter_block(); void enter_block_line();
-void exit_block(); void exit_block_line();
-bool in_block();
+void enter_context(); void enter_context_line();
+void exit_context(); void exit_context_line();
+bool in_context();
 
 #endif
 

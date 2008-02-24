@@ -7,7 +7,7 @@
 
 %option noyywrap
 
-%x dbstr block_finish starting_block_args arglist_begins
+%x dbstr context_finish starting_block_args arglist_begins
 %s block_args
 
 %{
@@ -46,6 +46,8 @@
 		    string_buf += *yptr++;
 		}
 
+def		{ return DEF; }
+
 true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }
 false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_LITERAL; }
 
@@ -61,22 +63,22 @@ do			{
 		  return DO;
 		}
 end			{
-		  if (in_block() && block_lines == block_depths) {
+		  if (in_context() && context_lines == context_depths) {
 		    IF_DEBUG printf("Going to block_finish (end).");
-		    BEGIN(block_finish);
+		    BEGIN(context_finish);
 		    yyless(0);
-		    return BLOCK_FINISH;
+		    return CONTEXT_FINISH;
 		  }
 		  return END;
 		}
 
 \{		{ /* see "do" */ unput('|'); unput('|'); BEGIN(starting_block_args); return '{'; }
 \}			{
-		  if (in_block() && block_lines == block_depths) {
-		    IF_DEBUG printf("Going to block_finish (}).");
-		    BEGIN(block_finish);
+		  if (in_context() && context_lines == context_depths) {
+		    IF_DEBUG printf("Going to context_finish (}).");
+		    BEGIN(context_finish);
 		    yyless(0);	// whoops. yyless returns all BUT first `n' chars.
-		    return BLOCK_FINISH;
+		    return CONTEXT_FINISH;
 		  }
 		  return '}';
 		}
@@ -85,12 +87,12 @@ end			{
 <block_args>\|	{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
 
 
-<block_finish>end	{
+<context_finish>end	{
 		  IF_DEBUG printf("Hear `end', returning to initial.\n");
 		  BEGIN(INITIAL);
 		  return END;
 		}
-<block_finish>\}	{
+<context_finish>\}	{
 		  IF_DEBUG printf("Hear }, returning to initial.\n");
 		  BEGIN(INITIAL);
 		  return '}';

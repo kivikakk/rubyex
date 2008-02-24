@@ -378,7 +378,7 @@ void _block()
   ASSERT(empty->name == "call");
   ASSERT(empty->args.size() == 0);
   ASSERT(empty->block);
-  ASSERT(empty->block->expressions.size() == 0);
+  ASSERT(empty->block->proc->expressions.size() == 0);
 
   BEGIN(p_one, "call {boo}", 1);
   $(FuncCallExpr, one, p_one[0]);
@@ -386,8 +386,8 @@ void _block()
   ASSERT(one->name == "call");
   ASSERT(one->args.size() == 0);
   ASSERT(one->block);
-  ASSERT(one->block->expressions.size() == 1);
-  $(IdentifierExpr, one_boo, *one->block->expressions.begin());
+  ASSERT(one->block->proc->expressions.size() == 1);
+  $(IdentifierExpr, one_boo, *one->block->proc->expressions.begin());
   ASSERT(one_boo->id == "boo");
 
   BEGIN(p_one_do, "call do boo end", 1);
@@ -396,8 +396,8 @@ void _block()
   ASSERT(one_do->name == "call");
   ASSERT(one_do->args.size() == 0);
   ASSERT(one_do->block);
-  ASSERT(one_do->block->expressions.size() == 1);
-  $(IdentifierExpr, one_do_boo, *one->block->expressions.begin());
+  ASSERT(one_do->block->proc->expressions.size() == 1);
+  $(IdentifierExpr, one_do_boo, *one->block->proc->expressions.begin());
   ASSERT(one_do_boo->id == "boo");
 
   BEGIN(p_one_nl, "call {\n\tboo\n}\n", 1);
@@ -406,8 +406,8 @@ void _block()
   ASSERT(one_nl->name == "call");
   ASSERT(one_nl->args.size() == 0);
   ASSERT(one_nl->block);
-  ASSERT(one_nl->block->expressions.size() == 1);
-  $(IdentifierExpr, one_nl_boo, *one->block->expressions.begin());
+  ASSERT(one_nl->block->proc->expressions.size() == 1);
+  $(IdentifierExpr, one_nl_boo, *one->block->proc->expressions.begin());
   ASSERT(one_nl_boo->id == "boo");
 
   BEGIN(p_nested, "call do nesting { well_this {}; that {}; the_other {\nthat\nthen};; }; done end", 1);
@@ -417,23 +417,23 @@ void _block()
   ASSERT(nested->name == "call");
   ASSERT(nested->args.size() == 0);
   ASSERT(nested->block);
-  ASSERT(nested->block->expressions.size() == 2);
+  ASSERT(nested->block->proc->expressions.size() == 2);
   
-  std::list<Expr *>::iterator it = nested->block->expressions.begin();
+  std::list<Expr *>::iterator it = nested->block->proc->expressions.begin();
   {
     $(FuncCallExpr, nesting, *it);
     ASSERT(nesting->target == NULL);
     ASSERT(nesting->name == "nesting");
     ASSERT(nesting->args.size() == 0);
     ASSERT(nesting->block);
-    ASSERT(nesting->block->expressions.size() == 3);
-    std::list<Expr *>::iterator sit = nesting->block->expressions.begin();
+    ASSERT(nesting->block->proc->expressions.size() == 3);
+    std::list<Expr *>::iterator sit = nesting->block->proc->expressions.begin();
     {
       $(FuncCallExpr, well_this, *sit);
       ASSERT(well_this->name == "well_this");
       ASSERT(well_this->args.size() == 0);
       ASSERT(well_this->block);
-      ASSERT(well_this->block->expressions.size() == 0);
+      ASSERT(well_this->block->proc->expressions.size() == 0);
     }
     ++sit;
     {
@@ -441,7 +441,7 @@ void _block()
       ASSERT(that->name == "that");
       ASSERT(that->args.size() == 0);
       ASSERT(that->block);
-      ASSERT(that->block->expressions.size() == 0);
+      ASSERT(that->block->proc->expressions.size() == 0);
     }
     ++sit;
     {
@@ -449,9 +449,9 @@ void _block()
       ASSERT(the_other->name == "the_other");
       ASSERT(the_other->args.size() == 0);
       ASSERT(the_other->block);
-      ASSERT(the_other->block->expressions.size() == 2);
+      ASSERT(the_other->block->proc->expressions.size() == 2);
 
-      std::list<Expr *>::iterator tsit = the_other->block->expressions.begin();
+      std::list<Expr *>::iterator tsit = the_other->block->proc->expressions.begin();
       {
 	$(IdentifierExpr, that, *tsit);
 	ASSERT(that->id == "that");
@@ -478,7 +478,7 @@ void _block_args()
   ASSERT(simple->name == "simple");
   $(BlockExpr, simple_block, simple->block);
   ASSERT(!simple_block->args || simple_block->args->args.size() == 0);
-  ASSERT(simple_block->expressions.size() == 0);
+  ASSERT(simple_block->proc->expressions.size() == 0);
 
 
   BEGIN(p_one, "one {|a| pink}", 1);
@@ -490,8 +490,8 @@ void _block_args()
   ASSERT(one_block_args->args.size() == 1);
   $(IdentifierExpr, a, *one_block_args->args.begin());
   ASSERT(a->id == "a");
-  ASSERT(one_block->expressions.size() == 1);
-  $(IdentifierExpr, pink, *one_block->expressions.begin());
+  ASSERT(one_block->proc->expressions.size() == 1);
+  $(IdentifierExpr, pink, *one_block->proc->expressions.begin());
   ASSERT(pink->id == "pink");
 
   BEGIN(p_many, "many do |x, y, z|\n\tx * y - z\nend", 1);
@@ -505,8 +505,8 @@ void _block_args()
   { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "x"); } ++it;
   { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "y"); } ++it;
   { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "z"); }
-  ASSERT(many_block->expressions.size() == 1);
-  $(FuncCallExpr, xyz, *many_block->expressions.begin());
+  ASSERT(many_block->proc->expressions.size() == 1);
+  $(FuncCallExpr, xyz, *many_block->proc->expressions.begin());
   $(FuncCallExpr, x_y, xyz->target);
   $(IdentifierExpr, _x, x_y->target);
   ASSERT(_x->id == "x");
@@ -552,8 +552,8 @@ void _multi_call()
   $(FuncCallExpr, d_fg, *b_c->args.begin());
   ASSERT(d_fg->name == "d");
   $(BlockExpr, _fg, d_fg->block);
-  ASSERT(_fg->expressions.size() == 1);
-  $(FuncCallExpr, f_g, *_fg->expressions.begin());
+  ASSERT(_fg->proc->expressions.size() == 1);
+  $(FuncCallExpr, f_g, *_fg->proc->expressions.begin());
   ASSERT(f_g->name == "f");
   ASSERT(f_g->args.size() == 1);
   $(IdentifierExpr, g, *f_g->args.begin());
@@ -563,12 +563,12 @@ void _multi_call()
   $(IdentifierExpr, h, *bc_e->args.begin());
   ASSERT(h->id == "h");
   $(BlockExpr, _qm, bc_e->block);
-  ASSERT(_qm->expressions.size() == 1);
-  $(FuncCallExpr, qm, *_qm->expressions.begin());
+  ASSERT(_qm->proc->expressions.size() == 1);
+  $(FuncCallExpr, qm, *_qm->proc->expressions.begin());
   ASSERT(qm->name == "q");
   $(BlockExpr, _m, qm->block);
-  ASSERT(_m->expressions.size() == 1);
-  $(FuncCallExpr, m, *_m->expressions.begin());
+  ASSERT(_m->proc->expressions.size() == 1);
+  $(FuncCallExpr, m, *_m->proc->expressions.begin());
   ASSERT(m->name == "m");
   ASSERT(m->args.size() == 0);
 }

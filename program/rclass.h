@@ -1,10 +1,12 @@
 #ifndef RCLASS_H
 #define RCLASS_H
 
-class RubyClass
+#include "rmodule.h"
+
+class RubyClass : public RubyModule
 {
   public:
-    RubyClass();
+    RubyClass(const std::string &);
 };
 
 #endif

@@ -12,3 +12,4 @@ out
 parser
 ruby.output
 program
+test.rbc

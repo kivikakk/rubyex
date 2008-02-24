@@ -22,6 +22,9 @@ class Emitter
     virtual void emit(std::ostream &) const;
     virtual void push(std::ostream &) const;
 
+    unsigned long emit_length() const;
+    unsigned long push_length() const;
+
   protected:
     static void emit_type(std::ostream &, type_t);
     static void emit_instruction(std::ostream &, instruction_t);

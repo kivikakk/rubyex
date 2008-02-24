@@ -1,5 +1,6 @@
 #include "emitter.h"
 #include <iostream>
+#include <sstream>
 
 void Emitter::push(std::ostream &) const
 {
@@ -9,6 +10,20 @@ void Emitter::push(std::ostream &) const
 void Emitter::emit(std::ostream &) const
 {
   std::cerr << "Error! " << typeid(this).name() << " doesn't know how to emit()." << std::endl;
+}
+
+unsigned long Emitter::emit_length() const
+{
+  std::ostringstream oss;
+  emit(oss);
+  return oss.tellp();
+}
+
+unsigned long Emitter::push_length() const
+{
+  std::ostringstream oss;
+  push(oss);
+  return oss.tellp();
 }
 
 void Emitter::emit_type(std::ostream &o, type_t t)

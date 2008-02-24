@@ -1,5 +1,26 @@
 #include "ast.h"
 
+void Procedure::p() const
+{
+  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it) {
+    if (it != expressions.begin()) std::cout << "; ";
+    (*it)->p();
+  }
+}
+
+void Procedure::emit(std::ostream &o) const
+{
+  unsigned long bytes = 0;
+
+  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
+    bytes += (*it)->emit_length();
+
+  emit_uint32(o, bytes);
+
+  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
+    (*it)->emit(o);
+}
+
 void IdentifierExpr::p() const {
   std::cout << this->id;
 }
@@ -136,6 +157,12 @@ void DefListExpr::p() const
   }
 }
 
+BlockExpr::BlockExpr(): args(NULL), proc(NULL)
+{ }
+
+BlockExpr::BlockExpr(Procedure *_proc): args(NULL), proc(_proc)
+{ }
+
 void BlockExpr::p() const
 {
   if (args) {
@@ -144,26 +171,21 @@ void BlockExpr::p() const
     std::cout << "| ";
   }
 
-  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it) {
-    if (it != this->expressions.begin()) std::cout << "; ";
-    (*it)->p();
-  }
+  proc->p();
 }
 
 void BlockExpr::push(std::ostream &o) const
 {
   emit_instruction(o, I_CONSTRUCT_BLOCK);
-
-  if (args)
+  
+  if (args) {
+    emit_uint32(o, args->args.size());
     for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it)
-      emit_string(o, (*it)->id);	// we don't let the IdExpr emit, we don't want an I_EXECUTE
+      emit_string(o, (*it)->id);
+  } else
+    emit_uint32(o, 0);
 
-  emit_instruction(o, I_END);
-
-  for (std::list<Expr *>::const_iterator it = this->expressions.begin(); it != this->expressions.end(); ++it)
-    (*it)->emit(o);
-
-  emit_instruction(o, I_END);
+  proc->emit(o);
 }
 
 FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block)
@@ -235,6 +257,34 @@ void AssignmentExpr::emit(std::ostream &o) const {
   value->emit(o);
   emit_instruction(o, I_ASSIGNMENT);
   emit_string(o, name);
+}
+
+FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, Procedure *_proc): target(_target), name(_name), proc(_proc)
+{ }
+
+void FuncDefExpr::p() const
+{
+  std::cout << "def ";
+  if (target) {
+    std::cout << "(";
+    target->p();
+    std::cout << ").";
+  }
+  name->p();
+  std::cout << std::endl;
+  proc->p();
+  std::cout << std::endl << "end" << std::endl;
+}
+
+void FuncDefExpr::emit(std::ostream &o) const
+{
+  if (target)
+    target->push(o);
+
+  emit_instruction(o, target ? I_TARGET_DEF : I_DEF);
+  emit_string(o, name->id);
+
+  proc->emit(o);
 }
 
 void Program::add_expression(Expr *expression) {

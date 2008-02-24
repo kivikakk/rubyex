@@ -15,9 +15,11 @@
 
 %token BLOCK_ARGUMENT_START BLOCK_ARGUMENT_END
 %token ARG_BRACKET
-%token NL DO END BLOCK_FINISH
+%token NL DO END CONTEXT_FINISH
 %token END_OF_FILE 0 "end of file"
 %token <symbol> SYMBOL
+
+%token DEF
 
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
@@ -25,11 +27,14 @@
 %token <boolean_literal> BOOLEAN_LITERAL
 
 %type <expr> line expr compiled_expr
-%type <block> block block_content block_line
+%type <block> block
 %type <arglist> arglist
-%type <deflist> deflist block_arguments block_argument_contents
+%type <deflist> deflist block_arguments block_argument_contents funcdef_args
 %type <literal> literal
 %type <funccall> funccall
+%type <funcdef> funcdef
+
+%type <procedure> block_content block_line funcdef_content funcdef_line
 
 %left '<' '>' '=' NE LE GE
 %left '+' '-'
@@ -39,9 +44,9 @@
 /* this is not exponentation in ruby; TODO */
 
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL
-%nonassoc DO END
 %nonassoc '.'
 %left '(' ')'
+%left DO END
 %left '{' '}'
 
 %%
@@ -54,11 +59,12 @@ line: 		NL	{ $$ = NULL; }
 	      | expr NL	{ $$ = $1; }
 	      | ';' { $$ = NULL; }
 	      | expr ';' { $$ = $1; }
-	      | expr BLOCK_FINISH { $$ = $1; IF_DEBUG printf("BLOCK_FINISH\n"); }
+	      | expr CONTEXT_FINISH { $$ = $1; IF_DEBUG printf("CONTEXT_FINISH\n"); }
 	      | expr END_OF_FILE { $$ = $1; }
 ;
 
 expr:		funccall { $$ = $1; }
+	      | funcdef	{ $$ = $1; }
 	      |	IDENTIFIER	{ $$ = $1; }
 	      |	FUNCTION_CALL { $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      |	IDENTIFIER block { $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
@@ -112,15 +118,15 @@ deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 ;
 
 block:		
-	      DO block_arguments block_content END	{ if ($3) $3->args = $2; $$ = $3; }
-	      |	'{' block_arguments block_content '}'	{ if ($3) $3->args = $2; $$ = $3; }
+	      DO block_arguments block_content END	{ $$ = new BlockExpr($3); $$->args = $2; }
+	      |	'{' block_arguments block_content '}'	{ $$ = new BlockExpr($3); $$->args = $2; }
 ;
 
-block_content:	{ enter_block(); } block_line { exit_block(); } { $$ = $2; }
+block_content:	{ enter_context(); } block_line { exit_context(); } { $$ = $2; }
 ;
 
-block_line:	/* empty */		{ $$ = new BlockExpr(); }
-	      |	block_line { enter_block_line(); } line { exit_block_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
+block_line:	/* empty */		{ $$ = new Procedure(); }
+	      |	block_line { enter_context_line(); } line { exit_context_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
 ;
 
 block_arguments:
@@ -132,6 +138,25 @@ block_arguments:
 block_argument_contents:
 		/* empty */	{ $$ = NULL; }
 	      | deflist		{ $$ = $1; }
+;
+
+funcdef:	DEF IDENTIFIER funcdef_args NL funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $5); }
+	      |	DEF IDENTIFIER funcdef_args ';' funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $5); }
+;
+
+/* LATEST TODO: funcdeg_args is getting turned into a FUNCTION_CALL instead, possibly in the lexer (yes in the lexer). fix? */
+
+funcdef_args:	/* empty */	{ $$ = NULL; }
+	      | '(' ')'		{ $$ = NULL; }
+	      | '(' deflist ')'	{ $$ = $2; }
+	      | deflist	{ $$ = $1; }
+;
+
+funcdef_content:	{ enter_context(); } funcdef_line { exit_context(); } { $$ = $2; }
+;
+
+funcdef_line:	/* empty */		{ $$ = new Procedure(); }
+	      | funcdef_line { enter_context_line(); } line { exit_context_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
 ;
 
 literal:	STRING_LITERAL	{ $$ = $1; }

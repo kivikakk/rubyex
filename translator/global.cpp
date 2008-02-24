@@ -1,34 +1,34 @@
 #include "global.h"
 #include <iostream>
 
-int block_depths = 0, block_lines = 0;
+int context_depths = 0, context_lines = 0;
 
-void enter_block()
+void enter_context()
 {
-  ++block_depths;
-  IF_DEBUG std::cout << "Entering block (new depth: " << block_depths << ")" << std::endl;
+  ++context_depths;
+  IF_DEBUG std::cout << "Entering context (new depth: " << context_depths << ")" << std::endl;
 }
 
-void exit_block()
+void exit_context()
 {
-  --block_depths;
-  IF_DEBUG std::cout << "Exiting block (new depth: " << block_depths << ")" << std::endl;
+  --context_depths;
+  IF_DEBUG std::cout << "Exiting context (new depth: " << context_depths << ")" << std::endl;
 }
 
-void enter_block_line()
+void enter_context_line()
 {
-  ++block_lines;
-  IF_DEBUG std::cout << "Entering block line (lines now: " << block_lines << ")" << std::endl;
+  ++context_lines;
+  IF_DEBUG std::cout << "Entering context line (lines now: " << context_lines << ")" << std::endl;
 }
 
-void exit_block_line()
+void exit_context_line()
 {
-  --block_lines;
-  IF_DEBUG std::cout << "Exiting block line (lines now: " << block_lines << ")" << std::endl;
+  --context_lines;
+  IF_DEBUG std::cout << "Exiting context line (lines now: " << context_lines << ")" << std::endl;
 }
 
-bool in_block()
+bool in_context()
 {
-  return (block_depths > 0);
+  return (context_depths > 0);
 }
 

@@ -32,6 +32,7 @@ class Reader
     bool read_bool();
     std::string read_text();
     std::string read_string();
+    std::string read_bytes(unsigned long);
 
   protected:
     std::istream &input;

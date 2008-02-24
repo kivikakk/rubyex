@@ -55,11 +55,7 @@ bool Reader::read_bool()
 std::string Reader::read_text()
 {
   uint32 l = read_uint32();
-  char *c = new char[l];
-  input.read(c, l);
-  std::string s = std::string(c, l);
-  delete [] c;
-  return s;
+  return read_bytes(l);
 }
 
 std::string Reader::read_string()
@@ -72,3 +68,11 @@ std::string Reader::read_string()
   return s;
 }
 
+std::string Reader::read_bytes(unsigned long l)
+{
+  char *c = new char[l];
+  input.read(c, l);
+  std::string s = std::string(c, l);
+  delete [] c;
+  return s;
+}

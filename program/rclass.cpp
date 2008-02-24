@@ -1,6 +1,5 @@
 #include "rclass.h"
 
-RubyClass::RubyClass()
-{
-}
+RubyClass::RubyClass(const std::string &_name): RubyModule(_name)
+{ }
 

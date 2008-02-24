@@ -22,9 +22,10 @@ typedef enum
   I_TARGET_CALL		= 0x11,
   I_CALL_BLOCK 		= 0x12,
   I_CALL		= 0x13,
-  I_SINGLE_CALL		= 0x14,		// `puts' - may be a call (no args) or variable
 
   I_CONSTRUCT_BLOCK	= 0x20,
+  I_TARGET_DEF		= 0x21,
+  I_DEF			= 0x22,
 
   I_END			= 0x30,
   I_POP			= 0x31,

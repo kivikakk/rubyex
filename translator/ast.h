@@ -14,6 +14,15 @@ class Expr : public PrettyPrint, public Emitter
     virtual ~Expr() { }
 };
 
+class Procedure : public PrettyPrint, public Emitter
+{
+  public:
+    std::list<Expr *> expressions;
+
+    void p() const;
+    void emit(std::ostream &) const;
+};
+
 class IdentifierExpr : public Expr
 {
   public:
@@ -86,13 +95,14 @@ class DefListExpr : public Expr
 class BlockExpr : public Expr
 {
   public:
-    BlockExpr(): args(NULL) { }
+    BlockExpr();
+    BlockExpr(Procedure *);
 
     void p() const;
     void push(std::ostream &) const;
 
     DefListExpr *args;
-    std::list<Expr *> expressions;
+    Procedure *proc;
 };
 
 class FuncCallExpr : public Expr
@@ -120,6 +130,19 @@ class AssignmentExpr : public Expr
 
     std::string name;
     Expr *value;
+};
+
+class FuncDefExpr : public Expr
+{
+  public:
+    FuncDefExpr(Expr *, IdentifierExpr *, Procedure *);
+
+    void p() const;
+    void emit(std::ostream &) const;
+
+    Expr *target;
+    IdentifierExpr *name;
+    Procedure *proc;
 };
 
 class Program : public PrettyPrint, public Emitter
