@@ -13,3 +13,4 @@ parser
 ruby.output
 program
 test.rbc
+IDE.vim
