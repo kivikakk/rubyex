@@ -254,7 +254,7 @@ void AssignmentExpr::p() const {
 }
 
 void AssignmentExpr::emit(std::ostream &o) const {
-  value->emit(o);
+  value->push(o);
   emit_instruction(o, I_ASSIGNMENT);
   emit_string(o, name);
 }

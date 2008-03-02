@@ -1,9 +1,10 @@
 #ifndef RMETHOD_H
 #define RMETHOD_H
 
+#include <string>
+
 class RubyMethod
-{
-};
+{ };
 
 class RubyCMethod : public RubyMethod
 {
@@ -12,6 +13,17 @@ class RubyCMethod : public RubyMethod
 
   protected:
     void *function;
+    int args;
+};
+
+class RubyBytecodeMethod : public RubyMethod
+{
+  public:
+    RubyBytecodeMethod(int);
+
+    std::string data;
+
+  protected:
     int args;
 };
 

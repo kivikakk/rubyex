@@ -28,16 +28,26 @@ void process(RubyEnvironment &e, Reader &r)
 
     switch (in) {
       case I_ASSIGNMENT: {
-	std::cerr << "ASSIGNMENT" << std::endl;
+	std::cerr << "ASSIGNMENT unfinished" << std::endl;
 	std::string name = r.read_string();
 	std::cerr << name << std::endl;
 	Stack::StackEntry rval = s.pop_variant();
 	break;
       }
-      case I_EXECUTE:
-	std::cerr << "EXECUTE unimplemented." << std::endl;
+      case I_EXECUTE: {
+	std::cerr << "EXECUTE" << std::endl;
+	type_t t = r.read_type();
+	switch (t) {
+	  case T_IDENTIFIER: std::cerr << r.read_string() << std::endl; break;
+	  case T_SYMBOL: std::cerr << r.read_string() << std::endl; break;
+	  case T_INTEGER_LITERAL: std::cerr << r.read_int32() << std::endl; break;
+	  case T_FLOATING_LITERAL: std::cerr << r.read_float() << std::endl; break;
+	  case T_BOOLEAN_LITERAL: std::cerr << (r.read_bool() ? "true" : "false") << std::endl; break;
+	  case T_STRING_LITERAL: std::cerr << '"' << r.read_text() << '"' << std::endl; break;
+	  default: std::cerr << "unknown_type(" << t << ")" << std::endl;
+	}
 	break;
-
+      }
       case I_TARGET_CALL_BLOCK:
       case I_TARGET_CALL:
       case I_CALL_BLOCK:
@@ -73,6 +83,22 @@ void process(RubyEnvironment &e, Reader &r)
 
 	s.push_block(block);
     
+	break;
+      }
+      // I_TARGET_DEF
+      case I_DEF: {
+	std::cerr << "DEF" << std::endl;
+	
+	std::string name = r.read_string();
+	uint32 arg_count = r.read_uint32();
+
+	RubyBytecodeMethod method(arg_count);
+	while (arg_count--)
+	  r.read_string();	// XXX
+	
+	uint32 byte_count = r.read_uint32();
+	method.data = r.read_bytes(byte_count);
+
 	break;
       }
 
