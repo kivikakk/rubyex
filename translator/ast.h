@@ -135,13 +135,14 @@ class AssignmentExpr : public Expr
 class FuncDefExpr : public Expr
 {
   public:
-    FuncDefExpr(Expr *, IdentifierExpr *, Procedure *);
+    FuncDefExpr(Expr *, IdentifierExpr *, DefListExpr *, Procedure *);
 
     void p() const;
     void emit(std::ostream &) const;
 
     Expr *target;
     IdentifierExpr *name;
+    DefListExpr *args;
     Procedure *proc;
 };
 

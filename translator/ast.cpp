@@ -259,7 +259,7 @@ void AssignmentExpr::emit(std::ostream &o) const {
   emit_string(o, name);
 }
 
-FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, Procedure *_proc): target(_target), name(_name), proc(_proc)
+FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, DefListExpr *_args, Procedure *_proc): target(_target), name(_name), args(_args), proc(_proc)
 { }
 
 void FuncDefExpr::p() const
@@ -271,6 +271,14 @@ void FuncDefExpr::p() const
     std::cout << ").";
   }
   name->p();
+  if (args) {
+    std::cout << "(";
+    for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it) {
+      if (it != args->args.begin()) std::cout << ", ";
+      (*it)->p();
+    }
+    std::cout << ")";
+  }
   std::cout << std::endl;
   proc->p();
   std::cout << std::endl << "end" << std::endl;
@@ -283,6 +291,13 @@ void FuncDefExpr::emit(std::ostream &o) const
 
   emit_instruction(o, target ? I_TARGET_DEF : I_DEF);
   emit_string(o, name->id);
+  // if these change from identifiers, might we need to push them instead? I'm not sure what's semantically more correct.
+  if (args) {
+    emit_uint32(o, args->args.size());
+    for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it)
+      emit_string(o, (*it)->id);
+  } else
+    emit_uint32(o, 0);
 
   proc->emit(o);
 }

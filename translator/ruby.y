@@ -140,15 +140,14 @@ block_argument_contents:
 	      | deflist		{ $$ = $1; }
 ;
 
-funcdef:	DEF IDENTIFIER funcdef_args NL funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $5); }
-	      |	DEF IDENTIFIER funcdef_args ';' funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $5); }
+funcdef:	DEF FUNCTION_CALL funcdef_args funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $3, $4); }
+	      |	DEF IDENTIFIER funcdef_args ';' funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $3, $5); }
+	      |	DEF IDENTIFIER funcdef_args NL funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $3, $5); }
 ;
 
-/* LATEST TODO: funcdeg_args is getting turned into a FUNCTION_CALL instead, possibly in the lexer (yes in the lexer). fix? */
-
 funcdef_args:	/* empty */	{ $$ = NULL; }
-	      | '(' ')'		{ $$ = NULL; }
-	      | '(' deflist ')'	{ $$ = $2; }
+	      | ARG_BRACKET ')'		{ $$ = NULL; }
+	      | ARG_BRACKET deflist ')'	{ $$ = $2; }
 	      | deflist	{ $$ = $1; }
 ;
 
