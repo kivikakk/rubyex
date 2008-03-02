@@ -14,6 +14,15 @@ long RubyFixnumValue::get_object_id() const
   return value * 2 + 1;
 }
 
+RubyObjectValue::RubyObjectValue(RubyObject *_value): value(_value)
+{ }
+
+long RubyObjectValue::get_object_id() const
+{
+  // objects are usually aligned, right?
+  return (unsigned long)value;
+}
+
 long RubyNilValue::get_object_id() const
 {
   return 4;
