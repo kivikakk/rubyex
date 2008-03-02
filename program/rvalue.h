@@ -5,22 +5,44 @@ class RubyValue
 {
   public:
     RubyValue();
+    virtual ~RubyValue();
 
-    typedef enum {
-      VT_FIXNUM, 		// SUBCLASS RubyValue?
-      VT_STRING,
-      VT_OBJECT
-    } value_type_t;
+    virtual long get_object_id() const = 0;
 };
 
-class RubyNilValue : public RubyValue
+class RubyFixnumValue : public RubyValue
+{
+  public:
+    RubyFixnumValue(long);
+
+    long get_object_id() const;
+
+    long value;
+};
+
+class RubyStringValue : public RubyValue
 { };
+
+class RubyObjectValue : public RubyValue
+{ };
+
+class RubyNilValue : public RubyValue
+{
+  public:
+    long get_object_id() const;
+};
 
 class RubyTrueValue : public RubyValue
-{ };
+{
+  public:
+    long get_object_id() const;
+};
 
 class RubyFalseValue : public RubyValue
-{ };
+{
+  public:
+    long get_object_id() const;
+};
 
 
 #endif

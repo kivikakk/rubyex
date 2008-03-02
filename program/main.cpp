@@ -28,7 +28,7 @@ void process(RubyEnvironment &e, Reader &r)
 
     switch (in) {
       case I_ASSIGNMENT: {
-	std::cerr << "ASSIGNMENT unfinished" << std::endl;
+	std::cerr << "ASSIGNMENT" << std::endl;
 	std::string name = r.read_string();
 	std::cerr << name << std::endl;
 	Stack::StackEntry rval = s.pop_variant();
