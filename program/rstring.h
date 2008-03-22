@@ -1,9 +1,9 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include "renvironment.h"
+#include "rei.h"
 
-class RubyString : public RubyEnvironmentInitializer
+class RubyStringEI : public RubyEnvironmentInitializer
 {
   public:
     void init(RubyEnvironment &);

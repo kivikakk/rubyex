@@ -1,5 +1,7 @@
 #include "rmodule.h"
 #include <iostream>
+#include "rclass.h"
+#include "renvironment.h"
 
 RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(new NamedLazyClass(_e, "Module")), name(_name)
 { }
@@ -26,4 +28,11 @@ void RubyModule::add_method(const std::string &name, RubyMethod *method)
   }
 
   methods[name] = method;
+}
+
+void RubyModuleEI::init(RubyEnvironment &e)
+{
+  RubyClass *rb_cModule = RubyClass::create_class(e, "Module");
+
+  e.add_class("Module", rb_cModule);
 }

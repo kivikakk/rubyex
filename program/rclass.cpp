@@ -1,4 +1,5 @@
 #include "rclass.h"
+#include "renvironment.h"
 
 RubyClass::RubyClass(RubyEnvironment &_e, LazyClass *_superklass, const std::string &_name): RubyModule(_e, new NamedLazyClass(_e, "Class"), _name), superklass(_superklass)
 {
@@ -15,4 +16,9 @@ RubyClass *RubyClass::create_class_with_super(RubyEnvironment &_e, const std::st
   return new RubyClass(_e, _superklass, _name);
 }
 
+void RubyClassEI::init(RubyEnvironment &e)
+{
+  RubyClass *rb_cClass = RubyClass::create_class(e, "Class");
 
+  e.add_class("Class", rb_cClass);
+}

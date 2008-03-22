@@ -1,9 +1,12 @@
 #include "rstring.h"
 #include <iostream>
+#include "rvalue.h"
+#include "rclass.h"
+#include "renvironment.h"
 
 RubyValue *string_reverse(RubyValue *);
 
-void RubyString::init(RubyEnvironment &e)
+void RubyStringEI::init(RubyEnvironment &e)
 {
   RubyClass *rb_cString = RubyClass::create_class(e, "String");
   rb_cString->add_method("reverse", CMETHOD(string_reverse, 0));

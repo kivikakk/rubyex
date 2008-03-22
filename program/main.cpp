@@ -2,6 +2,7 @@
 #include "renvironment.h"
 #include "reader.h"
 #include "stack.h"
+#include "rvalue.h"
 
 void process(RubyEnvironment &, Reader &);
 
@@ -20,6 +21,7 @@ int main(int argc, char **argv)
 void process(RubyEnvironment &e, Reader &r)
 {
   Stack s;
+  RubyValue *last_value = NULL;
 
   while (true) {
     instruction_t in = r.read_instruction();

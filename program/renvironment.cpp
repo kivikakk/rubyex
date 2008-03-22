@@ -1,5 +1,6 @@
 #include "renvironment.h"
 #include "rstring.h"
+#include "rkernel.h"
 #include <iostream>
 
 RubyValue
@@ -10,7 +11,15 @@ RubyValue
 RubyEnvironment::RubyEnvironment()
 {
   // Let's bring this online.
-  RubyString().init(*this);
+  RubyObjectEI().init(*this);
+  RubyModuleEI().init(*this);
+  RubyClassEI().init(*this);
+
+  RubyKernelEI().init(*this);
+
+  RubyStringEI().init(*this);
+
+  main = new RubyObject(new NamedLazyClass(*this, "Object"));
 }
 
 RubyClass *RubyEnvironment::get_class_by_name(const std::string &name)
@@ -52,7 +61,4 @@ void RubyEnvironment::add_module(const std::string &name, RubyModule *module)
 
   modules[name] = module;
 }
-
-RubyEnvironmentInitializer::~RubyEnvironmentInitializer()
-{ }
 

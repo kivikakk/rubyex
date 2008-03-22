@@ -22,5 +22,11 @@ class RubyModule : public RubyObject
     std::map<std::string, RubyMethod *> methods;
 };
 
+class RubyModuleEI : public RubyEnvironmentInitializer
+{
+  public:
+    void init(RubyEnvironment &);
+};
+
 #endif
 

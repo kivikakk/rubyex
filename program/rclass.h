@@ -3,6 +3,7 @@
 
 #include "rmodule.h"
 #include "lazyclass.h"
+#include "rei.h"
 
 class RubyClass : public RubyModule, public LazyClass
 {
@@ -14,6 +15,12 @@ class RubyClass : public RubyModule, public LazyClass
 
   protected:
     LazyClass *superklass;
+};
+
+class RubyClassEI : public RubyEnvironmentInitializer
+{
+  public:
+    void init(RubyEnvironment &);
 };
 
 #endif
