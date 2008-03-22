@@ -1,7 +1,10 @@
 #include "rmodule.h"
 #include <iostream>
 
-RubyModule::RubyModule(const std::string &_name): name(_name)
+RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(new NamedLazyClass(_e, "Module")), name(_name)
+{ }
+
+RubyModule::RubyModule(RubyEnvironment &_e, LazyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name)
 { }
 
 RubyModule::~RubyModule()

@@ -9,7 +9,8 @@
 class RubyModule : public RubyObject
 {
   public:
-    RubyModule(const std::string &);
+    RubyModule(RubyEnvironment &, const std::string &);
+    RubyModule(RubyEnvironment &, LazyClass *, const std::string &);
     virtual ~RubyModule();
 
     void add_method(const std::string &, RubyMethod *);

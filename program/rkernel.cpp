@@ -2,6 +2,6 @@
 
 void RubyKernel::init(RubyEnvironment &e)
 {
-  RubyModule *rb_mKernel = new RubyModule("Kernel");
+  RubyModule *rb_mKernel = new RubyModule(e, "Kernel");
 }
 

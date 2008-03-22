@@ -1,6 +1,8 @@
 #ifndef RVALUE_H
 #define RVALUE_H
 
+#include <string>
+
 class RubyValue
 {
   public:
@@ -31,6 +33,9 @@ class RubyStringValue : public RubyValue
   protected:
     std::string value;
 };
+
+
+class RubyObject;
 
 class RubyObjectValue : public RubyValue
 { 

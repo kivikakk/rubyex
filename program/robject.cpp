@@ -1,6 +1,6 @@
 #include "robject.h"
 
-RubyObject::RubyObject()
+RubyObject::RubyObject(LazyClass *_klass): klass(_klass), metaklass(NULL)
 { }
 
 RubyObject::~RubyObject()

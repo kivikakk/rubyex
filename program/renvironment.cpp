@@ -13,6 +13,26 @@ RubyEnvironment::RubyEnvironment()
   RubyString().init(*this);
 }
 
+RubyClass *RubyEnvironment::get_class_by_name(const std::string &name)
+{
+  if (classes.find(name) == classes.end()) {
+    std::cerr << "ERROR: tried to get an inexistant class." << std::endl;
+    throw std::exception();
+  }
+
+  return classes[name];
+}
+
+RubyModule *RubyEnvironment::get_module_by_name(const std::string &name)
+{
+  if (modules.find(name) == modules.end()) {
+    std::cerr << "ERROR: tried to get an inexistant module." << std::endl;
+    throw std::exception();
+  }
+
+  return modules[name];
+}
+
 void RubyEnvironment::add_class(const std::string &name, RubyClass *klass)
 {
   if (classes.find(name) != classes.end()) {
