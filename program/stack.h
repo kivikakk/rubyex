@@ -5,14 +5,28 @@
 #include "block.h"
 #include <vector>
 
+class RubyObject;
+
 class Stack
 {
   public:
     Stack();
 
+    typedef enum
+    {
+      SE_IDENTIFIER,
+      SE_SYMBOL,
+      SE_INTEGER,
+      SE_FLOATING,
+      SE_BOOLEAN,
+      SE_STRING,
+      SE_BLOCK,
+      SE_OBJECT
+    } stack_entry_type_t;
+
     typedef struct
     {
-      type_t type;
+      stack_entry_type_t type;
       union {
 	std::string *identifier;
 	std::string *symbol;
@@ -21,6 +35,7 @@ class Stack
 	bool boolean;
 	std::string *string;
 	Block *block;
+	RubyObject *object;
       };
     } StackEntry;
 
@@ -31,6 +46,7 @@ class Stack
     void push_boolean(bool);
     void push_string(const std::string &);
     void push_block(const Block &);
+    void push_object(RubyObject *);
     void push(const StackEntry &);
 
     StackEntry pop_variant();
