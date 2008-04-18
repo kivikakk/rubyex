@@ -10,7 +10,6 @@ void process(RubyEnvironment &, Reader &);
 
 int main(int argc, char **argv)
 {
-  std::cerr << "Reading byte-code ..." << std::endl;
   std::cerr << std::hex;
 
   RubyEnvironment e;
