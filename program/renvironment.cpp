@@ -3,11 +3,6 @@
 #include "rkernel.h"
 #include <iostream>
 
-RubyValue
-  *RubyEnvironment::NIL = new RubyNilValue(),
-  *RubyEnvironment::TRUE = new RubyTrueValue(),
-  *RubyEnvironment::FALSE = new RubyFalseValue();
-
 RubyEnvironment::RubyEnvironment()
 {
   // Let's bring this online.

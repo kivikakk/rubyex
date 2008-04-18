@@ -17,6 +17,6 @@ void RubyStringEI::init(RubyEnvironment &e)
 RubyValue *string_reverse(RubyValue *self)
 {
   std::cerr << "string_reverse called" << std::endl;
-  return RubyEnvironment::NIL;
+  // ?
 }
 

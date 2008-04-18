@@ -18,17 +18,13 @@ class RubyFixnumValue : public RubyValue
     long value;
 };
 
-class RubyStringValue : public RubyValue
+class RubySymbolValue : public RubyValue
 {
   public:
-    RubyStringValue(const std::string &);
+    RubySymbolValue(const std::string &);
 
-    const std::string &get_value() const;
-
-  protected:
     std::string value;
 };
-
 
 class RubyObject;
 
@@ -39,22 +35,6 @@ class RubyObjectValue : public RubyValue
 
     RubyObject *value;
 };
-
-class RubyNilValue : public RubyValue
-{
-  public:
-};
-
-class RubyTrueValue : public RubyValue
-{
-  public:
-};
-
-class RubyFalseValue : public RubyValue
-{
-  public:
-};
-
 
 #endif
 

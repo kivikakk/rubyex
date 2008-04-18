@@ -11,10 +11,6 @@ class RubyEnvironment
   public:
     RubyEnvironment();
 
-    static RubyValue *NIL, *TRUE, *FALSE;
-    // XXX: question; does having these global/static disable the possible
-    // reentrancy of instantiating multiple RubyEnvironments?
-
     void add_class(const std::string &, RubyClass *);
     void add_module(const std::string &, RubyModule *);
 
