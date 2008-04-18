@@ -2,38 +2,35 @@
 #define RVALUE_H
 
 #include <string>
+#include "rsymbol.h"
+
+class RubyObject;
 
 class RubyValue
 {
   public:
-    RubyValue();
-    virtual ~RubyValue();
-};
+    static RubyValue from_fixnum(long);
+    static RubyValue from_symbol(RubySymbol *);
+    static RubyValue from_object(RubyObject *);
 
-class RubyFixnumValue : public RubyValue
-{
-  public:
-    RubyFixnumValue(long);
+    typedef enum
+    {
+      RV_FIXNUM,
+      RV_SYMBOL,
+      RV_OBJECT
+    } ruby_value_type_t;
 
-    long value;
-};
+    ruby_value_type_t type;
+    union {
+      long fixnum;
+      RubySymbol *symbol;
+      RubyObject *object;
+    };
 
-class RubySymbolValue : public RubyValue
-{
-  public:
-    RubySymbolValue(const std::string &);
-
-    std::string value;
-};
-
-class RubyObject;
-
-class RubyObjectValue : public RubyValue
-{ 
-  public:
-    RubyObjectValue(RubyObject *);
-
-    RubyObject *value;
+  protected:
+    RubyValue(long);
+    RubyValue(RubySymbol *);
+    RubyValue(RubyObject *);
 };
 
 #endif

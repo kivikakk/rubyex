@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 void process(RubyEnvironment &e, Reader &r)
 {
   Stack s;
-  RubyValue *last_value = NULL;
+  RubyValue last_value = RubyValue::from_object(e.NIL);
 
   while (true) {
     instruction_t in = r.read_instruction();
@@ -41,10 +41,10 @@ void process(RubyEnvironment &e, Reader &r)
 	type_t t = r.read_type();
 	switch (t) {
 	  case T_IDENTIFIER: std::cerr << r.read_string() << std::endl; break;
-	  case T_SYMBOL: std::cerr << r.read_string() << std::endl; break;
-	  case T_INTEGER_LITERAL: std::cerr << r.read_int32() << std::endl; break;
+	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
+	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: std::cerr << r.read_float() << std::endl; break;
-	  case T_BOOLEAN_LITERAL: std::cerr << (r.read_bool() ? "true" : "false") << std::endl; break;
+	  case T_BOOLEAN_LITERAL: last_value = RubyValue::from_object(r.read_bool() ? e.TRUE : e.FALSE); break;
 	  case T_STRING_LITERAL: std::cerr << '"' << r.read_text() << '"' << std::endl; break;
 	  default: std::cerr << "unknown_type(" << t << ")" << std::endl;
 	}

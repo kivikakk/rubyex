@@ -1,17 +1,19 @@
 #include "rvalue.h"
 
-RubyValue::RubyValue()
+RubyValue RubyValue::from_fixnum(long value)
+{ return RubyValue(value); }
+
+RubyValue RubyValue::from_symbol(RubySymbol *value)
+{ return RubyValue(value); }
+
+RubyValue RubyValue::from_object(RubyObject *value)
+{ return RubyValue(value); }
+
+RubyValue::RubyValue(long value): type(RV_FIXNUM), fixnum(value)
 { }
 
-RubyValue::~RubyValue()
+RubyValue::RubyValue(RubySymbol *value): type(RV_SYMBOL), symbol(value)
 { }
 
-RubyFixnumValue::RubyFixnumValue(long _value): value(_value)
+RubyValue::RubyValue(RubyObject *value): type(RV_FIXNUM), object(value)
 { }
-
-RubySymbolValue::RubySymbolValue(const std::string &_value): value(_value)
-{ }
-
-RubyObjectValue::RubyObjectValue(RubyObject *_value): value(_value)
-{ }
-

@@ -1,6 +1,7 @@
 #include "renvironment.h"
 #include "rstring.h"
 #include "rkernel.h"
+#include "rtri.h"
 #include <iostream>
 
 RubyEnvironment::RubyEnvironment()
@@ -9,6 +10,8 @@ RubyEnvironment::RubyEnvironment()
   RubyObjectEI().init(*this);
   RubyModuleEI().init(*this);
   RubyClassEI().init(*this);
+
+  RubyTriEI().init(*this);
 
   RubyKernelEI().init(*this);
 
@@ -55,5 +58,14 @@ void RubyEnvironment::add_module(const std::string &name, RubyModule *module)
   }
 
   modules[name] = module;
+}
+
+RubySymbol *RubyEnvironment::get_symbol(const std::string &name)
+{
+  std::map<std::string, RubySymbol *>::iterator si = symbols.find(name);
+  if (si != symbols.end())
+    return si->second;
+  RubySymbol *sym = new RubySymbol(name);
+  return (symbols[name] = sym);
 }
 

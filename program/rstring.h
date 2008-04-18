@@ -1,5 +1,5 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef RSTRING_H
+#define RSTRING_H
 
 #include "rei.h"
 

@@ -4,7 +4,7 @@
 #include "rclass.h"
 #include "renvironment.h"
 
-RubyValue *string_reverse(RubyValue *);
+RubyValue string_reverse(RubyValue &);
 
 void RubyStringEI::init(RubyEnvironment &e)
 {
@@ -14,7 +14,7 @@ void RubyStringEI::init(RubyEnvironment &e)
   e.add_class("String", rb_cString);
 }
 
-RubyValue *string_reverse(RubyValue *self)
+RubyValue string_reverse(RubyValue &self)
 {
   std::cerr << "string_reverse called" << std::endl;
   // ?

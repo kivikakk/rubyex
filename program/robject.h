@@ -19,7 +19,7 @@ class RubyObject
     LazyClass *klass;
     RubyClass *metaklass;
 
-    std::map<std::string, RubyValue *> instance_variables;
+    std::map<std::string, RubyValue> instance_variables;
 };
 
 class RubyObjectEI : public RubyEnvironmentInitializer

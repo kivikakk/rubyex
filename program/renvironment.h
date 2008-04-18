@@ -17,11 +17,16 @@ class RubyEnvironment
     RubyClass *get_class_by_name(const std::string &);
     RubyModule *get_module_by_name(const std::string &);
 
+    RubySymbol *get_symbol(const std::string &);
+
     RubyObject *main;
+
+    RubyObject *TRUE, *FALSE, *NIL;
 
   protected:
     std::map<std::string, RubyClass *> classes;
     std::map<std::string, RubyModule *> modules;
+    std::map<std::string, RubySymbol *> symbols;
 };
 
 #endif
