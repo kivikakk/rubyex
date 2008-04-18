@@ -4,8 +4,9 @@
 GarbageCollector::GarbageCollector()
 { }
 
-void GarbageCollector::track(RubyObject *object)
+RubyObject *GarbageCollector::track(RubyObject *object)
 {
   objects.push_back(object);
+  return object;
 }
 

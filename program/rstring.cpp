@@ -9,14 +9,14 @@ RubyValue string_reverse(RubyValue &);
 void RubyStringEI::init(RubyEnvironment &e)
 {
   RubyClass *rb_cString = RubyClass::create_class(e, "String");
-  rb_cString->add_method("reverse", CMETHOD(string_reverse, 0));
+  rb_cString->add_method("reverse", COMETHOD(string_reverse, 0));
 
   e.add_class("String", rb_cString);
 }
 
-RubyValue string_reverse(RubyValue &self)
+RubyValue string_reverse(RubyEnvironment &e, RubyObject *self)
 {
   std::cerr << "string_reverse called" << std::endl;
-  // ?
+  return e.NIL;
 }
 

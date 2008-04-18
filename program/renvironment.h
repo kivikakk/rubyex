@@ -5,6 +5,7 @@
 #include <map>
 #include "rclass.h"
 #include "rmodule.h"
+#include "gc.h"
 
 class RubyEnvironment
 {
@@ -20,8 +21,9 @@ class RubyEnvironment
     RubySymbol *get_symbol(const std::string &);
 
     RubyObject *main;
-
     RubyObject *TRUE, *FALSE, *NIL;
+
+    GarbageCollector gc;
 
   protected:
     std::map<std::string, RubyClass *> classes;

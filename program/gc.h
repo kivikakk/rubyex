@@ -10,7 +10,7 @@ class GarbageCollector
   public:
     GarbageCollector();
 
-    void track(RubyObject *);
+    RubyObject *track(RubyObject *);
 
   protected:
     std::vector<RubyObject *> objects;
