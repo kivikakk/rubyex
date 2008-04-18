@@ -34,17 +34,21 @@ void process(RubyEnvironment &e, Reader &r)
 	std::string name = r.read_string();
 	std::cerr << name << std::endl;
 	Stack::StackEntry rval = s.pop_variant();
+	// XXX: assign the local namespace
 	break;
       }
       case I_EXECUTE: {
 	std::cerr << "EXECUTE" << std::endl;
 	type_t t = r.read_type();
 	switch (t) {
+	  // XXX: look in the local namespace
 	  case T_IDENTIFIER: std::cerr << r.read_string() << std::endl; break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
-	  case T_FLOATING_LITERAL: std::cerr << r.read_float() << std::endl; break;
+	  // XXX: craete, GC new float
+	  case T_FLOATING_LITERAL: std::cerr << r.read_floating() << std::endl; break;
 	  case T_BOOLEAN_LITERAL: last_value = RubyValue::from_object(r.read_bool() ? e.TRUE : e.FALSE); break;
+	  // XXX: create, GC new string
 	  case T_STRING_LITERAL: std::cerr << '"' << r.read_text() << '"' << std::endl; break;
 	  default: std::cerr << "unknown_type(" << t << ")" << std::endl;
 	}
@@ -117,7 +121,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_IDENTIFIER: s.push_identifier(r.read_string()); break;
 	  case T_SYMBOL: s.push_symbol(r.read_string()); break;
 	  case T_INTEGER_LITERAL: s.push_integer(r.read_int32()); break;
-	  case T_FLOATING_LITERAL: s.push_floating(r.read_float()); break;
+	  case T_FLOATING_LITERAL: s.push_floating(r.read_floating()); break;
 	  case T_BOOLEAN_LITERAL: s.push_boolean(r.read_bool()); break;
 	  case T_STRING_LITERAL: s.push_string(r.read_text()); break;
 	  case T_BLOCK: break;

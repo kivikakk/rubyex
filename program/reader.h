@@ -28,7 +28,7 @@ class Reader
     uint8 read_uint8();
     uint32 read_uint32();
     int32 read_int32();
-    double read_float();
+    double read_floating();
     bool read_bool();
     std::string read_text();
     std::string read_string();

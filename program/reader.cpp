@@ -40,7 +40,7 @@ int32 Reader::read_int32()
   return NTOHL(o);
 }
 
-double Reader::read_float()
+double Reader::read_floating()
 {
   double o;
   input.read((char *)&o, sizeof(double));
