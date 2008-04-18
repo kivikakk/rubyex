@@ -28,9 +28,9 @@ class RubyValue
     };
 
   protected:
-    RubyValue(long);
-    RubyValue(RubySymbol *);
-    RubyValue(RubyObject *);
+    explicit RubyValue(long);
+    explicit RubyValue(RubySymbol *);
+    explicit RubyValue(RubyObject *);
 };
 
 #endif

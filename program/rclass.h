@@ -8,13 +8,13 @@
 class RubyClass : public RubyModule, public LazyClass
 {
   public:
-    RubyClass(RubyEnvironment &, LazyClass *, const std::string &);
-
     static RubyClass *create_class(RubyEnvironment &, const std::string &);
     static RubyClass *create_class_with_super(RubyEnvironment &, const std::string &, LazyClass *);
 
   protected:
     LazyClass *superklass;
+
+    explicit RubyClass(RubyEnvironment &, LazyClass *, const std::string &);
 };
 
 class RubyClassEI : public RubyEnvironmentInitializer

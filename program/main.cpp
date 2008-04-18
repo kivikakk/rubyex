@@ -3,6 +3,8 @@
 #include "reader.h"
 #include "stack.h"
 #include "rvalue.h"
+#include "rstring.h"
+#include "rnumeric.h"
 
 void process(RubyEnvironment &, Reader &);
 
@@ -45,11 +47,9 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_IDENTIFIER: std::cerr << r.read_string() << std::endl; break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
-	  // XXX: craete, GC new float
-	  case T_FLOATING_LITERAL: std::cerr << r.read_floating() << std::endl; break;
+	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: last_value = RubyValue::from_object(r.read_bool() ? e.TRUE : e.FALSE); break;
-	  // XXX: create, GC new string
-	  case T_STRING_LITERAL: std::cerr << '"' << r.read_text() << '"' << std::endl; break;
+	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(r.read_text()))); break;
 	  default: std::cerr << "unknown_type(" << t << ")" << std::endl;
 	}
 	break;
