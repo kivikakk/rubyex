@@ -5,6 +5,7 @@
 #include "rvalue.h"
 #include "rstring.h"
 #include "rnumeric.h"
+#include "context.h"
 
 void process(RubyEnvironment &, Reader &);
 
@@ -21,6 +22,9 @@ int main(int argc, char **argv)
 
 void process(RubyEnvironment &e, Reader &r)
 {
+  std::vector<Context *> context_stack;
+  Context *context = new Context(e.main);
+
   Stack s;
   RubyValue last_value = RubyValue::from_object(e.NIL);
 
@@ -42,13 +46,13 @@ void process(RubyEnvironment &e, Reader &r)
 	std::cerr << "EXECUTE" << std::endl;
 	type_t t = r.read_type();
 	switch (t) {
-	  // XXX: look in the local namespace
+	  // XXX: look in the local namespace - incl. if we're in a class/etc. (Kernel->Object methods, par exemple)
 	  case T_IDENTIFIER: std::cerr << r.read_string() << std::endl; break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: last_value = RubyValue::from_object(r.read_bool() ? e.TRUE : e.FALSE); break;
-	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(r.read_text()))); break;
+	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  default: std::cerr << "unknown_type(" << t << ")" << std::endl;
 	}
 	break;
@@ -120,15 +124,20 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_IDENTIFIER: s.push_identifier(r.read_string()); break;
 	  case T_SYMBOL: s.push_symbol(r.read_string()); break;
 	  case T_INTEGER_LITERAL: s.push_integer(r.read_int32()); break;
-	  case T_FLOATING_LITERAL: s.push_floating(r.read_floating()); break;
-	  case T_BOOLEAN_LITERAL: s.push_boolean(r.read_bool()); break;
-	  case T_STRING_LITERAL: s.push_string(r.read_text()); break;
+	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
+	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE : e.FALSE); break;
+	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  case T_BLOCK: break;
-	};
+	}
 	break;
       }
       case I_PUSH_LAST:
-	std::cerr << "PUSH_LAST unimplemented." << std::endl;
+	std::cerr << "PUSH_LAST" << std::endl;
+	switch (last_value.type) {
+	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
+	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->get_value()); break;
+	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc? */ last_value.object); break;
+	}
 	break;
 
       default:

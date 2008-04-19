@@ -17,9 +17,6 @@ class Stack
       SE_IDENTIFIER,
       SE_SYMBOL,
       SE_INTEGER,
-      SE_FLOATING,
-      SE_BOOLEAN,
-      SE_STRING,
       SE_BLOCK,
       SE_OBJECT
     } stack_entry_type_t;
@@ -31,9 +28,6 @@ class Stack
 	std::string *identifier;
 	std::string *symbol;
 	int integer;
-	double floating;
-	bool boolean;
-	std::string *string;
 	Block *block;
 	RubyObject *object;
       };
@@ -42,9 +36,6 @@ class Stack
     void push_identifier(const std::string &);
     void push_symbol(const std::string &);
     void push_integer(int);
-    void push_floating(double);
-    void push_boolean(bool);
-    void push_string(const std::string &);
     void push_block(const Block &);
     void push_object(RubyObject *);
     void push(const StackEntry &);

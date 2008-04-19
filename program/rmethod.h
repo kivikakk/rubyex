@@ -31,5 +31,8 @@ class RubyBytecodeMethod : public RubyMethod
 #define CVMETHOD(fn, args) (new RubyCMethod((void *)(fn), (args), false))
 #define COMETHOD(fn, args) (new RubyCMethod((void *)(fn), (args), true))
 
+#define ARGS_ARBITRARY (-1)
+#define ARGS_MINIMAL(x) (-1 - (x))
+
 #endif
 

@@ -13,7 +13,7 @@ class RubyStringEI : public RubyEnvironmentInitializer
 class RubyString : public RubyObject
 {
   public:
-    RubyString(const std::string &);
+    RubyString(RubyEnvironment &, const std::string &);
 
   protected:
     std::string string_value;
