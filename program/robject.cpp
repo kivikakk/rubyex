@@ -10,7 +10,8 @@ RubyObject::~RubyObject()
 
 void RubyObjectEI::init(RubyEnvironment &e)
 {
-  RubyClass *rb_cObject = RubyClass::create_class(e, "Object");
+  RubyClass *rb_cObject = RubyClass::create_class_with_super(e, "Object", NULL);
+  // Object<nil, NOT Object<Object(!!)
 
   e.add_class("Object", rb_cObject);
 }

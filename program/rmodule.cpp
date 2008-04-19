@@ -32,7 +32,8 @@ void RubyModule::add_method(const std::string &name, RubyMethod *method)
 
 void RubyModuleEI::init(RubyEnvironment &e)
 {
-  RubyClass *rb_cModule = RubyClass::create_class(e, "Module");
+  // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
+  RubyClass *rb_cModule = RubyClass::create_class_with_super(e, "Module", new NamedLazyClass(e, "Object"));
 
   e.add_class("Module", rb_cModule);
 }
