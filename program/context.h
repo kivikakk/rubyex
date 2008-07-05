@@ -14,6 +14,8 @@ class Context
     Context(RubyObject *);
 
     RubyObject *get_context() const;
+
+    void assign(const std::string &, RubyValue);
     
     std::map<std::string, RubyValue> locals;
 

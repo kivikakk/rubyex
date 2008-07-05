@@ -35,19 +35,19 @@ void process(RubyEnvironment &e, Reader &r)
 
     switch (in) {
       case I_ASSIGNMENT: {
-	std::cerr << "ASSIGNMENT" << std::endl;
 	std::string name = r.read_string();
-	std::cerr << name << std::endl;
+	std::cerr << "ASSIGNMENT " << name << std::endl;
+
 	Stack::StackEntry rval = s.pop_variant();
-	// XXX: assign the local namespace
+	context->assign(name, Stack::entry_to_value(rval));
 	break;
       }
       case I_EXECUTE: {
 	std::cerr << "EXECUTE" << std::endl;
 	type_t t = r.read_type();
 	switch (t) {
-	  // XXX: look in the local namespace - incl. if we're in a class/etc. (Kernel->Object methods, par exemple)
-	  case T_IDENTIFIER: std::cerr << r.read_string() << std::endl; break;
+	  // XXX: look in the local namespace - incl. if we're in a class/etc. (Kernel->Object methods, par example)
+	  case T_IDENTIFIER: /* XXX */ std::cerr << r.read_string() << std::endl; break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
@@ -76,6 +76,8 @@ void process(RubyEnvironment &e, Reader &r)
 
 	while (arg_count--)
 	  Stack::StackEntry se = s.pop_variant();
+	
+	// XXX call
 	break;
       }
 
@@ -91,7 +93,7 @@ void process(RubyEnvironment &e, Reader &r)
 	block.data = r.read_bytes(byte_count);
 
 	s.push_block(block);
-    
+
 	break;
       }
       // I_TARGET_DEF
@@ -107,7 +109,7 @@ void process(RubyEnvironment &e, Reader &r)
 	
 	uint32 byte_count = r.read_uint32();
 	method.data = r.read_bytes(byte_count);
-
+	// XXX define
 	break;
       }
 
@@ -127,7 +129,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE : e.FALSE); break;
 	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
-	  case T_BLOCK: break;
+	  case T_BLOCK: /* XXX complain */ break;
 	}
 	break;
       }
@@ -136,7 +138,7 @@ void process(RubyEnvironment &e, Reader &r)
 	switch (last_value.type) {
 	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
 	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->get_value()); break;
-	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc? */ last_value.object); break;
+	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc track? */ last_value.object); break;
 	}
 	break;
 

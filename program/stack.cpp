@@ -4,6 +4,24 @@
 Stack::Stack()
 { }
 
+RubyValue Stack::entry_to_value(const StackEntry &entry)
+{
+  switch (entry.type) {
+    case SE_IDENTIFIER:
+      std::cerr << "not yet - need some serious changes - probably pass in the environment to e_t_v?" << std::endl;
+      throw;
+    case SE_SYMBOL: //return RubyValue::from_symbol(entry.
+      std::cerr << "not yet - this is also in the context of the environment right? whoops." << std::endl;
+      throw;
+    case SE_INTEGER: return RubyValue::from_fixnum(entry.integer);
+    case SE_OBJECT: return RubyValue::from_object(entry.object);
+    case SE_BLOCK:
+      std::cerr << ".. error?" << std::endl;
+      throw;
+  }
+  throw;
+}
+
 void Stack::push_identifier(const std::string &identifier)
 {
   StackEntry e;

@@ -9,12 +9,15 @@ class RubyObject;
 class RubyValue
 {
   public:
+    RubyValue();
+
     static RubyValue from_fixnum(long);
     static RubyValue from_symbol(RubySymbol *);
     static RubyValue from_object(RubyObject *);
 
     typedef enum
     {
+      RV_NOTHING,
       RV_FIXNUM,
       RV_SYMBOL,
       RV_OBJECT

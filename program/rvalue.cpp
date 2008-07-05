@@ -1,5 +1,8 @@
 #include "rvalue.h"
 
+RubyValue::RubyValue(): type(RV_NOTHING)
+{ }
+
 RubyValue RubyValue::from_fixnum(long value)
 { return RubyValue(value); }
 

@@ -4,6 +4,7 @@
 #include "bytecode.h"
 #include "block.h"
 #include <vector>
+#include "rvalue.h"
 
 class RubyObject;
 
@@ -32,6 +33,8 @@ class Stack
 	RubyObject *object;
       };
     } StackEntry;
+
+    static RubyValue entry_to_value(const StackEntry &);
 
     void push_identifier(const std::string &);
     void push_symbol(const std::string &);
