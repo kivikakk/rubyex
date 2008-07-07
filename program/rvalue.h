@@ -3,6 +3,7 @@
 
 #include <string>
 #include "rsymbol.h"
+#include "rmethod.h"
 
 class RubyObject;
 
@@ -14,6 +15,8 @@ class RubyValue
     static RubyValue from_fixnum(long);
     static RubyValue from_symbol(RubySymbol *);
     static RubyValue from_object(RubyObject *);
+
+    RubyMethod *get_method(const std::string &);
 
     typedef enum
     {

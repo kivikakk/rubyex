@@ -36,8 +36,8 @@ void process(RubyEnvironment &e, Reader &r)
     switch (in) {
       case I_ASSIGNMENT: {
 	std::string name = r.read_string();
-	Stack::StackEntry rval = s.pop_variant();
-	context->assign(name, context->entry_to_value(rval));
+	RubyValue rval = s.pop_value(context);
+	context->assign(name, rval);
 	break;
       }
       case I_EXECUTE: {
@@ -62,9 +62,10 @@ void process(RubyEnvironment &e, Reader &r)
 	bool is_target = (in == I_TARGET_CALL_BLOCK) || (in == I_TARGET_CALL),
 	  is_block = (in == I_TARGET_CALL_BLOCK) || (in == I_CALL_BLOCK);
 
-	std::cerr << "CALL [ " << (is_target ? "target " : "") << (is_block ? "block " : "") << "]" << std::endl;
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
+
+	std::cerr << "CALL " << (is_target ? "target." : "") << name << "(" << arg_count << ") " << (is_block ? "{block}" : "") << std::endl;
 
 	RubyValue target;
 	Block block; 
@@ -73,9 +74,8 @@ void process(RubyEnvironment &e, Reader &r)
 	if (is_block) block = s.pop_block();
 
 	while (arg_count--)
-	  Stack::StackEntry se = s.pop_variant();
+	  RubyValue se = s.pop_value(context);
 
-	
 	
 	// XXX call
 	break;
@@ -146,7 +146,7 @@ void process(RubyEnvironment &e, Reader &r)
 	break;
     }
 
-    context->_report();
+    // context->_report();
   }
 }
 
