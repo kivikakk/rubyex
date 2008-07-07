@@ -52,7 +52,7 @@ void Stack::push(const StackEntry &se)
 
 Stack::StackEntry Stack::pop_variant()
 {
-  StackEntry r = *ival.begin();
+  StackEntry r = *ival.rbegin();
   ival.pop_back();
   return r;
 }
