@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 void process(RubyEnvironment &e, Reader &r)
 {
   std::vector<Context *> context_stack;
-  Context *context = new Context(&e, e.main);
+  Context *context = new Context(&e, RubyValue::from_object(e.main));
 
   Stack s;
   RubyValue last_value = RubyValue::from_object(e.NIL);

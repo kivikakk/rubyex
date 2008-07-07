@@ -13,10 +13,10 @@
 class Context
 {
   public:
-    Context(RubyEnvironment *, RubyObject *);
+    Context(RubyEnvironment *, RubyValue);
 
     RubyEnvironment *get_environment() const;
-    RubyObject *get_context() const;
+    RubyValue get_context() const;
     void _report() const;
     RubyValue entry_to_value(const Stack::StackEntry &) const;
 
@@ -26,7 +26,7 @@ class Context
 
   protected:
     RubyEnvironment *environment;
-    RubyObject *context;
+    RubyValue context;
 };
 
 #endif

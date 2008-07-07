@@ -1,7 +1,7 @@
 #include "context.h"
 #include <iostream>
 
-Context::Context(RubyEnvironment *_environment, RubyObject *_context): environment(_environment), context(_context)
+Context::Context(RubyEnvironment *_environment, RubyValue _context): environment(_environment), context(_context)
 { }
 
 RubyEnvironment *Context::get_environment() const
@@ -9,7 +9,7 @@ RubyEnvironment *Context::get_environment() const
   return environment;
 }
 
-RubyObject *Context::get_context() const
+RubyValue Context::get_context() const
 {
   return context;
 }
