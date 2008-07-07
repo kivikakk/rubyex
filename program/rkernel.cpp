@@ -9,9 +9,9 @@ RubyValue kernel_p(RubyEnvironment &, const std::vector<RubyObject *> &);
 void RubyKernelEI::init(RubyEnvironment &e)
 {
   RubyModule *rb_mKernel = new RubyModule(e, "Kernel");
-  rb_mKernel->add_method("print", COMETHOD(kernel_print, ARGS_ARBITRARY));
-  rb_mKernel->add_method("puts", COMETHOD(kernel_puts, ARGS_ARBITRARY));
-  rb_mKernel->add_method("p", COMETHOD(kernel_p, ARGS_ARBITRARY));
+  rb_mKernel->add_method("print", CMETHOD(kernel_print, ARGS_ARBITRARY));
+  rb_mKernel->add_method("puts", CMETHOD(kernel_puts, ARGS_ARBITRARY));
+  rb_mKernel->add_method("p", CMETHOD(kernel_p, ARGS_ARBITRARY));
 
   e.add_module("Kernel", rb_mKernel);
 }

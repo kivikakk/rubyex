@@ -12,12 +12,11 @@ class RubyMethod
 class RubyCMethod : public RubyMethod
 {
   public:
-    RubyCMethod(void *, int, bool);
+    RubyCMethod(void *, int);
 
   protected:
     void *function;
     int args;
-    bool self_is_object;
 };
 
 class RubyBytecodeMethod : public RubyMethod
@@ -31,8 +30,7 @@ class RubyBytecodeMethod : public RubyMethod
     int args;
 };
 
-#define CVMETHOD(fn, args) (new RubyCMethod((void *)(fn), (args), false))
-#define COMETHOD(fn, args) (new RubyCMethod((void *)(fn), (args), true))
+#define CMETHOD(fn, args) (new RubyCMethod((void *)(fn), (args)))
 
 #define ARGS_ARBITRARY (-1)
 #define ARGS_MINIMAL(x) (-1 - (x))

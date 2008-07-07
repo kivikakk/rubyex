@@ -1,6 +1,6 @@
 #include "rmethod.h"
 
-RubyCMethod::RubyCMethod(void *_function, int _args, bool _self_is_object): function(_function), args(_args), self_is_object(_self_is_object)
+RubyCMethod::RubyCMethod(void *_function, int _args): function(_function), args(_args)
 { }
 
 RubyBytecodeMethod::RubyBytecodeMethod(int _args): args(_args)

@@ -9,7 +9,7 @@ RubyValue string_reverse(RubyEnvironment &, RubyObject *);
 void RubyStringEI::init(RubyEnvironment &e)
 {
   RubyClass *rb_cString = RubyClass::create_class(e, "String");
-  rb_cString->add_method("reverse", COMETHOD(string_reverse, 0));
+  rb_cString->add_method("reverse", CMETHOD(string_reverse, 0));
 
   e.add_class("String", rb_cString);
 }
