@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 void process(RubyEnvironment &e, Reader &r)
 {
   std::vector<Context *> context_stack;
-  Context *context = new Context(e.main);
+  Context *context = new Context(&e, e.main);
 
   Stack s;
   RubyValue last_value = RubyValue::from_object(e.NIL);
@@ -36,10 +36,8 @@ void process(RubyEnvironment &e, Reader &r)
     switch (in) {
       case I_ASSIGNMENT: {
 	std::string name = r.read_string();
-	std::cerr << "ASSIGNMENT " << name << std::endl;
-
 	Stack::StackEntry rval = s.pop_variant();
-	context->assign(name, Stack::entry_to_value(rval));
+	context->assign(name, context->entry_to_value(rval));
 	break;
       }
       case I_EXECUTE: {
@@ -69,13 +67,16 @@ void process(RubyEnvironment &e, Reader &r)
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
 
-	Stack::StackEntry target, block; 
+	RubyValue target;
+	Block block; 
 
-	if (is_target) target = s.pop_variant();
-	if (is_block) block = s.pop_variant();
+	if (is_target) target = s.pop_value(context);
+	if (is_block) block = s.pop_block();
 
 	while (arg_count--)
 	  Stack::StackEntry se = s.pop_variant();
+
+	
 	
 	// XXX call
 	break;
@@ -120,7 +121,6 @@ void process(RubyEnvironment &e, Reader &r)
 	std::cerr << "POP unimplemented." << std::endl;
 	break;
       case I_PUSH: {
-	std::cerr << "PUSH" << std::endl;
 	type_t t = r.read_type();
 	switch (t) {
 	  case T_IDENTIFIER: s.push_identifier(r.read_string()); break;
@@ -129,16 +129,16 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE : e.FALSE); break;
 	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
-	  case T_BLOCK: /* XXX complain */ break;
+	  case T_BLOCK: /* XXX complain */ std::cerr << "push a block?" << std::endl; break;
 	}
 	break;
       }
       case I_PUSH_LAST:
-	std::cerr << "PUSH_LAST" << std::endl;
 	switch (last_value.type) {
 	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
 	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->get_value()); break;
 	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc track? */ last_value.object); break;
+	  case RubyValue::RV_NOTHING: /* XXX what? */ std::cerr << "confused!" << std::endl; break;
 	}
 	break;
 
@@ -146,6 +146,8 @@ void process(RubyEnvironment &e, Reader &r)
 	std::cerr << "unknown(" << in << ")" << std::endl;
 	break;
     }
+
+    context->_report();
   }
 }
 

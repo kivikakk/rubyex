@@ -6,20 +6,26 @@
 
 #include <map>
 #include <string>
+#include "stack.h"
 #include "rvalue.h"
+#include "renvironment.h"
 
 class Context
 {
   public:
-    Context(RubyObject *);
+    Context(RubyEnvironment *, RubyObject *);
 
+    RubyEnvironment *get_environment() const;
     RubyObject *get_context() const;
+    void _report() const;
 
     void assign(const std::string &, RubyValue);
+    RubyValue entry_to_value(const Stack::StackEntry &);
     
     std::map<std::string, RubyValue> locals;
 
   protected:
+    RubyEnvironment *environment;
     RubyObject *context;
 };
 

@@ -7,6 +7,7 @@
 #include "rvalue.h"
 
 class RubyObject;
+class Context;
 
 class Stack
 {
@@ -34,8 +35,6 @@ class Stack
       };
     } StackEntry;
 
-    static RubyValue entry_to_value(const StackEntry &);
-
     void push_identifier(const std::string &);
     void push_symbol(const std::string &);
     void push_integer(int);
@@ -44,7 +43,13 @@ class Stack
     void push(const StackEntry &);
 
     StackEntry pop_variant();
-    template <typename T> T pop();
+    std::string pop_identifier();
+    std::string pop_symbol();
+    int pop_integer();
+    Block pop_block();
+    RubyObject *pop_object();
+
+    RubyValue pop_value(Context *);
 
   protected:
     std::vector<StackEntry> ival;

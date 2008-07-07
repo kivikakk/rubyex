@@ -1,26 +1,9 @@
 #include <iostream>
 #include "stack.h"
+#include "context.h"
 
 Stack::Stack()
 { }
-
-RubyValue Stack::entry_to_value(const StackEntry &entry)
-{
-  switch (entry.type) {
-    case SE_IDENTIFIER:
-      std::cerr << "not yet - need some serious changes - probably pass in the environment to e_t_v?" << std::endl;
-      throw;
-    case SE_SYMBOL: //return RubyValue::from_symbol(entry.
-      std::cerr << "not yet - this is also in the context of the environment right? whoops." << std::endl;
-      throw;
-    case SE_INTEGER: return RubyValue::from_fixnum(entry.integer);
-    case SE_OBJECT: return RubyValue::from_object(entry.object);
-    case SE_BLOCK:
-      std::cerr << ".. error?" << std::endl;
-      throw;
-  }
-  throw;
-}
 
 void Stack::push_identifier(const std::string &identifier)
 {
@@ -74,19 +57,42 @@ Stack::StackEntry Stack::pop_variant()
   return r;
 }
 
-template <typename T> T Stack::pop()
+std::string Stack::pop_identifier()
 {
-  StackEntry top = *ival.rbegin();
-  ival.pop_back();
-
-  switch (top.type) {
-    case SE_IDENTIFIER: { std::string id = *top.identifier; delete top.identifier; return dynamic_cast<T>(id); }
-    case SE_SYMBOL: { std::string sym = *top.symbol; delete top.symbol; return dynamic_cast<T>(sym); }
-    case SE_INTEGER: return dynamic_cast<T>(top.integer);
-    case SE_BLOCK: { Block block = *top.block; delete top.block; return dynamic_cast<T>(block); }
-    case SE_OBJECT: { RubyObject *object = top.object; return dynamic_cast<T>(object); }
-  }
-
-  std::cerr << "Unknown stack entry type: " << top.type << std::endl;
-  throw std::exception();
+  StackEntry top = pop_variant();
+  std::string id = *top.identifier;
+  delete top.identifier;
+  return id;
 }
+
+std::string Stack::pop_symbol()
+{
+  StackEntry top = pop_variant();
+  std::string sym = *top.symbol;
+  delete top.symbol;
+  return sym;
+}
+
+int Stack::pop_integer()
+{
+  return pop_variant().integer;
+}
+
+Block Stack::pop_block()
+{
+  StackEntry top = pop_variant();
+  Block block = *top.block;
+  delete top.block;
+  return block;
+}
+
+RubyObject *Stack::pop_object()
+{
+  return pop_variant().object;
+}
+
+RubyValue Stack::pop_value(Context *c)
+{
+  return c->entry_to_value(pop_variant());
+}
+
