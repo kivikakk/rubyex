@@ -93,6 +93,9 @@ RubyObject *Stack::pop_object()
 
 RubyValue Stack::pop_value(Context *c)
 {
+  // entry_to_value deallocates memory allocated in the StackEntry
+  // (TODO: if we made StackEntry a class, used a heap-allocated var
+  // and had the destructor do it, that'd be great...)
   return c->entry_to_value(pop_variant());
 }
 

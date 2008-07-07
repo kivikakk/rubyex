@@ -5,6 +5,10 @@
 #include "lazyclass.h"
 #include "rei.h"
 
+// RubyClass implements LazyClass itself, so as to be compatible with the "LazyClass protocol"
+// per se. (i.e. it can be used to resolve itself without issue when a LazyClass is expected)
+// .. has that even been implemented yet?
+
 class RubyClass : public RubyModule, public LazyClass
 {
   public:

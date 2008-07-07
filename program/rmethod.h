@@ -4,7 +4,10 @@
 #include <string>
 
 class RubyMethod
-{ };
+{
+  public:
+    // `Call' method?
+};
 
 class RubyCMethod : public RubyMethod
 {

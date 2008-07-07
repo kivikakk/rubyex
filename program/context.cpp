@@ -28,6 +28,41 @@ void Context::_report() const
   std::cerr << std::endl;
 }
 
+RubyValue Context::entry_to_value(const Stack::StackEntry &entry) const
+{
+  // We take control of StackEntry's memory. See a note in stack.cpp:pop_value about how we should do this better.
+
+  switch (entry.type) {
+    case Stack::SE_IDENTIFIER: {
+      std::string id = *entry.identifier;
+      delete entry.identifier;
+      
+      // first look at locals.
+      {
+	std::map<std::string, RubyValue>::const_iterator iter = locals.find(id);
+	if (iter != locals.end())
+	  return iter->second;
+      }
+
+      std::cerr << "Context::entry_to_value failing" << std::endl;
+      throw;
+    }
+
+    case Stack::SE_SYMBOL: {
+      std::string symbol = *entry.symbol;
+      delete entry.symbol;
+      return RubyValue::from_symbol(environment->get_symbol(symbol));
+    }
+
+    case Stack::SE_INTEGER: return RubyValue::from_fixnum(entry.integer);
+    case Stack::SE_OBJECT: return RubyValue::from_object(entry.object);
+    case Stack::SE_BLOCK:
+      std::cerr << ".. error?" << std::endl;
+      throw;
+  }
+  throw;
+}
+
 void Context::assign(const std::string &_name, RubyValue _value)
 {
   if (locals.find(_name) != locals.end()) {
@@ -37,23 +72,5 @@ void Context::assign(const std::string &_name, RubyValue _value)
   }
 
   locals[_name] = _value;
-}
-
-RubyValue Context::entry_to_value(const Stack::StackEntry &entry)
-{
-  switch (entry.type) {
-    case Stack::SE_IDENTIFIER:
-      std::cerr << "not yet - need some serious changes - probably pass in the environment to e_t_v?" << std::endl;
-      throw;
-    case Stack::SE_SYMBOL: //return RubyValue::from_symbol(entry.
-      std::cerr << "not yet - this is also in the context of the environment right? whoops." << std::endl;
-      throw;
-    case Stack::SE_INTEGER: return RubyValue::from_fixnum(entry.integer);
-    case Stack::SE_OBJECT: return RubyValue::from_object(entry.object);
-    case Stack::SE_BLOCK:
-      std::cerr << ".. error?" << std::endl;
-      throw;
-  }
-  throw;
 }
 

@@ -18,9 +18,9 @@ class Context
     RubyEnvironment *get_environment() const;
     RubyObject *get_context() const;
     void _report() const;
+    RubyValue entry_to_value(const Stack::StackEntry &) const;
 
     void assign(const std::string &, RubyValue);
-    RubyValue entry_to_value(const Stack::StackEntry &);
     
     std::map<std::string, RubyValue> locals;
 
