@@ -1,5 +1,6 @@
 #include "renvironment.h"
 #include "rstring.h"
+#include "rnumeric.h"
 #include "rkernel.h"
 #include "rtri.h"
 #include <iostream>
@@ -10,11 +11,11 @@ RubyEnvironment::RubyEnvironment()
   RubyObjectEI().init(*this);
   RubyModuleEI().init(*this);
   RubyClassEI().init(*this);
-
   RubyTriEI().init(*this);
 
   RubyKernelEI().init(*this);
 
+  RubyNumericEI().init(*this);
   RubyStringEI().init(*this);
 
   main = new RubyObject(new NamedLazyClass(*this, "Object"));

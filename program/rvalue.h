@@ -6,6 +6,7 @@
 #include "rmethod.h"
 
 class RubyObject;
+class RubyEnvironment;
 
 class RubyValue
 {
@@ -16,7 +17,7 @@ class RubyValue
     static RubyValue from_symbol(RubySymbol *);
     static RubyValue from_object(RubyObject *);
 
-    RubyMethod *get_method(const std::string &);
+    RubyMethod *get_method(const std::string &name, RubyEnvironment *);
 
     typedef enum
     {

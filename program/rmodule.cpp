@@ -30,6 +30,17 @@ void RubyModule::add_method(const std::string &name, RubyMethod *method)
   methods[name] = method;
 }
 
+RubyMethod *RubyModule::get_method(const std::string &name) const
+{
+  std::map<std::string, RubyMethod *>::const_iterator it = methods.find(name);
+  if (it == methods.end()) {
+    std::cerr << "ERROR: method '" << name << "' does not exist." << std::endl;
+    throw std::exception();
+  }
+
+  return it->second;
+}
+
 void RubyModuleEI::init(RubyEnvironment &e)
 {
   // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil

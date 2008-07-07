@@ -20,6 +20,7 @@ class Context
     void _report() const;
     RubyValue entry_to_value(const Stack::StackEntry &) const;
 
+    RubyMethod *get_method(const std::string &);
     void assign(const std::string &, RubyValue);
     
     std::map<std::string, RubyValue> locals;

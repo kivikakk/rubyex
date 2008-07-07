@@ -13,7 +13,7 @@ class RubyNumericEI : public RubyEnvironmentInitializer
 class RubyFloating : public RubyObject
 {
   public:
-    RubyFloating(double);
+    RubyFloating(RubyEnvironment &, double);
 
   protected:
     double floating_value;

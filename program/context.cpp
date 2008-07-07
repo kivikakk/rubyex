@@ -63,6 +63,11 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &entry) const
   throw;
 }
 
+RubyMethod *Context::get_method(const std::string &name)
+{
+  return context.get_method(name, environment);
+}
+
 void Context::assign(const std::string &_name, RubyValue _value)
 {
   if (locals.find(_name) != locals.end()) {

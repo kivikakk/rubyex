@@ -18,6 +18,7 @@ class RubyModule : public RubyObject
     void include_module(RubyModule *);
 
     const std::string &get_name() const;
+    RubyMethod *get_method(const std::string &) const;
 
   protected:
     std::string name;

@@ -47,7 +47,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_IDENTIFIER: /* XXX */ std::cerr << "EXECUTE identifier " << r.read_string() << std::endl; break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
-	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
+	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: last_value = RubyValue::from_object(r.read_bool() ? e.TRUE : e.FALSE); break;
 	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  default: std::cerr << "EXECUTE unknown_type(" << t << ")" << std::endl;
@@ -76,8 +76,14 @@ void process(RubyEnvironment &e, Reader &r)
 	while (arg_count--)
 	  RubyValue se = s.pop_value(context);
 
-	
-	// XXX call
+	// if we have a target, we need to be more direct
+	// XXX TODO RESUME: this implies that RubyValue needs its own lookup function,
+	// which Context::get_method can rely on, and which we can use directly here if is_target == true
+	RubyMethod *method = is_target ? target.get_method(name, &e) : context->get_method(name);
+	std::cerr << "method is " << method << std::endl;
+
+	// RESUME: about to call!
+
 	break;
       }
 
@@ -125,7 +131,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_IDENTIFIER: s.push_identifier(r.read_string()); break;
 	  case T_SYMBOL: s.push_symbol(r.read_string()); break;
 	  case T_INTEGER_LITERAL: s.push_integer(r.read_int32()); break;
-	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(r.read_floating()))); break;
+	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE : e.FALSE); break;
 	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  case T_BLOCK: /* XXX complain */ std::cerr << "push a block?" << std::endl; break;

@@ -15,6 +15,9 @@ class RubyObject
     RubyObject(LazyClass *);
     virtual ~RubyObject();
 
+    RubyClass *get_class() const;
+    RubyClass *get_metaclass() const;
+
   protected:
     LazyClass *klass;
     RubyClass *metaklass;
