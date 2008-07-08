@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "renvironment.h"
 #include "reader.h"
 #include "stack.h"
@@ -73,8 +74,9 @@ void process(RubyEnvironment &e, Reader &r)
 	if (is_target) target = s.pop_value(context);
 	if (is_block) block = s.pop_block();
 
+	std::vector<RubyValue> arguments;
 	while (arg_count--)
-	  RubyValue se = s.pop_value(context);
+	  arguments.push_back(s.pop_value(context));
 
 	// if we have a target, we need to be more direct
 	// XXX TODO RESUME: this implies that RubyValue needs its own lookup function,
