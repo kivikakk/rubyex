@@ -14,20 +14,6 @@ RubyValue Context::get_context() const
   return context;
 }
 
-void Context::_report() const
-{
-  std::cerr << "Context: " << locals.size() << " local(s)";
-  if (locals.size() > 0) {
-    std::cerr << ": ";
-    for (std::map<std::string, RubyValue>::const_iterator it = locals.begin(); it != locals.end(); ++it) {
-      if (it != locals.begin())
-	std::cerr << ", ";
-      std::cerr << it->first;
-    }
-  }
-  std::cerr << std::endl;
-}
-
 RubyValue Context::entry_to_value(const Stack::StackEntry &entry) const
 {
   // We take control of StackEntry's memory. See a note in stack.cpp:pop_value about how we should do this better.

@@ -17,7 +17,6 @@ class Context
 
     RubyEnvironment *get_environment() const;
     RubyValue get_context() const;
-    void _report() const;
     RubyValue entry_to_value(const Stack::StackEntry &) const;
 
     RubyMethod *get_method(const std::string &);
