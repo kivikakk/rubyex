@@ -13,6 +13,7 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   RubyClass *rb_cFixnum = RubyClass::create_class(_e, "Fixnum");
   rb_cFixnum->add_method("+", RubyMethod::Create(fixnum_add, 1));
   _e.add_class("Fixnum", rb_cFixnum);
+  _e.Fixnum = rb_cFixnum;
 
   RubyClass *rb_cFloat = RubyClass::create_class(_e, "Float");
   _e.add_class("Float", rb_cFloat);

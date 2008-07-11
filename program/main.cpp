@@ -28,7 +28,7 @@ void process(RubyEnvironment &e, Reader &r)
   Context *context = new Context(&e, RubyValue::from_object(e.main));
 
   Stack s;
-  RubyValue last_value = RubyValue::from_object(e.NIL);
+  RubyValue last_value = e.NIL;
 
   while (true) {
     instruction_t in = r.read_instruction();
@@ -50,7 +50,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
-	  case T_BOOLEAN_LITERAL: last_value = RubyValue::from_object(r.read_bool() ? e.TRUE : e.FALSE); break;
+	  case T_BOOLEAN_LITERAL: last_value = r.read_bool() ? e.TRUE : e.FALSE; break;
 	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  default: std::cerr << "EXECUTE unknown_type(" << t << ")" << std::endl;
 	}
@@ -67,8 +67,6 @@ void process(RubyEnvironment &e, Reader &r)
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
 
-	std::cerr << "CALL " << (is_target ? "target." : "") << name << "(" << arg_count << ") " << (is_block ? "{block}" : "") << std::endl;
-
 	RubyValue target;
 	Block block; 
 
@@ -83,7 +81,6 @@ void process(RubyEnvironment &e, Reader &r)
 	// XXX TODO RESUME: this implies that RubyValue needs its own lookup function,
 	// which Context::get_method can rely on, and which we can use directly here if is_target == true
 	RubyMethod *method = is_target ? target.get_method(name, e) : context->get_method(name);
-	std::cerr << "method is " << method << std::endl;
 
 	method->call(e, is_target ? target : context->get_context(), arguments);	// boom
 	break;
@@ -134,7 +131,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case T_SYMBOL: s.push_symbol(r.read_string()); break;
 	  case T_INTEGER_LITERAL: s.push_integer(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
-	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE : e.FALSE); break;
+	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE.object : e.FALSE.object); break;
 	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  case T_BLOCK: /* XXX complain */ std::cerr << "push a block?" << std::endl; break;
 	}
@@ -145,7 +142,7 @@ void process(RubyEnvironment &e, Reader &r)
 	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
 	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->get_value()); break;
 	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc track? */ last_value.object); break;
-	  case RubyValue::RV_NOTHING: /* XXX what? */ std::cerr << "confused!" << std::endl; break;
+	  case RubyValue::RV_NOTHING: /* XXX what? */ std::cerr << "I_PUSH_LAST instruction, but was given a RV_NOTHING RubyValue (uninitialised RubyValue somewhere?); confused!" << std::endl; break;
 	}
 	break;
 

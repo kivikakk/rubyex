@@ -24,8 +24,10 @@ class RubyEnvironment
 
     RubySymbol *get_symbol(const std::string &);
 
+    RubyClass *Object, *Module, *Class, *Symbol, *Fixnum, *String;
+
     RubyObject *main;
-    RubyObject *TRUE, *FALSE, *NIL;
+    RubyValue TRUE, FALSE, NIL;
 
     GarbageCollector gc;
 

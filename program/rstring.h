@@ -15,7 +15,6 @@ class RubyString : public RubyObject
   public:
     RubyString(RubyEnvironment &, const std::string &);
 
-  protected:
     std::string string_value;
 };
 

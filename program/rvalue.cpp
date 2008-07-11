@@ -14,8 +14,18 @@ RubyValue RubyValue::from_symbol(RubySymbol *_value)
 RubyValue RubyValue::from_object(RubyObject *_value)
 { return RubyValue(_value); }
 
+RubyClass *RubyValue::get_class(RubyEnvironment &_e) const
+{
+  switch (type) {
+    case RubyValue::RV_FIXNUM: return _e.Fixnum;
+    case RubyValue::RV_SYMBOL: return _e.Symbol;
+    case RubyValue::RV_OBJECT: return object->get_class();
+    default: std::cerr << "RubyValue::get_class: don't know my own type" << std::endl; throw;
+  }
+}
+
 // the inclusion of `environment' here as a parameter seems a cop-out
-RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
+RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e) const
 {
   // We need to find a method by this name in our context. We go through the class's ::ancestors.
   // Tradition has it:
@@ -26,22 +36,20 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
   // 		...]
 
   switch (type) {
-    case RubyValue::RV_FIXNUM: return _e.get_class_by_name("Fixnum")->get_method(_name); // XXX these will need to fall back too, since `4.puts' works in MRI
-    case RubyValue::RV_SYMBOL: return _e.get_class_by_name("Symbol")->get_method(_name);
+    case RubyValue::RV_FIXNUM: return _e.Fixnum->get_method(_name); // XXX these will need to fall back too, since `4.puts' works in MRI
+    case RubyValue::RV_SYMBOL: return _e.Symbol->get_method(_name);
     case RubyValue::RV_OBJECT: {
       // MyMetaClass
-      RubyClass *mc = object->get_metaclass_read();
-      if (mc && mc->has_method(_name))
-	return mc->get_method(_name);
+      RubyClass *c = object->get_metaclass_read();
+      if (c && c->has_method(_name))
+	return c->get_method(_name);
       
-      // MyClass
-      // XXX TODO
-
-      std::cerr << "RubyValue::get_method: we never found a method?" << std::endl;
-      throw;
+      // MyClass, MyClassIncludedModules, SuperClass, SuperClassIncludedModules, SuperSuperClass,
+      // SuperSuperClassIncludedModules, ..., ...
+      return object->get_class()->find_method(_name);
       break;
     }
-    default: std::cerr << "what in the world?" << std::endl; throw; break;
+    default: std::cerr << "RubyValue::get_method: what in the world? my type is not recognisable" << std::endl; throw;
   }
 }
 

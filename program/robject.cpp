@@ -1,6 +1,10 @@
 #include "robject.h"
 #include "rclass.h"
 #include "renvironment.h"
+#include "rmethod.h"
+#include "rstring.h"
+#include <sstream>
+#include <iomanip>
 
 RubyObject::RubyObject(LazyClass *_klass): klass(_klass), metaklass(NULL)
 { }
@@ -36,10 +40,25 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
   return metaklass;
 }
 
+RubyValue object_inspect(RubyEnvironment &, RubyValue);
+
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cObject = RubyClass::create_class_with_super(_e, "Object", NULL);
   // Object<nil, NOT Object<Object(!!)
+  rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect));
 
   _e.add_class("Object", rb_cObject);
+  _e.Object = rb_cObject;
 }
+
+RubyValue object_inspect(RubyEnvironment &_e, RubyValue _self)
+{
+  std::ostringstream oss;
+  oss << "#<" << _self.get_class(_e)->get_name() << ":";
+  oss << std::dec << _self.object;
+  oss << ">";
+
+  return RubyValue::from_object(new RubyString(_e, oss.str()));
+}
+
