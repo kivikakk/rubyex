@@ -2,6 +2,7 @@
 #include <iostream>
 #include "rclass.h"
 #include "renvironment.h"
+#include "rmethod.h"
 
 RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(new NamedLazyClass(_e, "Module")), name(_name)
 { }

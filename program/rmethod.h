@@ -2,6 +2,12 @@
 #define RMETHOD_H
 
 #include <string>
+#include <vector>
+#include "renvironment.h"
+#include "rvalue.h"
+
+typedef RubyValue (*RCMethodInstanceNoArgs)(RubyEnvironment &, RubyValue);
+typedef RubyValue (*RCMethodModuleArgs)(RubyEnvironment &, const std::vector<RubyValue> &);
 
 class RubyMethod
 {

@@ -7,6 +7,7 @@
 #include "rstring.h"
 #include "rnumeric.h"
 #include "context.h"
+#include "rmethod.h"
 
 void process(RubyEnvironment &, Reader &);
 

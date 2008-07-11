@@ -1,10 +1,11 @@
 #include "rkernel.h"
+#include "rmethod.h"
 #include <vector>
 #include <iostream>
 
-RubyValue kernel_print(RubyEnvironment &, const std::vector<RubyObject *> &);
-RubyValue kernel_puts(RubyEnvironment &, const std::vector<RubyObject *> &);
-RubyValue kernel_p(RubyEnvironment &, const std::vector<RubyObject *> &);
+RubyValue kernel_print(RubyEnvironment &, const std::vector<RubyValue> &);
+RubyValue kernel_puts(RubyEnvironment &, const std::vector<RubyValue> &);
+RubyValue kernel_p(RubyEnvironment &, const std::vector<RubyValue> &);
 
 void RubyKernelEI::init(RubyEnvironment &e)
 {
@@ -16,20 +17,20 @@ void RubyKernelEI::init(RubyEnvironment &e)
   e.add_module("Kernel", rb_mKernel);
 }
 
-RubyValue kernel_print(RubyEnvironment &e, const std::vector<RubyObject *> &args)
+RubyValue kernel_print(RubyEnvironment &e, const std::vector<RubyValue> &args)
 {
   std::cerr << "Kernel::print called with " << args.size() << " arguments." << std::endl;
   return RubyValue::from_object(e.NIL);
 }
 
-RubyValue kernel_puts(RubyEnvironment &e, const std::vector<RubyObject *> &args)
+RubyValue kernel_puts(RubyEnvironment &e, const std::vector<RubyValue> &args)
 {
   std::cerr << "Kernel::puts called with " << args.size() << " arguments." << std::endl;
   kernel_print(e, args);
   return RubyValue::from_object(e.NIL);
 }
 
-RubyValue kernel_p(RubyEnvironment &e, const std::vector<RubyObject *> &args)
+RubyValue kernel_p(RubyEnvironment &e, const std::vector<RubyValue> &args)
 {
   std::cerr << "Kernel::p called with " << args.size() << " arguments." << std::endl;
   kernel_puts(e, args);

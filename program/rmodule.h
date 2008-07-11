@@ -5,7 +5,8 @@
 #include <map>
 #include <vector>
 #include "robject.h"
-#include "rmethod.h"
+
+class RubyMethod;
 
 class RubyModule : public RubyObject
 {

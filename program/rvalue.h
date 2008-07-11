@@ -3,10 +3,10 @@
 
 #include <string>
 #include "rsymbol.h"
-#include "rmethod.h"
 
 class RubyObject;
 class RubyEnvironment;
+class RubyMethod;
 
 class RubyValue
 {

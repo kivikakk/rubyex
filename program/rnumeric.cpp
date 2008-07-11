@@ -3,6 +3,7 @@
 #include "rvalue.h"
 #include "rclass.h"
 #include "renvironment.h"
+#include "rmethod.h"
 
 RubyValue fixnum_add(RubyEnvironment &, RubyValue, RubyValue);
 
