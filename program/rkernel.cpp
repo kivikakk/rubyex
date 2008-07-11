@@ -31,20 +31,17 @@ RubyValue kernel_print(RubyEnvironment &_e, RubyValue _self, const std::vector<R
 RubyValue kernel_puts(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
-    std::vector<RubyValue> to_print; RubyMethod *m;
+    std::vector<RubyValue> to_print;
 
     RubyValue result_val; RubyString *result;
 
     if (it->object->get_class() == _e.String)
       result_val = *it;
-    else {
-      if (it->object == _e.NIL.object)
-	m = it->get_method("inspect", _e);
-      else
-	m = it->get_method("to_s", _e);
+    else if (it->object == _e.NIL.object)
+      result_val = it->call(_e, "inspect");
+    else
+      result_val = it->call(_e, "to_s");
 
-      result_val = m->call(_e, *it);
-    }
     result = dynamic_cast<RubyString *>(result_val.object);
 
     std::string s = result->string_value;
@@ -60,8 +57,7 @@ RubyValue kernel_puts(RubyEnvironment &_e, RubyValue _self, const std::vector<Ru
 RubyValue kernel_p(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
-    RubyMethod *m = it->get_method("inspect", _e);
-    RubyValue r = m->call(_e, *it);
+    RubyValue r = it->call(_e, "inspect");
     std::vector<RubyValue> rca; rca.push_back(r);
     kernel_puts(_e, _self, rca);
   }

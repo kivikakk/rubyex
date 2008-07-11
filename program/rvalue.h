@@ -2,6 +2,7 @@
 #define RVALUE_H
 
 #include <string>
+#include <vector>
 #include "rsymbol.h"
 
 class RubyObject;
@@ -20,6 +21,12 @@ class RubyValue
 
     RubyClass *get_class(RubyEnvironment &_e) const;
     RubyMethod *get_method(const std::string &, RubyEnvironment &) const;
+
+    RubyValue call(RubyEnvironment &, const std::string &) const;
+    RubyValue call(RubyEnvironment &, const std::string &, RubyValue) const;
+    RubyValue call(RubyEnvironment &, const std::string &, RubyValue, RubyValue) const;
+    RubyValue call(RubyEnvironment &, const std::string &, RubyValue, RubyValue, RubyValue) const;
+    RubyValue call(RubyEnvironment &, const std::string &, const std::vector<RubyValue> &) const;
 
     typedef enum
     {

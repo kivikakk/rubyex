@@ -1,6 +1,7 @@
+#include <iostream>
 #include "rvalue.h"
 #include "renvironment.h"
-#include <iostream>
+#include "rmethod.h"
 
 RubyValue::RubyValue(): type(RV_NOTHING)
 { }
@@ -52,6 +53,38 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
     default: std::cerr << "RubyValue::get_method: what in the world? my type is not recognisable" << std::endl; throw;
   }
 }
+
+RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name) const
+{ return get_method(_name, _e)->call(_e, *this); }
+
+RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, RubyValue _arg0) const
+{
+  std::vector<RubyValue> args;
+  args.push_back(_arg0);
+  return get_method(_name, _e)->call(_e, *this, args);
+}
+RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, RubyValue _arg0, RubyValue _arg1) const
+{
+  std::vector<RubyValue> args;
+  args.push_back(_arg0);
+  args.push_back(_arg1);
+  return get_method(_name, _e)->call(_e, *this, args);
+}
+
+RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, RubyValue _arg0, RubyValue _arg1, RubyValue _arg2) const
+{
+  std::vector<RubyValue> args;
+  args.push_back(_arg0);
+  args.push_back(_arg1);
+  args.push_back(_arg2);
+  return get_method(_name, _e)->call(_e, *this, args);
+}
+
+RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, const std::vector<RubyValue> &_args) const
+{
+  return get_method(_name, _e)->call(_e, *this, _args);
+}
+
 
 RubyValue::RubyValue(long _value): type(RV_FIXNUM), fixnum(_value)
 { }
