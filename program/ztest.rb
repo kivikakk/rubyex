@@ -1,5 +1,2 @@
-a = 1
-b = 2
-c = 3
+Kernel.p "This is Kernel.p"
 
-a + b + c

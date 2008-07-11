@@ -7,7 +7,7 @@
 RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(new NamedLazyClass(_e, "Module")), name(_name)
 { }
 
-RubyModule::RubyModule(RubyEnvironment &_e, LazyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name)
+RubyModule::RubyModule(LazyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name)
 { }
 
 RubyModule::~RubyModule()
@@ -31,11 +31,16 @@ void RubyModule::add_method(const std::string &_name, RubyMethod *_method)
   methods[_name] = _method;
 }
 
+bool RubyModule::has_method(const std::string &_name) const
+{
+  return (methods.find(_name) != methods.end());
+}
+
 RubyMethod *RubyModule::get_method(const std::string &_name) const
 {
   std::map<std::string, RubyMethod *>::const_iterator it = methods.find(_name);
   if (it == methods.end()) {
-    std::cerr << "ERROR: method '" << _name << "' does not exist." << std::endl;
+    std::cerr << "ERROR: module " << this->name << " does not have method '" << _name << "'. I have " << methods.size() << " method(s)." << std::endl;
     throw std::exception();
   }
 

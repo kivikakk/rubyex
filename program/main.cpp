@@ -82,11 +82,10 @@ void process(RubyEnvironment &e, Reader &r)
 	// if we have a target, we need to be more direct
 	// XXX TODO RESUME: this implies that RubyValue needs its own lookup function,
 	// which Context::get_method can rely on, and which we can use directly here if is_target == true
-	RubyMethod *method = is_target ? target.get_method(name, &e) : context->get_method(name);
+	RubyMethod *method = is_target ? target.get_method(name, e) : context->get_method(name);
 	std::cerr << "method is " << method << std::endl;
 
-	// RESUME: about to call!
-
+	method->call(e, is_target ? target : context->get_context(), arguments);	// boom
 	break;
       }
 

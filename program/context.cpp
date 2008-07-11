@@ -1,5 +1,6 @@
 #include "context.h"
 #include <iostream>
+#include <exception>
 
 Context::Context(RubyEnvironment *_environment, RubyValue _context): environment(_environment), context(_context)
 { }
@@ -30,6 +31,12 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
 	  return iter->second;
       }
 
+      // how about environment globals?
+      try {
+	return RubyValue::from_object(environment->get_global_by_name(id));
+      } catch (std::exception)
+      { }
+
       std::cerr << "Context::entry_to_value failing" << std::endl;
       throw;
     }
@@ -51,7 +58,7 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
 
 RubyMethod *Context::get_method(const std::string &_name)
 {
-  return context.get_method(_name, environment);
+  return context.get_method(_name, *environment);
 }
 
 void Context::assign(const std::string &_name, RubyValue _value)

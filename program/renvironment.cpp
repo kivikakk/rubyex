@@ -21,9 +21,31 @@ RubyEnvironment::RubyEnvironment()
   main = new RubyObject(new NamedLazyClass(*this, "Object"));
 }
 
+bool RubyEnvironment::global_exists(const std::string &_name) const
+{
+  return class_exists(_name) || module_exists(_name);
+}
+
+RubyObject *RubyEnvironment::get_global_by_name(const std::string &_name)
+{
+  // XXX TODO what about constants?
+  if (class_exists(_name))
+    return get_class_by_name(_name);
+  if (module_exists(_name))
+    return get_module_by_name(_name);
+
+  std::cerr << "ERROR: tried to get an inexistant global." << std::endl;
+  throw std::exception();
+}
+
+bool RubyEnvironment::class_exists(const std::string &_name) const
+{
+  return (classes.find(_name) != classes.end());
+}
+
 RubyClass *RubyEnvironment::get_class_by_name(const std::string &_name)
 {
-  if (classes.find(_name) == classes.end()) {
+  if (!class_exists(_name)) {
     std::cerr << "ERROR: tried to get an inexistant class." << std::endl;
     throw std::exception();
   }
@@ -31,9 +53,14 @@ RubyClass *RubyEnvironment::get_class_by_name(const std::string &_name)
   return classes[_name];
 }
 
+bool RubyEnvironment::module_exists(const std::string &_name) const
+{
+  return (modules.find(_name) != modules.end());
+}
+
 RubyModule *RubyEnvironment::get_module_by_name(const std::string &_name)
 {
-  if (modules.find(_name) == modules.end()) {
+  if (!module_exists(_name)) {
     std::cerr << "ERROR: tried to get an inexistant module." << std::endl;
     throw std::exception();
   }

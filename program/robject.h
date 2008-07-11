@@ -15,8 +15,12 @@ class RubyObject
     RubyObject(LazyClass *);
     virtual ~RubyObject();
 
+    void add_metaclass_method(RubyEnvironment &, const std::string &, RubyMethod *);
+
     RubyClass *get_class() const;
-    RubyClass *get_metaclass() const;
+    RubyClass *get_metaclass_read() const;
+
+    RubyClass *get_metaclass(RubyEnvironment &_e);
 
   protected:
     LazyClass *klass;
