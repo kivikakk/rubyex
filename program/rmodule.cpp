@@ -21,31 +21,31 @@ const std::string &RubyModule::get_name() const
   return name;
 }
 
-void RubyModule::add_method(const std::string &name, RubyMethod *method)
+void RubyModule::add_method(const std::string &_name, RubyMethod *_method)
 {
-  if (methods.find(name) != methods.end()) {
+  if (methods.find(_name) != methods.end()) {
     std::cerr << "ERROR: added a method where one exists already." << std::endl;
     throw std::exception();
   }
 
-  methods[name] = method;
+  methods[_name] = _method;
 }
 
-RubyMethod *RubyModule::get_method(const std::string &name) const
+RubyMethod *RubyModule::get_method(const std::string &_name) const
 {
-  std::map<std::string, RubyMethod *>::const_iterator it = methods.find(name);
+  std::map<std::string, RubyMethod *>::const_iterator it = methods.find(_name);
   if (it == methods.end()) {
-    std::cerr << "ERROR: method '" << name << "' does not exist." << std::endl;
+    std::cerr << "ERROR: method '" << _name << "' does not exist." << std::endl;
     throw std::exception();
   }
 
   return it->second;
 }
 
-void RubyModuleEI::init(RubyEnvironment &e)
+void RubyModuleEI::init(RubyEnvironment &_e)
 {
   // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
-  RubyClass *rb_cModule = RubyClass::create_class_with_super(e, "Module", new NamedLazyClass(e, "Object"));
+  RubyClass *rb_cModule = RubyClass::create_class_with_super(_e, "Module", new NamedLazyClass(_e, "Object"));
 
-  e.add_class("Module", rb_cModule);
+  _e.add_class("Module", rb_cModule);
 }

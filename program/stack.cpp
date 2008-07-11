@@ -5,49 +5,49 @@
 Stack::Stack()
 { }
 
-void Stack::push_identifier(const std::string &identifier)
+void Stack::push_identifier(const std::string &_identifier)
 {
   StackEntry e;
   e.type = SE_IDENTIFIER;
-  e.identifier = new std::string(identifier);
+  e.identifier = new std::string(_identifier);
   push(e);
 }
 
-void Stack::push_symbol(const std::string &symbol)
+void Stack::push_symbol(const std::string &_symbol)
 {
   StackEntry e;
   e.type = SE_SYMBOL;
-  e.symbol = new std::string(symbol);
+  e.symbol = new std::string(_symbol);
   push(e);
 }
 
-void Stack::push_integer(int integer)
+void Stack::push_integer(int _integer)
 {
   StackEntry e;
   e.type = SE_INTEGER;
-  e.integer = integer;
+  e.integer = _integer;
   push(e);
 }
 
-void Stack::push_block(const Block &block)
+void Stack::push_block(const Block &_block)
 {
   StackEntry e;
   e.type = SE_BLOCK;
-  e.block = new Block(block);
+  e.block = new Block(_block);
   push(e);
 }
 
-void Stack::push_object(RubyObject *object)
+void Stack::push_object(RubyObject *_object)
 {
   StackEntry e;
   e.type = SE_OBJECT;
-  e.object = object;
+  e.object = _object;
   push(e);
 }
 
-void Stack::push(const StackEntry &se)
+void Stack::push(const StackEntry &_se)
 {
-  ival.push_back(se);
+  ival.push_back(_se);
 }
 
 Stack::StackEntry Stack::pop_variant()
@@ -91,11 +91,11 @@ RubyObject *Stack::pop_object()
   return pop_variant().object;
 }
 
-RubyValue Stack::pop_value(Context *c)
+RubyValue Stack::pop_value(Context *_c)
 {
   // entry_to_value deallocates memory allocated in the StackEntry
   // (TODO: if we made StackEntry a class, used a heap-allocated var
   // and had the destructor do it, that'd be great...)
-  return c->entry_to_value(pop_variant());
+  return _c->entry_to_value(pop_variant());
 }
 

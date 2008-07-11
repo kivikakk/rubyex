@@ -4,15 +4,15 @@
 #include "rclass.h"
 #include "renvironment.h"
 
-void RubyTriEI::init(RubyEnvironment &e)
+void RubyTriEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cTrueClass = RubyClass::create_class(e, "TrueClass");
-  RubyClass *rb_cFalseClass = RubyClass::create_class(e, "FalseClass");
-  RubyClass *rb_cNilClass = RubyClass::create_class(e, "NilClass");
+  RubyClass *rb_cTrueClass = RubyClass::create_class(_e, "TrueClass");
+  RubyClass *rb_cFalseClass = RubyClass::create_class(_e, "FalseClass");
+  RubyClass *rb_cNilClass = RubyClass::create_class(_e, "NilClass");
 
-  e.add_class("TrueClass", rb_cTrueClass);
-  e.add_class("FalseClass", rb_cFalseClass);
-  e.add_class("NilClass", rb_cNilClass);
+  _e.add_class("TrueClass", rb_cTrueClass);
+  _e.add_class("FalseClass", rb_cFalseClass);
+  _e.add_class("NilClass", rb_cNilClass);
 
   // TODO: e.NIL, e.FALSE, e.TRUE
 }

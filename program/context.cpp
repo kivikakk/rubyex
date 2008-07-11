@@ -14,14 +14,14 @@ RubyValue Context::get_context() const
   return context;
 }
 
-RubyValue Context::entry_to_value(const Stack::StackEntry &entry) const
+RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
 {
   // We take control of StackEntry's memory. See a note in stack.cpp:pop_value about how we should do this better.
 
-  switch (entry.type) {
+  switch (_entry.type) {
     case Stack::SE_IDENTIFIER: {
-      std::string id = *entry.identifier;
-      delete entry.identifier;
+      std::string id = *_entry.identifier;
+      delete _entry.identifier;
       
       // first look at locals.
       {
@@ -35,13 +35,13 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &entry) const
     }
 
     case Stack::SE_SYMBOL: {
-      std::string symbol = *entry.symbol;
-      delete entry.symbol;
+      std::string symbol = *_entry.symbol;
+      delete _entry.symbol;
       return RubyValue::from_symbol(environment->get_symbol(symbol));
     }
 
-    case Stack::SE_INTEGER: return RubyValue::from_fixnum(entry.integer);
-    case Stack::SE_OBJECT: return RubyValue::from_object(entry.object);
+    case Stack::SE_INTEGER: return RubyValue::from_fixnum(_entry.integer);
+    case Stack::SE_OBJECT: return RubyValue::from_object(_entry.object);
     case Stack::SE_BLOCK:
       std::cerr << ".. error?" << std::endl;
       throw;
@@ -49,9 +49,9 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &entry) const
   throw;
 }
 
-RubyMethod *Context::get_method(const std::string &name)
+RubyMethod *Context::get_method(const std::string &_name)
 {
-  return context.get_method(name, environment);
+  return context.get_method(_name, environment);
 }
 
 void Context::assign(const std::string &_name, RubyValue _value)

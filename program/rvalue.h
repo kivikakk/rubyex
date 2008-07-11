@@ -17,7 +17,7 @@ class RubyValue
     static RubyValue from_symbol(RubySymbol *);
     static RubyValue from_object(RubyObject *);
 
-    RubyMethod *get_method(const std::string &name, RubyEnvironment *);
+    RubyMethod *get_method(const std::string &, RubyEnvironment *);
 
     typedef enum
     {

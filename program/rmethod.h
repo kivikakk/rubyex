@@ -6,22 +6,40 @@
 #include "renvironment.h"
 #include "rvalue.h"
 
-typedef RubyValue (*RCMethodInstanceNoArgs)(RubyEnvironment &, RubyValue);
-typedef RubyValue (*RCMethodModuleArgs)(RubyEnvironment &, const std::vector<RubyValue> &);
+typedef RubyValue (*RCMethodNoArgs)(RubyEnvironment &, RubyValue);
+typedef RubyValue (*RCMethodArgs)(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 
 class RubyMethod
 {
   public:
-    // `Call' method?
+    static RubyMethod *Create(RCMethodNoArgs);
+    static RubyMethod *Create(RCMethodArgs, int);
+
+    virtual RubyValue call(RubyEnvironment &, RubyValue);
+    virtual RubyValue call(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &) = 0;
 };
 
-class RubyCMethod : public RubyMethod
+class RubyMethodNoArgs : public RubyMethod
 {
   public:
-    RubyCMethod(void *, int);
+    RubyMethodNoArgs(RCMethodNoArgs);
+
+    RubyValue call(RubyEnvironment &, RubyValue);
+    RubyValue call(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 
   protected:
-    void *function;
+    RCMethodNoArgs function;
+};
+
+class RubyMethodArgs : public RubyMethod
+{
+  public:
+    RubyMethodArgs(RCMethodArgs, int);
+
+    RubyValue call(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
+
+  protected:
+    RCMethodArgs function;
     int args;
 };
 
@@ -30,13 +48,13 @@ class RubyBytecodeMethod : public RubyMethod
   public:
     RubyBytecodeMethod(int);
 
+    RubyValue call(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
+
     std::string data;
 
   protected:
     int args;
 };
-
-#define CMETHOD(fn, args) (new RubyCMethod((void *)(fn), (args)))
 
 #define ARGS_ARBITRARY (-1)
 #define ARGS_MINIMAL(x) (-1 - (x))

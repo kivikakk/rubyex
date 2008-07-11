@@ -68,11 +68,11 @@ std::string Reader::read_string()
   return s;
 }
 
-std::string Reader::read_bytes(unsigned long l)
+std::string Reader::read_bytes(unsigned long _l)
 {
-  char *c = new char[l];
-  input.read(c, l);
-  std::string s = std::string(c, l);
+  char *c = new char[_l];
+  input.read(c, _l);
+  std::string s = std::string(c, _l);
   delete [] c;
   return s;
 }

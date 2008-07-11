@@ -16,9 +16,9 @@ RubyClass *RubyClass::create_class_with_super(RubyEnvironment &_e, const std::st
   return new RubyClass(_e, _superklass, _name);
 }
 
-void RubyClassEI::init(RubyEnvironment &e)
+void RubyClassEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cClass = RubyClass::create_class_with_super(e, "Class", new NamedLazyClass(e, "Module"));
+  RubyClass *rb_cClass = RubyClass::create_class_with_super(_e, "Class", new NamedLazyClass(_e, "Module"));
 
-  e.add_class("Class", rb_cClass);
+  _e.add_class("Class", rb_cClass);
 }

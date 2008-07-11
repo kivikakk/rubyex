@@ -5,10 +5,10 @@
 GarbageCollector::GarbageCollector()
 { }
 
-RubyObject *GarbageCollector::track(RubyObject *object)
+RubyObject *GarbageCollector::track(RubyObject *_object)
 {
-  std::cerr << "GC: tracking object " << typeid(object).name() << std::endl;
-  objects.push_back(object);
-  return object;
+  std::cerr << "GC: tracking object " << typeid(_object).name() << std::endl;
+  objects.push_back(_object);
+  return _object;
 }
 

@@ -21,52 +21,52 @@ RubyEnvironment::RubyEnvironment()
   main = new RubyObject(new NamedLazyClass(*this, "Object"));
 }
 
-RubyClass *RubyEnvironment::get_class_by_name(const std::string &name)
+RubyClass *RubyEnvironment::get_class_by_name(const std::string &_name)
 {
-  if (classes.find(name) == classes.end()) {
+  if (classes.find(_name) == classes.end()) {
     std::cerr << "ERROR: tried to get an inexistant class." << std::endl;
     throw std::exception();
   }
 
-  return classes[name];
+  return classes[_name];
 }
 
-RubyModule *RubyEnvironment::get_module_by_name(const std::string &name)
+RubyModule *RubyEnvironment::get_module_by_name(const std::string &_name)
 {
-  if (modules.find(name) == modules.end()) {
+  if (modules.find(_name) == modules.end()) {
     std::cerr << "ERROR: tried to get an inexistant module." << std::endl;
     throw std::exception();
   }
 
-  return modules[name];
+  return modules[_name];
 }
 
-void RubyEnvironment::add_class(const std::string &name, RubyClass *klass)
+void RubyEnvironment::add_class(const std::string &_name, RubyClass *_klass)
 {
-  if (classes.find(name) != classes.end()) {
+  if (classes.find(_name) != classes.end()) {
     std::cerr << "ERROR: added a class where one exists already." << std::endl;
     throw std::exception();
   }
 
-  classes[name] = klass;
+  classes[_name] = _klass;
 }
 
-void RubyEnvironment::add_module(const std::string &name, RubyModule *module)
+void RubyEnvironment::add_module(const std::string &_name, RubyModule *_module)
 {
-  if (modules.find(name) != modules.end()) {
+  if (modules.find(_name) != modules.end()) {
     std::cerr << "ERROR: added a module where one exists already." << std::endl;
     throw std::exception();
   }
 
-  modules[name] = module;
+  modules[_name] = _module;
 }
 
-RubySymbol *RubyEnvironment::get_symbol(const std::string &name)
+RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
 {
-  std::map<std::string, RubySymbol *>::iterator si = symbols.find(name);
+  std::map<std::string, RubySymbol *>::iterator si = symbols.find(_name);
   if (si != symbols.end())
     return si->second;
-  RubySymbol *sym = new RubySymbol(name);
-  return (symbols[name] = sym);
+  RubySymbol *sym = new RubySymbol(_name);
+  return (symbols[_name] = sym);
 }
 

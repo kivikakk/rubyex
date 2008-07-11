@@ -18,10 +18,10 @@ RubyClass *RubyObject::get_metaclass() const
   return metaklass;
 }
 
-void RubyObjectEI::init(RubyEnvironment &e)
+void RubyObjectEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cObject = RubyClass::create_class_with_super(e, "Object", NULL);
+  RubyClass *rb_cObject = RubyClass::create_class_with_super(_e, "Object", NULL);
   // Object<nil, NOT Object<Object(!!)
 
-  e.add_class("Object", rb_cObject);
+  _e.add_class("Object", rb_cObject);
 }
