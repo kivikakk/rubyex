@@ -45,5 +45,5 @@ RubyValue::RubyValue(long _value): type(RV_FIXNUM), fixnum(_value)
 RubyValue::RubyValue(RubySymbol *_value): type(RV_SYMBOL), symbol(_value)
 { }
 
-RubyValue::RubyValue(RubyObject *_value): type(RV_FIXNUM), object(_value)
+RubyValue::RubyValue(RubyObject *_value): type(RV_OBJECT), object(_value)
 { }
