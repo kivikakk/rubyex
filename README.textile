@@ -1,0 +1,13 @@
+h1. RubyEx
+
+h2. What, why, how?
+
+RubyEx is my attempt at creating a cute little Ruby parser, byte-code generator and VM for that byte-code. I'm no byte-code designer, I'm no parser writer, and I sure have no idea how to structure a VM, but for a first try it's all working out rather well.
+
+I am an avid Rubyist, and my only motivating factor to write this is since I thought it'd be a good bit of fun. Originally my plan was to write an interpreter for the byte-code to run as a kernel module (speed?!) - I may still try to do it, but that's risky like nothing else and a complex beast to run in kernel space that we'd all rather not. So in the end, RubyEx has turned out to be my parser and VM.
+
+The parser ("translator") is written using bison/flex, and generates byte-code from a lovely object-oriented AST. It can also generate Ruby from the AST (future: Ruby lint or code-cleaner?), and the current design means it wouldn't be too hard to add other forms of output for the AST.
+
+The VM ("program") is written in C++, and has been (and no doubt will continue to be) a learning experience for me as I learn just how much Ruby gives us.
+
+I'd still like a better name for RubyEx, too.
