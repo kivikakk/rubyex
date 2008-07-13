@@ -149,7 +149,8 @@ class FuncDefExpr : public Expr
 class Program : public PrettyPrint, public Emitter
 {
   public:
-    Program() { }
+    Program();
+    Program(std::ostream &);
     Expr *operator[](int);
 
     void add_expression(Expr *);
@@ -158,6 +159,10 @@ class Program : public PrettyPrint, public Emitter
     void emit(std::ostream &) const;
 
     std::list<Expr *> expressions;
+
+  protected:
+    bool emit_as_we_go;
+    std::ostream *emitter_stream;
 };
 
 #endif

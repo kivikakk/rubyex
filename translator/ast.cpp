@@ -303,9 +303,19 @@ void FuncDefExpr::emit(std::ostream &o) const
 }
 
 void Program::add_expression(Expr *expression) {
-  if (expression)
-    this->expressions.push_back(expression);
+  if (expression) {
+    if (emit_as_we_go)
+      expression->emit(*emitter_stream);
+    else
+      this->expressions.push_back(expression);
+  }
 }
+
+Program::Program(): emit_as_we_go(false)
+{ }
+
+Program::Program(std::ostream &o): emit_as_we_go(true), emitter_stream(&o)
+{ }
 
 Expr *Program::operator[](int index) {
   std::list<Expr *>::iterator it = expressions.begin();
