@@ -8,12 +8,13 @@
 RubyEnvironment::RubyEnvironment()
 {
   // Let's bring this online.
+  RubyKernelEI().init(*this);
+
+  // Object includes Kernel, so we put it here ...
   RubyObjectEI().init(*this);
   RubyModuleEI().init(*this);
   RubyClassEI().init(*this);
   RubyTriEI().init(*this);
-
-  RubyKernelEI().init(*this);
 
   RubyNumericEI().init(*this);
   RubyStringEI().init(*this);

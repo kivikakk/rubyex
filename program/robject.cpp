@@ -47,6 +47,7 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   RubyClass *rb_cObject = RubyClass::create_class_with_super(_e, "Object", NULL);
   // Object<nil, NOT Object<Object(!!)
   rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect));
+  rb_cObject->include_module(_e.Kernel);
 
   _e.add_class("Object", rb_cObject);
   _e.Object = rb_cObject;

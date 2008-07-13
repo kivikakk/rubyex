@@ -25,6 +25,7 @@ class RubyEnvironment
     RubySymbol *get_symbol(const std::string &);
 
     RubyClass *Object, *Module, *Class, *Symbol, *Fixnum, *String;
+    RubyModule *Kernel;
 
     RubyObject *main;
     RubyValue TRUE, FALSE, NIL;

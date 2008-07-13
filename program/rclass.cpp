@@ -19,18 +19,23 @@ RubyMethod *RubyClass::find_method(const std::string &_name) const
   // MyClass, MyClassIncludedModules, ...
   // SuperClass, SuperClassIncludedModules ...,
   // SuperSuperClass, SuperSuperClassIncludedModules ...,
-  
-  if (this->has_method(_name))
-    return this->get_method(_name);
 
   const RubyClass *sagasu = this;
-  while ((sagasu->superklass)) {
-    sagasu = sagasu->superklass->resolve();
+  while ((sagasu)) {
     if (sagasu->has_method(_name))
       return sagasu->get_method(_name);
+    // Included modules?
+    for (std::list<RubyModule *>::const_iterator it = sagasu->includes.begin(); it != sagasu->includes.end(); ++it)
+      if ((*it)->has_method(_name))
+	return (*it)->get_method(_name);
+
+    if (sagasu->superklass)
+      sagasu = sagasu->superklass->resolve();
+    else
+      sagasu = NULL;
   }
 
-  std::cerr << "RubyClass::find_method: failed to find " << _name << std::endl;
+  std::cerr << "RubyClass::find_method: cannot find " << get_name() << "#" << _name << std::endl;
   throw;
 }
 

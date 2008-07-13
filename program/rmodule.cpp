@@ -31,6 +31,25 @@ void RubyModule::add_method(const std::string &_name, RubyMethod *_method)
   methods[_name] = _method;
 }
 
+void RubyModule::add_module_method(RubyEnvironment &_e, const std::string &_name, RubyMethod *_method)
+{
+  add_method(_name, _method);		// TODO: visibility? this should be private.
+  add_metaclass_method(_e, _name, _method);
+}
+
+void RubyModule::include_module(RubyModule *_module)
+{
+  for (std::list<RubyModule *>::const_iterator it = includes.begin(); it != includes.end(); ++it)
+    if (*it == _module) {
+      std::cerr << "WARNING: " << name << " already included " << _module->get_name() << "?" << std::endl;
+      // is this even an error condition?
+      return;
+    }
+
+  // new takes precedent.
+  includes.push_front(_module);
+}
+
 bool RubyModule::has_method(const std::string &_name) const
 {
   return (methods.find(_name) != methods.end());

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <map>
-#include <vector>
+#include <list>
 #include "robject.h"
 
 class RubyMethod;
@@ -16,6 +16,7 @@ class RubyModule : public RubyObject
     virtual ~RubyModule();
 
     void add_method(const std::string &, RubyMethod *);
+    void add_module_method(RubyEnvironment &, const std::string &, RubyMethod *);
     void include_module(RubyModule *);
 
     const std::string &get_name() const;
@@ -25,7 +26,7 @@ class RubyModule : public RubyObject
   protected:
     std::string name;
     std::map<std::string, RubyMethod *> methods;
-    std::vector<RubyModule *> includes;
+    std::list<RubyModule *> includes;
 };
 
 class RubyModuleEI : public RubyEnvironmentInitializer

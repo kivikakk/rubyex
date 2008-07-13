@@ -11,11 +11,12 @@ RubyValue kernel_p(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &)
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
   RubyModule *rb_mKernel = new RubyModule(_e, "Kernel");
-  rb_mKernel->add_metaclass_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
-  rb_mKernel->add_metaclass_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
-  rb_mKernel->add_metaclass_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
+  rb_mKernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
+  rb_mKernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
+  rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
 
   _e.add_module("Kernel", rb_mKernel);
+  _e.Kernel = rb_mKernel;
 }
 
 RubyValue kernel_print(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)

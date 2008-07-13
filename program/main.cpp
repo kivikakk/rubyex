@@ -46,7 +46,8 @@ void process(RubyEnvironment &e, Reader &r)
 	type_t t = r.read_type();
 	switch (t) {
 	  // XXX: look in the local namespace - incl. if we're in a class/etc. (Kernel->Object methods, par example)
-	  case T_IDENTIFIER: /* XXX */ std::cerr << "EXECUTE identifier " << r.read_string() << std::endl; break;
+	  case T_IDENTIFIER: /* XXX we favour local vars over funcs; local var by `a', func called by `a()' */
+	      std::cerr << "EXECUTE identifier " << r.read_string() << std::endl; break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
@@ -82,7 +83,7 @@ void process(RubyEnvironment &e, Reader &r)
 	// which Context::get_method can rely on, and which we can use directly here if is_target == true
 	RubyMethod *method = is_target ? target.get_method(name, e) : context->get_method(name);
 
-	method->call(e, is_target ? target : context->get_context(), arguments);	// boom
+	last_value = method->call(e, is_target ? target : context->get_context(), arguments);	// boom
 	break;
       }
 
