@@ -304,9 +304,10 @@ void FuncDefExpr::emit(std::ostream &o) const
 
 void Program::add_expression(Expr *expression) {
   if (expression) {
-    if (emit_as_we_go)
+    if (emit_as_we_go) {
+      emitted_yet = true;
       expression->emit(*emitter_stream);
-    else
+    } else
       this->expressions.push_back(expression);
   }
 }
@@ -314,7 +315,7 @@ void Program::add_expression(Expr *expression) {
 Program::Program(): emit_as_we_go(false)
 { }
 
-Program::Program(std::ostream &o): emit_as_we_go(true), emitter_stream(&o)
+Program::Program(std::ostream &o): emit_as_we_go(true), emitted_yet(false), emitter_stream(&o)
 { }
 
 Expr *Program::operator[](int index) {
@@ -336,5 +337,15 @@ void Program::p() const {
 void Program::emit(std::ostream &o) const {
   for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
     (*it)->emit(o);
+}
+
+bool Program::emitted_flag() const
+{
+  return emitted_yet;
+}
+
+void Program::reset_emitted_flag()
+{
+  emitted_yet = false;
 }
 

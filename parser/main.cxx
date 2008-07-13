@@ -8,6 +8,11 @@
 
 bool omit_errors = false;
 
+extern "C" int yywrap(void)
+{
+  return 1;
+}
+
 int main_parser(std::list<std::string> &);
 int main_test(std::list<std::string> &);
 

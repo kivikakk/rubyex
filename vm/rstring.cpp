@@ -9,12 +9,14 @@
 
 RubyValue string_reverse(RubyEnvironment &, RubyValue);
 RubyValue string_inspect(RubyEnvironment &, RubyValue);
+RubyValue string_to_s(RubyEnvironment &, RubyValue);
 
 void RubyStringEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cString = RubyClass::create_class(_e, "String");
   rb_cString->add_method("reverse", RubyMethod::Create(string_reverse));
   rb_cString->add_method("inspect", RubyMethod::Create(string_inspect));
+  rb_cString->add_method("to_s", RubyMethod::Create(string_to_s));
 
   _e.add_class("String", rb_cString);
   _e.String = rb_cString;
@@ -42,6 +44,11 @@ RubyValue string_inspect(RubyEnvironment &_e, RubyValue _self)
       o << (char)v[i];
   o << '"';
   return RubyValue::from_object(_e.gc.track(new RubyString(_e, o.str())));
+}
+
+RubyValue string_to_s(RubyEnvironment &_e, RubyValue _self)
+{
+  return _self;
 }
 
 RubyString::RubyString(RubyEnvironment &_e, const std::string &_string_value): RubyObject(new NamedLazyClass(_e, "String")), string_value(_string_value)

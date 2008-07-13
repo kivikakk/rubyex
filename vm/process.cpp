@@ -5,7 +5,7 @@
 #include "rnumeric.h"
 #include "rmethod.h"
 
-void process(RubyEnvironment &e, Reader &r, std::vector<Context *> &context_stack, Context *context)
+RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 {
   Stack s;
   RubyValue last_value = e.NIL;
@@ -20,6 +20,7 @@ void process(RubyEnvironment &e, Reader &r, std::vector<Context *> &context_stac
 	std::string name = r.read_string();
 	RubyValue rval = s.pop_value(context);
 	context->assign(name, rval);
+	last_value = rval;
 	break;
       }
       case I_EXECUTE: {
@@ -132,5 +133,7 @@ void process(RubyEnvironment &e, Reader &r, std::vector<Context *> &context_stac
 	break;
     }
   }
+
+  return last_value;
 }
 

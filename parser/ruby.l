@@ -5,7 +5,7 @@
   #include <string>
 %}
 
-%option noyywrap
+%option yywrap
 
 %x dbstr context_finish starting_block_args arglist_begins
 %s block_args

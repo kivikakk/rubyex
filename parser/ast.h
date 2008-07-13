@@ -160,8 +160,11 @@ class Program : public PrettyPrint, public Emitter
 
     std::list<Expr *> expressions;
 
+    bool emitted_flag() const;
+    void reset_emitted_flag();
+
   protected:
-    bool emit_as_we_go;
+    bool emit_as_we_go, emitted_yet;
     std::ostream *emitter_stream;
 };
 

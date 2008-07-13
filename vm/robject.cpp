@@ -5,6 +5,7 @@
 #include "rstring.h"
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 RubyObject::RubyObject(LazyClass *_klass): klass(_klass), metaklass(NULL)
 { }
@@ -40,20 +41,23 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
   return metaklass;
 }
 
-RubyValue object_inspect(RubyEnvironment &, RubyValue);
+RubyValue object_inspect_to_s(RubyEnvironment &, RubyValue);
+RubyValue object_send(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cObject = RubyClass::create_class_with_super(_e, "Object", NULL);
   // Object<nil, NOT Object<Object(!!)
-  rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect));
+  rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect_to_s));
+  rb_cObject->add_method("to_s", RubyMethod::Create(object_inspect_to_s));
+  rb_cObject->add_method("send", RubyMethod::Create(object_send, ARGS_ARBITRARY));
   rb_cObject->include_module(_e.Kernel);
 
   _e.add_class("Object", rb_cObject);
   _e.Object = rb_cObject;
 }
 
-RubyValue object_inspect(RubyEnvironment &_e, RubyValue _self)
+RubyValue object_inspect_to_s(RubyEnvironment &_e, RubyValue _self)
 {
   std::ostringstream oss;
   oss << "#<" << _self.get_class(_e)->get_name() << ":";
@@ -61,5 +65,18 @@ RubyValue object_inspect(RubyEnvironment &_e, RubyValue _self)
   oss << ">";
 
   return RubyValue::from_object(new RubyString(_e, oss.str()));
+}
+
+RubyValue object_send(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyValue a = _args[0];
+  if (!(a.type == RubyValue::RV_SYMBOL) && !(a.type == RubyValue::RV_OBJECT && (a.object->get_class() == _e.String))) {
+    std::cerr << "Object#send: not given a Symbol or String" << std::endl;
+    throw;	// boom. XXX TypeError
+  }
+
+  std::string function_name = dynamic_cast<RubyString *>(_args[0].object)->string_value;
+  std::vector<RubyValue> rest = std::vector<RubyValue>(_args.begin() + 1, _args.end());
+  return _self.call(_e, function_name, rest);
 }
 

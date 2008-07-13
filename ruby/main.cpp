@@ -1,28 +1,36 @@
-#include <sstream>
-#include <iostream>
-#include "vm/renvironment.h"
-#include "vm/process.h"
-#include "parser/ast.h"
-#include "parser/main.h"
+#include "twophase.h"
+#include "irb.h"
+#include <string>
+#include <list>
 
 bool omit_errors = false; 	// required for parser.
 
-int main()
+// This is copied from parser/main.cxx .. DRY? But where?
+template <class I, class L, class E> bool find_remove(L &list, const E &element)
 {
-  std::ostringstream oss;
-  Program p(oss);
-  int r = yyparse(&p);
-  if (r != 0)
-    return r;
+  I it = std::find(list.begin(), list.end(), element);
+  if (it != list.end()) {
+    list.erase(it);
+    return true;
+  }
+  return false;
+}
 
-  std::istringstream iss(oss.str());
-  RubyEnvironment e;
-  Reader reader(iss);
-  std::vector<Context *> cs;
-  Context *c = new Context(&e, RubyValue::from_object(e.main));
+bool find_remove_string(std::list<std::string> &list, const std::string &element)
+{
+  return find_remove<std::list<std::string>::iterator>(list, element);
+}
 
-  process(e, reader, cs, c);
+int main(int argc, char **argv)
+{
+  std::string invoked_as = argv[0];
+  std::list<std::string> arguments;
+  for (int i = 1; i < argc; ++i)
+    arguments.push_back(argv[i]);
 
-  return 0;
+  if (find_remove_string(arguments, "-irb"))
+    return irb(argc, argv);
+
+  return twophase(argc, argv);
 }
 

@@ -37,8 +37,8 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
   // 		...]
 
   switch (type) {
-    case RubyValue::RV_FIXNUM: return _e.Fixnum->get_method(_name); // XXX these will need to fall back too, since `4.puts' works in MRI
-    case RubyValue::RV_SYMBOL: return _e.Symbol->get_method(_name);
+    case RubyValue::RV_FIXNUM: return _e.Fixnum->find_method(_name);
+    case RubyValue::RV_SYMBOL: return _e.Symbol->find_method(_name);
     case RubyValue::RV_OBJECT: {
       // MyMetaClass
       RubyClass *c = object->get_metaclass_read();
