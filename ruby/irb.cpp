@@ -7,11 +7,14 @@
 #include "parser/main.h"
 #include "parser/global.h"
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 
 int irb_yywrap();
 
 Program *pb;
+int line_count;
+
 int irb(int, char **)
 {
   ruby_yywrap_delegate = irb_yywrap;
@@ -23,8 +26,10 @@ int irb(int, char **)
   RubyEnvironment e;
   Context *c = new Context(&e, RubyValue::from_object(e.main));
 
+  line_count = 0;
   while (true) {
-    std::cout << "rxirb(main):0> ";
+    std::cout << "rxirb(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":0> ";
+
     std::string input;
     std::getline(std::cin, input);
     if (std::cin.eof()) {
@@ -59,7 +64,7 @@ int irb_yywrap()
   if (pb->emitted_flag())
     return 1;
 
-  std::cout << "rxirb(main):x> ";
+  std::cout << "rxi(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":0* ";
   std::string input;
   std::getline(std::cin, input);
   if (std::cin.eof()) {
