@@ -4,8 +4,11 @@ LDFLAGS :=
 CPPS := $(wildcard *.cpp)
 OBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
 
-program: $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ $(OBJS)
+program: program.a
+	$(CXX) $(LDFLAGS) -o $@ program.a
+
+program.a: $(OBJS)
+	ar rs $@ $(OBJS)
 
 out/%.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<

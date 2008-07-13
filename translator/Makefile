@@ -4,9 +4,12 @@ LDFLAGS :=
 CPPS := $(wildcard *.cpp)
 OBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
 
-parser: out/ruby.tab.o out/lex.yy.o $(OBJS)
-	$(CXX) $(LDFLAGS) -o $@ out/ruby.tab.o out/lex.yy.o $(OBJS)
+parser: parser.a
+	$(CXX) $(LDFLAGS) -o $@ parser.a
 	@./test 1> /dev/null
+
+parser.a: out/ruby.tab.o out/lex.yy.o $(OBJS)
+	ar rs $@ out/ruby.tab.o out/lex.yy.o $(OBJS)
 
 out/%.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
