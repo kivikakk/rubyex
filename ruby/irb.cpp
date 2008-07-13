@@ -28,7 +28,7 @@ int irb(int, char **)
 
   line_count = 0;
   while (true) {
-    std::cout << "rxirb(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":0> ";
+    std::cout << "rxi(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":0> ";
 
     std::string input;
     std::getline(std::cin, input);
