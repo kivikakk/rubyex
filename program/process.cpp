@@ -1,32 +1,12 @@
-#include <iostream>
-#include <vector>
-#include "renvironment.h"
-#include "reader.h"
+#include "process.h"
 #include "stack.h"
 #include "rvalue.h"
 #include "rstring.h"
 #include "rnumeric.h"
-#include "context.h"
 #include "rmethod.h"
 
-void process(RubyEnvironment &, Reader &);
-
-int main(int argc, char **argv)
+void process(RubyEnvironment &e, Reader &r, std::vector<Context *> &context_stack, Context *context)
 {
-  std::cerr << std::hex;
-
-  RubyEnvironment e;
-  Reader r(std::cin);
-  process(e, r);
-
-  return 0;
-}
-
-void process(RubyEnvironment &e, Reader &r)
-{
-  std::vector<Context *> context_stack;
-  Context *context = new Context(&e, RubyValue::from_object(e.main));
-
   Stack s;
   RubyValue last_value = e.NIL;
 
@@ -151,8 +131,6 @@ void process(RubyEnvironment &e, Reader &r)
 	std::cerr << "unknown(" << in << ")" << std::endl;
 	break;
     }
-
-    // context->_report();
   }
 }
 
