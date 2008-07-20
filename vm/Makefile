@@ -2,15 +2,23 @@ CXXFLAGS := -I. -I../include -g -Wall
 LDFLAGS := 
 
 CPPS := $(wildcard *.cpp)
-OBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
+CXXS := $(wildcard *.cxx)
+CPPOBJS := $(patsubst %.cpp,out/%.o,$(CPPS))
+CXXOBJS := $(patsubst %.cxx,out/%.o,$(CXXS))
 
-vm: vm.a
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ main.cxx vm.a
+# .cpp files are linked into vm.a, which is shared.
+# .cxx files are those specific for the `vm' executable.
 
-vm.a: $(OBJS)
-	ar rs $@ $(OBJS)
+vm: $(CXXOBJS) vm.a
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $(CXXOBJS) vm.a
+
+vm.a: $(CPPOBJS)
+	ar rs $@ $(CPPOBJS)
 
 out/%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+out/%.o: %.cxx
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 clean:

@@ -3,6 +3,9 @@
 #include <vector>
 #include <iostream>
 #include "rstring.h"
+#include "eval_hook.h"
+
+RubyValue kernel_eval(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 
 RubyValue kernel_print(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_puts(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
@@ -11,12 +14,24 @@ RubyValue kernel_p(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &)
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
   RubyModule *rb_mKernel = new RubyModule(_e, "Kernel");
+  rb_mKernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
+
   rb_mKernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
 
   _e.add_module("Kernel", rb_mKernel);
   _e.Kernel = rb_mKernel;
+}
+
+RubyValue kernel_eval(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyValue first = _args[0];
+  if (first.object->get_class() != _e.String) {
+    std::cerr << "Kernel::eval: tried to eval non-String" << std::endl;
+    throw;
+  }
+  return eval_hook(_e, _self, dynamic_cast<RubyString *>(first.object)->string_value);
 }
 
 RubyValue kernel_print(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
