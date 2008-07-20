@@ -5,6 +5,7 @@
 #include "rstring.h"
 #include "eval_hook.h"
 
+RubyValue kernel_binding(RubyEnvironment &, RubyValue);
 RubyValue kernel_eval(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 
 RubyValue kernel_print(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
@@ -14,6 +15,7 @@ RubyValue kernel_p(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &)
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
   RubyModule *rb_mKernel = new RubyModule(_e, "Kernel");
+  rb_mKernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
   rb_mKernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
 
   rb_mKernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
@@ -22,6 +24,11 @@ void RubyKernelEI::init(RubyEnvironment &_e)
 
   _e.add_module("Kernel", rb_mKernel);
   _e.Kernel = rb_mKernel;
+}
+
+RubyValue kernel_binding(RubyEnvironment &_e, RubyValue _self)
+{
+  return _e.NIL;
 }
 
 RubyValue kernel_eval(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)

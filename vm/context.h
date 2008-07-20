@@ -3,6 +3,8 @@
 
 // A context for local variables, etc.
 // Experimental concept; not sure if this is the correct way of representing it.
+//
+// Relationship to `Binding'?
 
 #include <map>
 #include <string>

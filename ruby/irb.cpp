@@ -12,8 +12,8 @@
 
 int irb_yywrap();
 
-Program *pb;
-int line_count;
+static Program *pb;
+static int line_count;
 
 int irb(int, char **)
 {

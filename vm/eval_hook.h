@@ -3,8 +3,9 @@
 
 #include "renvironment.h"
 #include "rvalue.h"
+#include "context.h"
 
-RubyValue eval_hook(RubyEnvironment &, RubyValue, const std::string &);
+RubyValue eval_hook(RubyEnvironment &, Context *, RubyValue, const std::string &);
 
 #endif
 
