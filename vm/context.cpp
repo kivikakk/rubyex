@@ -2,17 +2,21 @@
 #include <iostream>
 #include <exception>
 
-Context::Context(RubyEnvironment *_environment, RubyValue _context): environment(_environment), context(_context)
+Context::Context(RubyEnvironment *_environment, RubyValue _context): binding(new Binding(_context)), environment(_environment), outside_binding(false)
 { }
+
+Context::Context(RubyEnvironment *_environment, RubyValue _context, Binding *_binding): binding(_binding), environment(_environment), outside_binding(true)
+{ }
+
+Context::~Context()
+{
+  if (!outside_binding)
+    delete binding;
+}
 
 RubyEnvironment *Context::get_environment() const
 {
   return environment;
-}
-
-RubyValue Context::get_context() const
-{
-  return context;
 }
 
 RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
@@ -26,8 +30,8 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
       
       // first look at locals.
       {
-	std::map<std::string, RubyValue>::const_iterator iter = locals.find(id);
-	if (iter != locals.end())
+	std::map<std::string, RubyValue>::const_iterator iter = binding->locals.find(id);
+	if (iter != binding->locals.end())
 	  return iter->second;
       }
 
@@ -58,17 +62,17 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
 
 RubyMethod *Context::get_method(const std::string &_name)
 {
-  return context.get_method(_name, *environment);
+  return binding->get_context().get_method(_name, *environment);
 }
 
 void Context::assign(const std::string &_name, RubyValue _value)
 {
-  if (locals.find(_name) != locals.end()) {
+  if (binding->locals.find(_name) != binding->locals.end()) {
     // XXX We're going to overwrite something.
     // XXX GC concerns?
     ;
   }
 
-  locals[_name] = _value;
+  binding->locals[_name] = _value;
 }
 

@@ -2,6 +2,7 @@
 #include "rstring.h"
 #include "rnumeric.h"
 #include "rkernel.h"
+#include "rbinding.h"
 #include "rtri.h"
 #include <iostream>
 
@@ -14,6 +15,7 @@ RubyEnvironment::RubyEnvironment()
   RubyObjectEI().init(*this);
   RubyModuleEI().init(*this);
   RubyClassEI().init(*this);
+  RubyBindingEI().init(*this);
   RubyTriEI().init(*this);
 
   RubyNumericEI().init(*this);

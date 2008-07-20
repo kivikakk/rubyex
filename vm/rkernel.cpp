@@ -38,7 +38,7 @@ RubyValue kernel_eval(RubyEnvironment &_e, RubyValue _self, const std::vector<Ru
     std::cerr << "Kernel::eval: tried to eval non-String" << std::endl;
     throw;
   }
-  return eval_hook(_e, _self, dynamic_cast<RubyString *>(first.object)->string_value);
+  return eval_hook(_e, /* XXX */ NULL, _self, dynamic_cast<RubyString *>(first.object)->string_value);
 }
 
 RubyValue kernel_print(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)

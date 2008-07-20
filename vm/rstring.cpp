@@ -7,6 +7,7 @@
 #include "renvironment.h"
 #include "rmethod.h"
 
+RubyValue string_add(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_reverse(RubyEnvironment &, RubyValue);
 RubyValue string_inspect(RubyEnvironment &, RubyValue);
 RubyValue string_to_s(RubyEnvironment &, RubyValue);
@@ -14,12 +15,20 @@ RubyValue string_to_s(RubyEnvironment &, RubyValue);
 void RubyStringEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cString = RubyClass::create_class(_e, "String");
+  rb_cString->add_method("+", RubyMethod::Create(string_add, 1));
   rb_cString->add_method("reverse", RubyMethod::Create(string_reverse));
   rb_cString->add_method("inspect", RubyMethod::Create(string_inspect));
   rb_cString->add_method("to_s", RubyMethod::Create(string_to_s));
 
   _e.add_class("String", rb_cString);
   _e.String = rb_cString;
+}
+
+RubyValue string_add(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyString *s1 = dynamic_cast<RubyString *>(_self.object),
+	     *s2 = dynamic_cast<RubyString *>(_args[0].object);
+  return RubyValue::from_object(_e.gc.track(new RubyString(_e, s1->string_value + s2->string_value)));
 }
 
 RubyValue string_reverse(RubyEnvironment &_e, RubyValue _self)

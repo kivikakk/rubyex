@@ -64,7 +64,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 	// which Context::get_method can rely on, and which we can use directly here if is_target == true
 	RubyMethod *method = is_target ? target.get_method(name, e) : context->get_method(name);
 
-	last_value = method->call(e, is_target ? target : context->get_context(), arguments);	// boom
+	last_value = method->call(e, is_target ? target : context->binding->get_context(), arguments);	// boom
 	break;
       }
 
