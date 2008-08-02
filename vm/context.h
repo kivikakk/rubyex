@@ -21,6 +21,7 @@ class Context
 
     RubyEnvironment *get_environment() const;
     RubyValue entry_to_value(const Stack::StackEntry &) const;
+    RubyValue resolve_identifier(const std::string &) const;
 
     RubyMethod *get_method(const std::string &);
     void assign(const std::string &, RubyValue);

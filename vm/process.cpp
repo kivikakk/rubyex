@@ -26,9 +26,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
       case I_EXECUTE: {
 	type_t t = r.read_type();
 	switch (t) {
-	  // XXX: look in the local namespace - incl. if we're in a class/etc. (Kernel->Object methods, par example)
-	  case T_IDENTIFIER: /* XXX we favour local vars over funcs; local var by `a', func called by `a()' */
-	      std::cerr << "EXECUTE identifier " << r.read_string() << std::endl; break;
+	  case T_IDENTIFIER: last_value = context->resolve_identifier(r.read_string()); break;
 	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
 	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;

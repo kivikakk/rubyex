@@ -58,9 +58,9 @@ RubyValue kernel_puts(RubyEnvironment &_e, RubyValue _self, const std::vector<Ru
 
     RubyValue result_val; RubyString *result;
 
-    if (it->object->get_class() == _e.String)
+    if (it->type == RubyValue::RV_OBJECT && it->object->get_class() == _e.String)
       result_val = *it;
-    else if (it->object == _e.NIL.object)
+    else if (it->type == RubyValue::RV_OBJECT && it->object == _e.NIL.object)
       result_val = it->call(_e, "inspect");
     else
       result_val = it->call(_e, "to_s");

@@ -27,22 +27,7 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
     case Stack::SE_IDENTIFIER: {
       std::string id = *_entry.identifier;
       delete _entry.identifier;
-      
-      // first look at locals.
-      {
-	std::map<std::string, RubyValue>::const_iterator iter = binding->locals.find(id);
-	if (iter != binding->locals.end())
-	  return iter->second;
-      }
-
-      // how about environment globals?
-      try {
-	return RubyValue::from_object(environment->get_global_by_name(id));
-      } catch (std::exception)
-      { }
-
-      std::cerr << "Context::entry_to_value failing" << std::endl;
-      throw;
+      return resolve_identifier(id);
     }
 
     case Stack::SE_SYMBOL: {
@@ -57,6 +42,27 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
       std::cerr << ".. error?" << std::endl;
       throw;
   }
+  throw;
+}
+
+RubyValue Context::resolve_identifier(const std::string &_identifier) const
+{
+  // first look at locals.
+  {
+    std::map<std::string, RubyValue>::const_iterator iter = binding->locals.find(_identifier);
+    if (iter != binding->locals.end())
+      return iter->second;
+  }
+
+  // how about environment globals? (<< XXX seems conceptually incorrect)
+  try {
+    return RubyValue::from_object(environment->get_global_by_name(_identifier));
+  } catch (std::exception)
+  { }
+
+  // methods
+
+  std::cerr << "Context::entry_to_value failing" << std::endl;
   throw;
 }
 
