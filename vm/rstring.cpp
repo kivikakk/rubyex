@@ -44,7 +44,16 @@ RubyValue string_inspect(RubyEnvironment &_e, RubyValue _self)
   o << '"' << std::hex;
   for (unsigned int i = 0; i < v.length(); ++i)
     if (v[i] < 0x20 || v[i] > 0x7e)
-      o << "\\x" << (unsigned int)v[i];
+      switch (v[i]) {
+	case 0x7: o << "\\a"; break;
+	case 0x8: o << "\\b"; break;
+	case 0x9: o << "\\t"; break;
+	case 0xa: o << "\\n"; break;
+	case 0xb: o << "\\v"; break;
+	case 0xc: o << "\\f"; break;
+	case 0xd: o << "\\r"; break;
+	default: o << "\\x" << (unsigned int)v[i]; break;
+      }
     else if (v[i] == '"')
       o << "\\\"";
     else if (v[i] == '\\')
