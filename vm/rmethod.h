@@ -6,8 +6,8 @@
 #include "binding.h"
 #include "rvalue.h"
 
-typedef RubyValue (*RCMethodNoArgs)(Binding &, RubyValue);
-typedef RubyValue (*RCMethodArgs)(Binding &, RubyValue, const std::vector<RubyValue> &);
+typedef RubyValue (*RCMethodNoArgs)(linked_ptr<Binding> &, RubyValue);
+typedef RubyValue (*RCMethodArgs)(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 class RubyMethod
 {
@@ -15,8 +15,8 @@ class RubyMethod
     static RubyMethod *Create(RCMethodNoArgs);
     static RubyMethod *Create(RCMethodArgs, int);
 
-    virtual RubyValue call(Binding &, RubyValue);
-    virtual RubyValue call(Binding &, RubyValue, const std::vector<RubyValue> &) = 0;
+    virtual RubyValue call(linked_ptr<Binding> &, RubyValue);
+    virtual RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &) = 0;
 };
 
 class RubyMethodNoArgs : public RubyMethod
@@ -24,8 +24,8 @@ class RubyMethodNoArgs : public RubyMethod
   public:
     RubyMethodNoArgs(RCMethodNoArgs);
 
-    RubyValue call(Binding &, RubyValue);
-    RubyValue call(Binding &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
   protected:
     RCMethodNoArgs function;
@@ -36,7 +36,7 @@ class RubyMethodArgs : public RubyMethod
   public:
     RubyMethodArgs(RCMethodArgs, int);
 
-    RubyValue call(Binding &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
   protected:
     RCMethodArgs function;
@@ -48,7 +48,7 @@ class RubyBytecodeMethod : public RubyMethod
   public:
     RubyBytecodeMethod(int);
 
-    RubyValue call(Binding &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
     std::string data;
 

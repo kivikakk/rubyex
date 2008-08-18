@@ -5,12 +5,12 @@
 #include "rstring.h"
 #include "eval_hook.h"
 
-RubyValue kernel_binding(Binding &, RubyValue);
-RubyValue kernel_eval(Binding &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_binding(linked_ptr<Binding> &, RubyValue);
+RubyValue kernel_eval(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
-RubyValue kernel_print(Binding &, RubyValue, const std::vector<RubyValue> &);
-RubyValue kernel_puts(Binding &, RubyValue, const std::vector<RubyValue> &);
-RubyValue kernel_p(Binding &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_print(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_puts(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_p(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
@@ -26,41 +26,41 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel = rb_mKernel;
 }
 
-RubyValue kernel_binding(Binding &_b, RubyValue _self)
+RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return _b.environment.NIL;
+  return _b->environment.NIL;
 }
 
-RubyValue kernel_eval(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyValue first = _args[0];
-  if (first.object->get_class() != _b.environment.String) {
+  if (first.object->get_class() != _b->environment.String) {
     std::cerr << "Kernel::eval: tried to eval non-String" << std::endl;
     throw;
   }
-  return eval_hook(_b.environment, /* XXX */ NULL, _self, dynamic_cast<RubyString *>(first.object)->string_value);
+  return eval_hook(_b->environment, _b, _self, dynamic_cast<RubyString *>(first.object)->string_value);
 }
 
-RubyValue kernel_print(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_print(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
-    if (it->object->get_class() == _b.environment.String)	// PlaysForSure
+    if (it->object->get_class() == _b->environment.String)	// PlaysForSure
       std::cout << dynamic_cast<RubyString *>(it->object)->string_value;
   }
 
-  return _b.environment.NIL;
+  return _b->environment.NIL;
 }
 
-RubyValue kernel_puts(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_puts(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     std::vector<RubyValue> to_print;
 
     RubyValue result_val; RubyString *result;
 
-    if (it->type == RubyValue::RV_OBJECT && it->object->get_class() == _b.environment.String)
+    if (it->type == RubyValue::RV_OBJECT && it->object->get_class() == _b->environment.String)
       result_val = *it;
-    else if (it->type == RubyValue::RV_OBJECT && it->object == _b.environment.NIL.object)
+    else if (it->type == RubyValue::RV_OBJECT && it->object == _b->environment.NIL.object)
       result_val = it->call(_b, "inspect");
     else
       result_val = it->call(_b, "to_s");
@@ -74,10 +74,10 @@ RubyValue kernel_puts(Binding &_b, RubyValue _self, const std::vector<RubyValue>
     to_print.push_back(result_val);
     kernel_print(_b, _self, to_print);
   }
-  return _b.environment.NIL;
+  return _b->environment.NIL;
 }
 
-RubyValue kernel_p(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_p(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     RubyValue r = it->call(_b, "inspect");
@@ -85,6 +85,6 @@ RubyValue kernel_p(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_
     kernel_puts(_b, _self, rca);
   }
 
-  return _b.environment.NIL;
+  return _b->environment.NIL;
 }
 

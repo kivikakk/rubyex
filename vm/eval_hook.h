@@ -3,9 +3,10 @@
 
 #include "renvironment.h"
 #include "rvalue.h"
-#include "context.h"
+#include "linked_ptr.h"
+#include "binding.h"
 
-RubyValue eval_hook(RubyEnvironment &, Context *, RubyValue, const std::string &);
+RubyValue eval_hook(RubyEnvironment &, linked_ptr<Binding>, RubyValue, const std::string &);
 
 #endif
 

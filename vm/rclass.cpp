@@ -51,7 +51,7 @@ RubyClass::RubyClass(RubyEnvironment &_e, LazyClass *_superklass, const std::str
 }
     
 
-RubyValue class_new(Binding &, RubyValue, const std::vector<RubyValue> &);
+RubyValue class_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyClassEI::init(RubyEnvironment &_e)
 {
@@ -62,7 +62,7 @@ void RubyClassEI::init(RubyEnvironment &_e)
   _e.Class = rb_cClass;
 }
 
-RubyValue class_new(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyClass *s = dynamic_cast<RubyClass *>(_self.object);
   RubyObject *i = s->new_instance();

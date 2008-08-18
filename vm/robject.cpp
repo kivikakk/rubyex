@@ -41,8 +41,8 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
   return metaklass;
 }
 
-RubyValue object_inspect_to_s(Binding &, RubyValue);
-RubyValue object_send(Binding &, RubyValue, const std::vector<RubyValue> &);
+RubyValue object_inspect_to_s(linked_ptr<Binding> &, RubyValue);
+RubyValue object_send(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
@@ -57,25 +57,25 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   _e.Object = rb_cObject;
 }
 
-RubyValue object_inspect_to_s(Binding &_b, RubyValue _self)
+RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   try {
-    return RubyValue::from_object(new RubyString(_b.environment, _b.environment.get_name_by_global(_self.object)));
+    return RubyValue::from_object(new RubyString(_b->environment, _b->environment.get_name_by_global(_self.object)));
   } catch (CannotFindGlobalError)
   { }
 
   std::ostringstream oss;
-  oss << "#<" << _self.get_class(_b.environment)->get_name() << ":";
+  oss << "#<" << _self.get_class(_b->environment)->get_name() << ":";
   oss << std::dec << _self.object;
   oss << ">";
 
-  return RubyValue::from_object(new RubyString(_b.environment, oss.str()));
+  return RubyValue::from_object(new RubyString(_b->environment, oss.str()));
 }
 
-RubyValue object_send(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyValue a = _args[0];
-  if (!(a.type == RubyValue::RV_SYMBOL) && !(a.type == RubyValue::RV_OBJECT && (a.object->get_class() == _b.environment.String))) {
+  if (!(a.type == RubyValue::RV_SYMBOL) && !(a.type == RubyValue::RV_OBJECT && (a.object->get_class() == _b->environment.String))) {
     std::cerr << "Object#send: not given a Symbol or String" << std::endl;
     throw;	// boom. XXX TypeError
   }

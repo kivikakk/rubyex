@@ -2,7 +2,7 @@
 #include <iostream>
 #include <exception>
 
-Context::Context(RubyEnvironment &_environment, RubyValue _context): binding(new Binding(_environment, _context))
+Context::Context(RubyEnvironment &_environment, RubyValue _context): binding(linked_ptr<Binding>(new Binding(_environment, _context)))
 { }
 
 Context::Context(linked_ptr<Binding> &_binding): binding(_binding)

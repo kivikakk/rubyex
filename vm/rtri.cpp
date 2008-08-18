@@ -6,10 +6,10 @@
 #include "rmethod.h"
 #include "rstring.h"
 
-RubyValue true_inspect(Binding &, RubyValue);
-RubyValue false_inspect(Binding &, RubyValue);
-RubyValue nil_inspect(Binding &, RubyValue);
-RubyValue nil_to_s(Binding &, RubyValue);
+RubyValue true_inspect(linked_ptr<Binding> &, RubyValue);
+RubyValue false_inspect(linked_ptr<Binding> &, RubyValue);
+RubyValue nil_inspect(linked_ptr<Binding> &, RubyValue);
+RubyValue nil_to_s(linked_ptr<Binding> &, RubyValue);
 
 void RubyTriEI::init(RubyEnvironment &_e)
 {
@@ -35,15 +35,15 @@ void RubyTriEI::init(RubyEnvironment &_e)
   _e.NIL = RubyValue::from_object(rb_oNil);
 }
 
-RubyValue true_inspect(Binding &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b.environment, "true")); }
+RubyValue true_inspect(linked_ptr<Binding> &_b, RubyValue)
+{ return RubyValue::from_object(new RubyString(_b->environment, "true")); }
 
-RubyValue false_inspect(Binding &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b.environment, "false")); }
+RubyValue false_inspect(linked_ptr<Binding> &_b, RubyValue)
+{ return RubyValue::from_object(new RubyString(_b->environment, "false")); }
 
-RubyValue nil_inspect(Binding &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b.environment, "nil")); }
+RubyValue nil_inspect(linked_ptr<Binding> &_b, RubyValue)
+{ return RubyValue::from_object(new RubyString(_b->environment, "nil")); }
 
-RubyValue nil_to_s(Binding &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b.environment, "")); }
+RubyValue nil_to_s(linked_ptr<Binding> &_b, RubyValue)
+{ return RubyValue::from_object(new RubyString(_b->environment, "")); }
 

@@ -4,10 +4,11 @@
 #include "parser/ast.h"
 #include "parser/main.h"
 #include "parser/global.h"
+#include "vm/binding.h"
 #include <string>
 #include <sstream>
 
-RubyValue eval_hook(RubyEnvironment &_e, Context *_context, RubyValue _self, const std::string &_code)
+RubyValue eval_hook(RubyEnvironment &_e, linked_ptr<Binding> _binding, RubyValue _self, const std::string &_code)
 {
   std::ostringstream bytecode;
   Program p(bytecode);
@@ -22,6 +23,7 @@ RubyValue eval_hook(RubyEnvironment &_e, Context *_context, RubyValue _self, con
   std::istringstream iss(bytecode.str());
   Reader reader(iss);
 
-  return process(_e, reader, _context);
+  Context *c = new Context(_binding);
+  return process(_e, reader, c);
 }
 

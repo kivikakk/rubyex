@@ -4,12 +4,13 @@
 #include <string>
 #include <vector>
 #include "rsymbol.h"
+#include "linked_ptr.h"
 
-class Binding;
 class RubyEnvironment;
 class RubyObject;
 class RubyMethod;
 class RubyClass;
+class Binding;
 
 class RubyValue
 {
@@ -23,11 +24,11 @@ class RubyValue
     RubyClass *get_class(RubyEnvironment &_e) const;
     RubyMethod *get_method(const std::string &, RubyEnvironment &) const;
 
-    RubyValue call(Binding &, const std::string &) const;
-    RubyValue call(Binding &, const std::string &, RubyValue) const;
-    RubyValue call(Binding &, const std::string &, RubyValue, RubyValue) const;
-    RubyValue call(Binding &, const std::string &, RubyValue, RubyValue, RubyValue) const;
-    RubyValue call(Binding &, const std::string &, const std::vector<RubyValue> &) const;
+    RubyValue call(linked_ptr<Binding> &, const std::string &) const;
+    RubyValue call(linked_ptr<Binding> &, const std::string &, RubyValue) const;
+    RubyValue call(linked_ptr<Binding> &, const std::string &, RubyValue, RubyValue) const;
+    RubyValue call(linked_ptr<Binding> &, const std::string &, RubyValue, RubyValue, RubyValue) const;
+    RubyValue call(linked_ptr<Binding> &, const std::string &, const std::vector<RubyValue> &) const;
 
     typedef enum
     {

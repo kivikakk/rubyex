@@ -7,10 +7,10 @@
 #include "rmethod.h"
 #include "rstring.h"
 
-RubyValue fixnum_add(Binding &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_multiply(Binding &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_inspect_to_s(Binding &, RubyValue);
-RubyValue fixnum_times(Binding &, RubyValue);
+RubyValue fixnum_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_multiply(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &, RubyValue);
+RubyValue fixnum_times(linked_ptr<Binding> &, RubyValue);
 
 void RubyNumericEI::init(RubyEnvironment &_e)
 {
@@ -31,26 +31,26 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   _e.add_class("Float", rb_cFloat);
 }
 
-RubyValue fixnum_add(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+RubyValue fixnum_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 {
   // XXX: typecheck `operand'
   return RubyValue::from_fixnum(_self.fixnum + _operand[0].fixnum); // XXX bignum
 }
 
-RubyValue fixnum_multiply(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+RubyValue fixnum_multiply(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 {
   // XXX: typecheck `operand'
   return RubyValue::from_fixnum(_self.fixnum * _operand[0].fixnum); // XXX bignum
 }
 
-RubyValue fixnum_inspect_to_s(Binding &_b, RubyValue _self)
+RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   std::ostringstream oss;
   oss << _self.fixnum;
-  return RubyValue::from_object(_b.environment.gc.track(new RubyString(_b.environment, oss.str())));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
 }
 
-RubyValue fixnum_times(Binding &_b, RubyValue _self)
+RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self)
 {
   for (int i = 0; i < _self.fixnum; ++i)
     /* XXX yield */ ;

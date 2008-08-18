@@ -51,7 +51,7 @@ int irb(int, char **)
 
     RubyValue result = process(e, reader, c);
     std::cout << "=> ";
-    RubyValue inspection = result.call(*c->binding, "inspect");
+    RubyValue inspection = result.call(c->binding, "inspect");
     std::cout << dynamic_cast<RubyString *>(inspection.object)->string_value
 	      << std::endl;
   }

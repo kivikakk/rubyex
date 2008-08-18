@@ -7,11 +7,11 @@
 #include "renvironment.h"
 #include "rmethod.h"
 
-RubyValue string_new(Binding &, RubyValue, const std::vector<RubyValue> &);
-RubyValue string_add(Binding &, RubyValue, const std::vector<RubyValue> &);
-RubyValue string_reverse(Binding &, RubyValue);
-RubyValue string_inspect(Binding &, RubyValue);
-RubyValue string_to_s(Binding &, RubyValue);
+RubyValue string_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue string_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue string_reverse(linked_ptr<Binding> &, RubyValue);
+RubyValue string_inspect(linked_ptr<Binding> &, RubyValue);
+RubyValue string_to_s(linked_ptr<Binding> &, RubyValue);
 
 void RubyStringEI::init(RubyEnvironment &_e)
 {
@@ -27,30 +27,30 @@ void RubyStringEI::init(RubyEnvironment &_e)
   _e.String = rb_cString;
 }
 
-RubyValue string_new(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   if (_args.size() == 0)
-    return RubyValue::from_object(new RubyString(_b.environment, ""));
+    return RubyValue::from_object(new RubyString(_b->environment, ""));
   else if (_args.size() == 1)
-    return RubyValue::from_object(new RubyString(_b.environment, dynamic_cast<RubyString *>(_args[0].object)->string_value));
+    return RubyValue::from_object(new RubyString(_b->environment, dynamic_cast<RubyString *>(_args[0].object)->string_value));
   
   throw std::exception();	// TODO: Throw a real exception (ArgumentError)
 }
 
-RubyValue string_add(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue string_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyString *s1 = dynamic_cast<RubyString *>(_self.object),
 	     *s2 = dynamic_cast<RubyString *>(_args[0].object);
-  return RubyValue::from_object(_b.environment.gc.track(new RubyString(_b.environment, s1->string_value + s2->string_value)));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, s1->string_value + s2->string_value)));
 }
 
-RubyValue string_reverse(Binding &_b, RubyValue _self)
+RubyValue string_reverse(linked_ptr<Binding> &_b, RubyValue _self)
 {
   RubyString *r = dynamic_cast<RubyString *>(_self.object);
-  return RubyValue::from_object(_b.environment.gc.track(new RubyString(_b.environment, std::string(r->string_value.rbegin(), r->string_value.rend()))));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, std::string(r->string_value.rbegin(), r->string_value.rend()))));
 }
 
-RubyValue string_inspect(Binding &_b, RubyValue _self)
+RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
 {
   std::string &v = dynamic_cast<RubyString *>(_self.object)->string_value;
   std::ostringstream o;
@@ -74,10 +74,10 @@ RubyValue string_inspect(Binding &_b, RubyValue _self)
     else
       o << (char)v[i];
   o << '"';
-  return RubyValue::from_object(_b.environment.gc.track(new RubyString(_b.environment, o.str())));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, o.str())));
 }
 
-RubyValue string_to_s(Binding &_b, RubyValue _self)
+RubyValue string_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   return _self;
 }
