@@ -1,5 +1,5 @@
-#ifndef __STLEXT_H__
-#define __STLEXT_H__
+#ifndef STLEXT_H
+#define STLEXT_H
 
 #include <functional>
 
