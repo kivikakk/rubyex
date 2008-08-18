@@ -5,7 +5,13 @@ template <class X>
 class linked_ptr
 {
   public:
-    template <class Y> friend class linked_ptr<Y>;
+#ifndef NO_MEMBER_TEMPLATES
+#  define TEMPLATE_FUNCTION template <class Y>
+    TEMPLATE_FUNCTION friend class linked_ptr<Y>;
+#else
+#  define TEMPLATE FUNCTION
+    typedef X Y;
+#endif
 
     typedef X element_type;
 
@@ -34,6 +40,7 @@ class linked_ptr
       return *this;
     }
 
+#ifndef NO_MEMBER_TEMPLATES
     template <class Y> friend class linked_ptr<Y>;
     template <class Y> linked_ptr(const linked_ptr<Y> &r) throw()
     {
@@ -48,6 +55,7 @@ class linked_ptr
 
       return *this;
     }
+#endif
 
     X &operator*() const throw()	{ return *ptr; }
     X *operator->() const throw()	{ return ptr; }
@@ -63,27 +71,29 @@ class linked_ptr
     {
       ptr = r.ptr;
       next = r.next;
-      next.prev = this;
+      next->prev = this;
       prev = &r;
       r.next = this;
     }
 
+#ifndef NO_MEMBER_TEMPLATES
     template <class Y> void acquire(const linked_ptr<Y> &r) throw()
     {
       ptr = r.ptr;
       next = r.next;
-      next.prev = this;
+      next->prev = this;
       prev = &r;
       r.next = this;
     }
+#endif
 
     void release()
     {
       if (unique())
 	delete ptr;
       else {
-	prev.next = next;
-	next.prev = prev;
+	prev->next = next;
+	next->prev = prev;
 	next = prev = 0;
       }
       ptr = 0;

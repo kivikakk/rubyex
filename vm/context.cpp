@@ -2,17 +2,11 @@
 #include <iostream>
 #include <exception>
 
-Context::Context(RubyEnvironment *_environment, RubyValue _context): binding(new Binding(_context)), environment(_environment), outside_binding(false)
+Context::Context(RubyEnvironment *_environment, RubyValue _context): binding(new Binding(_context)), environment(_environment)
 { }
 
-Context::Context(RubyEnvironment *_environment, RubyValue _context, Binding *_binding): binding(_binding), environment(_environment), outside_binding(true)
+Context::Context(RubyEnvironment *_environment, RubyValue _context, linked_ptr<Binding> &_binding): binding(_binding), environment(_environment)
 { }
-
-Context::~Context()
-{
-  if (!outside_binding)
-    delete binding;
-}
 
 RubyEnvironment *Context::get_environment() const
 {

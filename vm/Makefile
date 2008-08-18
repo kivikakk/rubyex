@@ -1,4 +1,4 @@
-CXXFLAGS := -I. -I../include -g -Wall
+CXXFLAGS := -I. -I../include -g -Wall -DNO_MEMBER_TEMPLATES
 LDFLAGS := 
 
 CPPS := $(wildcard *.cpp)
