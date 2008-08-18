@@ -21,7 +21,7 @@
 		  doing_symbol = false;
 		  BEGIN(dbstr);
 		}
-<dbstr>\"			{ /* all done */
+<dbstr>\"		{ /* all done */
 		  BEGIN(INITIAL);
 		  if (doing_symbol) {
 		    yylval.symbol = new SymbolExpr(string_buf);
@@ -32,11 +32,16 @@
 		  return STRING_LITERAL;
 		}
 <dbstr>\n	string_buf += '\n';
-<dbstr>\\n	string_buf += '\n';
-<dbstr>\\t	string_buf += '\t';
-<dbstr>\\r	string_buf += '\r';
+<dbstr>\\a	string_buf += '\a';
 <dbstr>\\b	string_buf += '\b';
+<dbstr>\\t	string_buf += '\t';
+<dbstr>\\n	string_buf += '\n';
+<dbstr>\\v	string_buf += '\v';
 <dbstr>\\f	string_buf += '\f';
+<dbstr>\\r	string_buf += '\r';
+
+<dbstr>\\x[0-9a-fA-F]{1,2}	string_buf += (char)strtol(yytext + 2, NULL, 16);
+<dbstr>\\[0-7]{1,3}		string_buf += (char)strtol(yytext + 1, NULL, 8);
 
 <dbstr>\\(.|\n)	string_buf += yytext[1];
 
