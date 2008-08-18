@@ -9,6 +9,7 @@ class Binding
 {
   public:
     Binding(RubyValue);
+    ~Binding();
 
     RubyValue get_context() const;
 

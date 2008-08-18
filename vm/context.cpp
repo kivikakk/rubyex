@@ -48,7 +48,7 @@ RubyValue Context::resolve_identifier(const std::string &_identifier) const
       return iter->second;
   }
 
-  // how about environment globals? (<< XXX seems conceptually incorrect)
+  // how about environment globals? (<< XXX seems conceptually incorrect - should they be exposed any other way, logically?)
   try {
     return RubyValue::from_object(environment->get_global_by_name(_identifier));
   } catch (std::exception)
