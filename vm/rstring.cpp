@@ -41,7 +41,7 @@ RubyValue string_inspect(RubyEnvironment &_e, RubyValue _self)
 {
   std::string &v = dynamic_cast<RubyString *>(_self.object)->string_value;
   std::ostringstream o;
-  o << '"' << std::hex;
+  o << '"';
   for (unsigned int i = 0; i < v.length(); ++i)
     if (v[i] < 0x20 || v[i] > 0x7e)
       switch (v[i]) {
@@ -52,7 +52,7 @@ RubyValue string_inspect(RubyEnvironment &_e, RubyValue _self)
 	case 0xb: o << "\\v"; break;
 	case 0xc: o << "\\f"; break;
 	case 0xd: o << "\\r"; break;
-	default: o << "\\x" << (unsigned int)v[i]; break;
+	default: o << "\\" << std::oct << std::setiosflags(std::ios::right) << std::setfill('0') << std::setw(3) << (unsigned int)(unsigned char)v[i]; break;
       }
     else if (v[i] == '"')
       o << "\\\"";
