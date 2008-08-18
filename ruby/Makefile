@@ -12,3 +12,7 @@ out/%.o: %.cpp
 
 clean:
 	-rm out/*.o ruby
+
+relink:
+	-rm ruby
+	@make ruby
