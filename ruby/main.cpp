@@ -2,6 +2,7 @@
 #include "irb.h"
 #include <string>
 #include <list>
+#include <algorithm>
 
 bool omit_errors = false; 	// required for parser.
 
