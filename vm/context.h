@@ -18,9 +18,8 @@ class Context
 {
   public:
     Context(RubyEnvironment *, RubyValue);
-    Context(RubyEnvironment *, RubyValue, linked_ptr<Binding> &);
+    Context(linked_ptr<Binding> &);
 
-    RubyEnvironment *get_environment() const;
     RubyValue entry_to_value(const Stack::StackEntry &) const;
     RubyValue resolve_identifier(const std::string &) const;
 
@@ -28,9 +27,6 @@ class Context
     void assign(const std::string &, RubyValue);
 
     linked_ptr<Binding> binding;
-    
-  protected:
-    RubyEnvironment *environment;
 };
 
 #endif
