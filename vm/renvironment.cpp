@@ -4,7 +4,10 @@
 #include "rkernel.h"
 #include "rbinding.h"
 #include "rtri.h"
+#include "stlext.h"
 #include <iostream>
+#include <algorithm>
+#include <functional>
 
 RubyEnvironment::RubyEnvironment()
 {
@@ -69,6 +72,22 @@ RubyModule *RubyEnvironment::get_module_by_name(const std::string &_name) const
   }
 
   return modules.find(_name)->second;
+}
+
+const std::string &RubyEnvironment::get_name_by_global(RubyObject *_global) const
+{
+  std::map<std::string, RubyClass *>::const_iterator cls =
+    std::find_if(classes.begin(), classes.end(), second_equal_to<std::map<std::string, RubyObject *>::value_type>(_global));
+  if (cls != classes.end())
+    return cls->first;
+
+  std::map<std::string, RubyModule *>::const_iterator mod =
+    std::find_if(modules.begin(), modules.end(), second_equal_to<std::map<std::string, RubyObject *>::value_type>(_global));
+  if (mod != modules.end())
+    return mod->first;
+
+  throw CannotFindGlobalError();
+// select2nd<std::map<std::string, RubyClass *>::value_type>()
 }
 
 void RubyEnvironment::add_class(const std::string &_name, RubyClass *_klass)

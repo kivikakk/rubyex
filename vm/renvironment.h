@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <exception>
 #include "rclass.h"
 #include "rmodule.h"
 #include "gc.h"
@@ -22,6 +23,8 @@ class RubyEnvironment
     bool module_exists(const std::string &) const;
     RubyModule *get_module_by_name(const std::string &) const;
 
+    const std::string &get_name_by_global(RubyObject *) const;
+
     RubySymbol *get_symbol(const std::string &);
 
     RubyClass *Object, *Module, *Class, *Binding, *Symbol, *Fixnum, *String;
@@ -37,6 +40,9 @@ class RubyEnvironment
     std::map<std::string, RubyModule *> modules;
     std::map<std::string, RubySymbol *> symbols;
 };
+
+class CannotFindGlobalError : public std::exception
+{ };
 
 #endif
 

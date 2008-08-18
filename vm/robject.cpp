@@ -59,6 +59,11 @@ void RubyObjectEI::init(RubyEnvironment &_e)
 
 RubyValue object_inspect_to_s(RubyEnvironment &_e, RubyValue _self)
 {
+  try {
+    return RubyValue::from_object(new RubyString(_e, _e.get_name_by_global(_self.object)));
+  } catch (CannotFindGlobalError)
+  { }
+
   std::ostringstream oss;
   oss << "#<" << _self.get_class(_e)->get_name() << ":";
   oss << std::dec << _self.object;
