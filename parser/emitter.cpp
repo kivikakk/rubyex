@@ -1,5 +1,6 @@
 #include "emitter.h"
 #include <iostream>
+#include <typeinfo>
 #include <sstream>
 
 void Emitter::push(std::ostream &) const

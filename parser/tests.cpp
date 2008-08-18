@@ -240,6 +240,7 @@ void _assignment()
 
 void _method_call()
 {
+  // This fails for now, but should work (`def' shouldn't be interpreted as a func def)
   BEGIN(p_regular, "abc.def", 1);
   $(FuncCallExpr, regular, p_regular[0]);
   $(IdentifierExpr, lval, regular->target);

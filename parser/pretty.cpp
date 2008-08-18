@@ -1,4 +1,5 @@
 #include "pretty.h"
+#include <typeinfo>
 #include <iostream>
 
 PrettyPrint::~PrettyPrint() { }
