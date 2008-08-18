@@ -87,7 +87,6 @@ const std::string &RubyEnvironment::get_name_by_global(RubyObject *_global) cons
     return mod->first;
 
   throw CannotFindGlobalError();
-// select2nd<std::map<std::string, RubyClass *>::value_type>()
 }
 
 void RubyEnvironment::add_class(const std::string &_name, RubyClass *_klass)

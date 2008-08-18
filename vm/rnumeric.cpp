@@ -16,7 +16,7 @@ void RubyNumericEI::init(RubyEnvironment &_e)
 {
   // TODO: the whole Numeric, Fixnum, Bignum, etc. class hierarchy.
   RubyClass *rb_cFixnum = RubyClass::create_class(_e, "Fixnum");
-  
+  // TODO: undefine Fixnum's `new'?
   rb_cFixnum->add_method("+", RubyMethod::Create(fixnum_add, 1));
   rb_cFixnum->add_method("*", RubyMethod::Create(fixnum_multiply, 1));
 

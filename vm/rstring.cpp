@@ -7,6 +7,7 @@
 #include "renvironment.h"
 #include "rmethod.h"
 
+RubyValue string_new(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_add(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_reverse(RubyEnvironment &, RubyValue);
 RubyValue string_inspect(RubyEnvironment &, RubyValue);
@@ -15,6 +16,8 @@ RubyValue string_to_s(RubyEnvironment &, RubyValue);
 void RubyStringEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cString = RubyClass::create_class(_e, "String");
+  rb_cString->add_metaclass_method(_e, "new", RubyMethod::Create(string_new, ARGS_ARBITRARY));
+
   rb_cString->add_method("+", RubyMethod::Create(string_add, 1));
   rb_cString->add_method("reverse", RubyMethod::Create(string_reverse));
   rb_cString->add_method("inspect", RubyMethod::Create(string_inspect));
@@ -22,6 +25,16 @@ void RubyStringEI::init(RubyEnvironment &_e)
 
   _e.add_class("String", rb_cString);
   _e.String = rb_cString;
+}
+
+RubyValue string_new(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  if (_args.size() == 0)
+    return RubyValue::from_object(new RubyString(_e, ""));
+  else if (_args.size() == 1)
+    return RubyValue::from_object(new RubyString(_e, dynamic_cast<RubyString *>(_args[0].object)->string_value));
+  
+  throw std::exception();	// TODO: Throw a real exception (ArgumentError)
 }
 
 RubyValue string_add(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
