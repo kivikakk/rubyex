@@ -1,6 +1,8 @@
 #ifndef LINKED_PTR_H
 #define LINKED_PTR_H
 
+// Adapted from http://ootips.org/yonat/4dev/linked_ptr.h. Thanks! :)
+
 template <class X>
 class linked_ptr
 {
