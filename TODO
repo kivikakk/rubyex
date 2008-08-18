@@ -1,3 +1,14 @@
 Now that we have some form of `eval', work on implementing `irb' in the subset of Ruby that rx understands.
 That'll require stdio, function definitions for sure (more control structures?), and ultimately _blocks_.
 We have closures now, though, so it should be a piece of cake.
+
+This is also a TODO bug:
+celtic@sohma:~/git/rubyex/ruby master$ ./ruby -irb
+Binding()
+rxi(main):001:0> 3; 2
+=> 2
+rxi(main):002:0> a = Class.new.new; 3
+=> 3
+rxi(main):003:0> p a
+Segmentation fault (core dumped)
+celtic@sohma:~/git/rubyex/ruby master$
