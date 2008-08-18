@@ -9,16 +9,12 @@
 class Binding
 {
   public:
-    Binding(RubyEnvironment *, RubyValue);
+    Binding(RubyEnvironment &, RubyValue);
     ~Binding();
-
-    RubyEnvironment *get_environment() const;
-    RubyValue get_context() const;
 
     std::map<std::string, RubyValue> locals;
 
-  protected:
-    RubyEnvironment *environment;
+    RubyEnvironment &environment;
     RubyValue context;
 };
 

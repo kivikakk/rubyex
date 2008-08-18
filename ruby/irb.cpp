@@ -24,7 +24,7 @@ int irb(int, char **)
   pb = &p;
 
   RubyEnvironment e;
-  Context *c = new Context(&e, RubyValue::from_object(e.main));
+  Context *c = new Context(e, RubyValue::from_object(e.main));
 
   line_count = 0;
   while (true) {
@@ -51,7 +51,7 @@ int irb(int, char **)
 
     RubyValue result = process(e, reader, c);
     std::cout << "=> ";
-    RubyValue inspection = result.call(e, "inspect");
+    RubyValue inspection = result.call(*c->binding, "inspect");
     std::cout << dynamic_cast<RubyString *>(inspection.object)->string_value
 	      << std::endl;
   }

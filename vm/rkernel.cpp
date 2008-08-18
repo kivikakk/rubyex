@@ -5,12 +5,12 @@
 #include "rstring.h"
 #include "eval_hook.h"
 
-RubyValue kernel_binding(RubyEnvironment &, RubyValue);
-RubyValue kernel_eval(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_binding(Binding &, RubyValue);
+RubyValue kernel_eval(Binding &, RubyValue, const std::vector<RubyValue> &);
 
-RubyValue kernel_print(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
-RubyValue kernel_puts(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
-RubyValue kernel_p(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_print(Binding &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_puts(Binding &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_p(Binding &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
@@ -26,44 +26,44 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel = rb_mKernel;
 }
 
-RubyValue kernel_binding(RubyEnvironment &_e, RubyValue _self)
+RubyValue kernel_binding(Binding &_b, RubyValue _self)
 {
-  return _e.NIL;
+  return _b.environment.NIL;
 }
 
-RubyValue kernel_eval(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_eval(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyValue first = _args[0];
-  if (first.object->get_class() != _e.String) {
+  if (first.object->get_class() != _b.environment.String) {
     std::cerr << "Kernel::eval: tried to eval non-String" << std::endl;
     throw;
   }
-  return eval_hook(_e, /* XXX */ NULL, _self, dynamic_cast<RubyString *>(first.object)->string_value);
+  return eval_hook(_b.environment, /* XXX */ NULL, _self, dynamic_cast<RubyString *>(first.object)->string_value);
 }
 
-RubyValue kernel_print(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_print(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
-    if (it->object->get_class() == _e.String)	// PlaysForSure
+    if (it->object->get_class() == _b.environment.String)	// PlaysForSure
       std::cout << dynamic_cast<RubyString *>(it->object)->string_value;
   }
 
-  return _e.NIL;
+  return _b.environment.NIL;
 }
 
-RubyValue kernel_puts(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_puts(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     std::vector<RubyValue> to_print;
 
     RubyValue result_val; RubyString *result;
 
-    if (it->type == RubyValue::RV_OBJECT && it->object->get_class() == _e.String)
+    if (it->type == RubyValue::RV_OBJECT && it->object->get_class() == _b.environment.String)
       result_val = *it;
-    else if (it->type == RubyValue::RV_OBJECT && it->object == _e.NIL.object)
-      result_val = it->call(_e, "inspect");
+    else if (it->type == RubyValue::RV_OBJECT && it->object == _b.environment.NIL.object)
+      result_val = it->call(_b, "inspect");
     else
-      result_val = it->call(_e, "to_s");
+      result_val = it->call(_b, "to_s");
 
     result = dynamic_cast<RubyString *>(result_val.object);
 
@@ -72,19 +72,19 @@ RubyValue kernel_puts(RubyEnvironment &_e, RubyValue _self, const std::vector<Ru
       result->string_value += "\n";
 
     to_print.push_back(result_val);
-    kernel_print(_e, _self, to_print);
+    kernel_print(_b, _self, to_print);
   }
-  return _e.NIL;
+  return _b.environment.NIL;
 }
 
-RubyValue kernel_p(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue kernel_p(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
-    RubyValue r = it->call(_e, "inspect");
+    RubyValue r = it->call(_b, "inspect");
     std::vector<RubyValue> rca; rca.push_back(r);
-    kernel_puts(_e, _self, rca);
+    kernel_puts(_b, _self, rca);
   }
 
-  return _e.NIL;
+  return _b.environment.NIL;
 }
 

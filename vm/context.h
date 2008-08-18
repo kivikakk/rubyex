@@ -17,7 +17,7 @@
 class Context
 {
   public:
-    Context(RubyEnvironment *, RubyValue);
+    Context(RubyEnvironment &, RubyValue);
     Context(linked_ptr<Binding> &);
 
     RubyValue entry_to_value(const Stack::StackEntry &) const;

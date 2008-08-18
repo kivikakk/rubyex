@@ -2,7 +2,7 @@
 #include <iostream>
 #include <exception>
 
-Context::Context(RubyEnvironment *_environment, RubyValue _context): binding(new Binding(_environment, _context))
+Context::Context(RubyEnvironment &_environment, RubyValue _context): binding(new Binding(_environment, _context))
 { }
 
 Context::Context(linked_ptr<Binding> &_binding): binding(_binding)
@@ -22,7 +22,7 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
     case Stack::SE_SYMBOL: {
       std::string symbol = *_entry.symbol;
       delete _entry.symbol;
-      return RubyValue::from_symbol(binding->get_environment()->get_symbol(symbol));
+      return RubyValue::from_symbol(binding->environment.get_symbol(symbol));
     }
 
     case Stack::SE_INTEGER: return RubyValue::from_fixnum(_entry.integer);
@@ -45,7 +45,7 @@ RubyValue Context::resolve_identifier(const std::string &_identifier) const
 
   // how about environment globals? (<< XXX seems conceptually incorrect - should they be exposed any other way, logically?)
   try {
-    return RubyValue::from_object(binding->get_environment()->get_global_by_name(_identifier));
+    return RubyValue::from_object(binding->environment.get_global_by_name(_identifier));
   } catch (std::exception)
   { }
 
@@ -57,7 +57,7 @@ RubyValue Context::resolve_identifier(const std::string &_identifier) const
 
 RubyMethod *Context::get_method(const std::string &_name)
 {
-  return binding->get_context().get_method(_name, *binding->get_environment());
+  return binding->context.get_method(_name, binding->environment);
 }
 
 void Context::assign(const std::string &_name, RubyValue _value)

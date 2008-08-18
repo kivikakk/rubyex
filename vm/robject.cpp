@@ -41,8 +41,8 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
   return metaklass;
 }
 
-RubyValue object_inspect_to_s(RubyEnvironment &, RubyValue);
-RubyValue object_send(RubyEnvironment &, RubyValue, const std::vector<RubyValue> &);
+RubyValue object_inspect_to_s(Binding &, RubyValue);
+RubyValue object_send(Binding &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
@@ -57,31 +57,31 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   _e.Object = rb_cObject;
 }
 
-RubyValue object_inspect_to_s(RubyEnvironment &_e, RubyValue _self)
+RubyValue object_inspect_to_s(Binding &_b, RubyValue _self)
 {
   try {
-    return RubyValue::from_object(new RubyString(_e, _e.get_name_by_global(_self.object)));
+    return RubyValue::from_object(new RubyString(_b.environment, _b.environment.get_name_by_global(_self.object)));
   } catch (CannotFindGlobalError)
   { }
 
   std::ostringstream oss;
-  oss << "#<" << _self.get_class(_e)->get_name() << ":";
+  oss << "#<" << _self.get_class(_b.environment)->get_name() << ":";
   oss << std::dec << _self.object;
   oss << ">";
 
-  return RubyValue::from_object(new RubyString(_e, oss.str()));
+  return RubyValue::from_object(new RubyString(_b.environment, oss.str()));
 }
 
-RubyValue object_send(RubyEnvironment &_e, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue object_send(Binding &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyValue a = _args[0];
-  if (!(a.type == RubyValue::RV_SYMBOL) && !(a.type == RubyValue::RV_OBJECT && (a.object->get_class() == _e.String))) {
+  if (!(a.type == RubyValue::RV_SYMBOL) && !(a.type == RubyValue::RV_OBJECT && (a.object->get_class() == _b.environment.String))) {
     std::cerr << "Object#send: not given a Symbol or String" << std::endl;
     throw;	// boom. XXX TypeError
   }
 
   std::string function_name = dynamic_cast<RubyString *>(_args[0].object)->string_value;
   std::vector<RubyValue> rest = std::vector<RubyValue>(_args.begin() + 1, _args.end());
-  return _self.call(_e, function_name, rest);
+  return _self.call(_b, function_name, rest);
 }
 

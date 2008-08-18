@@ -54,35 +54,35 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
   }
 }
 
-RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name) const
-{ return get_method(_name, _e)->call(_e, *this); }
+RubyValue RubyValue::call(Binding &_b, const std::string &_name) const
+{ return get_method(_name, _b.environment)->call(_b, *this); }
 
-RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, RubyValue _arg0) const
+RubyValue RubyValue::call(Binding &_b, const std::string &_name, RubyValue _arg0) const
 {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
-  return get_method(_name, _e)->call(_e, *this, args);
+  return get_method(_name, _b.environment)->call(_b, *this, args);
 }
-RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, RubyValue _arg0, RubyValue _arg1) const
+RubyValue RubyValue::call(Binding &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1) const
 {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
   args.push_back(_arg1);
-  return get_method(_name, _e)->call(_e, *this, args);
+  return get_method(_name, _b.environment)->call(_b, *this, args);
 }
 
-RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, RubyValue _arg0, RubyValue _arg1, RubyValue _arg2) const
+RubyValue RubyValue::call(Binding &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1, RubyValue _arg2) const
 {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
   args.push_back(_arg1);
   args.push_back(_arg2);
-  return get_method(_name, _e)->call(_e, *this, args);
+  return get_method(_name, _b.environment)->call(_b, *this, args);
 }
 
-RubyValue RubyValue::call(RubyEnvironment &_e, const std::string &_name, const std::vector<RubyValue> &_args) const
+RubyValue RubyValue::call(Binding &_b, const std::string &_name, const std::vector<RubyValue> &_args) const
 {
-  return get_method(_name, _e)->call(_e, *this, _args);
+  return get_method(_name, _b.environment)->call(_b, *this, _args);
 }
 
 
