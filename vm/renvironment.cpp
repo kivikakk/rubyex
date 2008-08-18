@@ -29,7 +29,7 @@ bool RubyEnvironment::global_exists(const std::string &_name) const
   return class_exists(_name) || module_exists(_name);
 }
 
-RubyObject *RubyEnvironment::get_global_by_name(const std::string &_name)
+RubyObject *RubyEnvironment::get_global_by_name(const std::string &_name) const
 {
   // XXX TODO what about constants?
   if (class_exists(_name))
@@ -46,14 +46,14 @@ bool RubyEnvironment::class_exists(const std::string &_name) const
   return (classes.find(_name) != classes.end());
 }
 
-RubyClass *RubyEnvironment::get_class_by_name(const std::string &_name)
+RubyClass *RubyEnvironment::get_class_by_name(const std::string &_name) const
 {
   if (!class_exists(_name)) {
     std::cerr << "ERROR: tried to get an inexistant class." << std::endl;
     throw std::exception();
   }
 
-  return classes[_name];
+  return classes.find(_name)->second;
 }
 
 bool RubyEnvironment::module_exists(const std::string &_name) const
@@ -61,14 +61,14 @@ bool RubyEnvironment::module_exists(const std::string &_name) const
   return (modules.find(_name) != modules.end());
 }
 
-RubyModule *RubyEnvironment::get_module_by_name(const std::string &_name)
+RubyModule *RubyEnvironment::get_module_by_name(const std::string &_name) const
 {
   if (!module_exists(_name)) {
     std::cerr << "ERROR: tried to get an inexistant module." << std::endl;
     throw std::exception();
   }
 
-  return modules[_name];
+  return modules.find(_name)->second;
 }
 
 void RubyEnvironment::add_class(const std::string &_name, RubyClass *_klass)

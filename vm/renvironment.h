@@ -16,11 +16,11 @@ class RubyEnvironment
     void add_module(const std::string &, RubyModule *);
 
     bool global_exists(const std::string &) const;
-    RubyObject *get_global_by_name(const std::string &);
+    RubyObject *get_global_by_name(const std::string &) const;
     bool class_exists(const std::string &) const;
-    RubyClass *get_class_by_name(const std::string &);
+    RubyClass *get_class_by_name(const std::string &) const;
     bool module_exists(const std::string &) const;
-    RubyModule *get_module_by_name(const std::string &);
+    RubyModule *get_module_by_name(const std::string &) const;
 
     RubySymbol *get_symbol(const std::string &);
 
