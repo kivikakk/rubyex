@@ -12,6 +12,7 @@ class Block
     Block();
 
     RubyValue call(linked_ptr<Binding> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue);
     RubyValue call(linked_ptr<Binding> &, const std::vector<RubyValue> &);
 
     std::string code;
