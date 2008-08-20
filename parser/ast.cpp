@@ -124,6 +124,20 @@ void StringLiteralExpr::push(std::ostream &o) const {
   emit_text(o, value);
 }
 
+void NilLiteralExpr::p() const {
+  std::cout << "nil";
+}
+
+void NilLiteralExpr::emit(std::ostream &o) const {
+  emit_instruction(o, I_EXECUTE);
+  emit_type(o, T_NIL_LITERAL);
+}
+
+void NilLiteralExpr::push(std::ostream &o) const {
+  emit_instruction(o, I_PUSH);
+  emit_type(o, T_NIL_LITERAL);
+}
+
 ArgListExpr::ArgListExpr(Expr *first) {
   this->args.push_back(first);
   // FuncCallExpr will be responsible for this->args' members later.

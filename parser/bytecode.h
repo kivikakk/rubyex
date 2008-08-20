@@ -9,6 +9,7 @@ typedef enum
   T_FLOATING_LITERAL	= 0x04,
   T_BOOLEAN_LITERAL	= 0x05,
   T_STRING_LITERAL	= 0x06,
+  T_NIL_LITERAL		= 0x07,
 
   T_BLOCK		= 0xf0
 } type_t;

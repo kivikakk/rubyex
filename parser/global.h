@@ -24,6 +24,7 @@ typedef union {
   IntegerLiteralExpr *integer_literal;
   FloatingLiteralExpr *floating_literal;
   BooleanLiteralExpr *boolean_literal;
+  NilLiteralExpr *nil_literal;
 
   IdentifierExpr *identifier;
   SymbolExpr *symbol;

@@ -26,6 +26,7 @@
 %token <integer_literal> INTEGER_LITERAL
 %token <floating_literal> FLOATING_LITERAL
 %token <boolean_literal> BOOLEAN_LITERAL
+%token <nil_literal> NIL_LITERAL
 
 %type <expr> line expr compiled_expr
 %type <block> block
@@ -163,5 +164,6 @@ literal:	STRING_LITERAL	{ $$ = $1; }
 	      |	INTEGER_LITERAL	{ $$ = $1; }
 	      | FLOATING_LITERAL	{ $$ = $1; }
 	      | BOOLEAN_LITERAL	{ $$ = $1; }
+	      | NIL_LITERAL	{ $$ = $1; }
 ;
 

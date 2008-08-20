@@ -32,6 +32,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: last_value = r.read_bool() ? e.TRUE : e.FALSE; break;
 	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(e, r.read_text()))); break;
+	  case T_NIL_LITERAL: last_value = e.NIL; break;
 	  default: std::cerr << "EXECUTE unknown_type(" << t << ")" << std::endl;
 	}
 	break;
@@ -111,6 +112,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE.object : e.FALSE.object); break;
 	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
+	  case T_NIL_LITERAL: s.push_object(e.NIL.object); break;
 	  case T_BLOCK: /* XXX complain */ std::cerr << "push a block?" << std::endl; break;
 	}
 	break;

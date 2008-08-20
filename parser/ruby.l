@@ -55,6 +55,7 @@ def		{ return DEF; }
 
 true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }
 false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_LITERAL; }
+nil		{ yylval.nil_literal = new NilLiteralExpr(); return NIL_LITERAL; }
 
 do[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return DO; }
 \{[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return '{'; }

@@ -72,6 +72,15 @@ TypedClassDefinition(FloatingLiteralExpr, double);
 TypedClassDefinition(BooleanLiteralExpr, bool);
 TypedClassDefinition(StringLiteralExpr, std::string);
 
+class NilLiteralExpr : public LiteralExpr
+{
+  public:
+    NilLiteralExpr() { }
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+};
+
 class ArgListExpr : public Expr
 {
   public:
