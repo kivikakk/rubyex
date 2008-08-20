@@ -3,11 +3,18 @@
 
 #include <vector>
 #include <string>
+#include "rvalue.h"
+#include "binding.h"
 
 class Block
 {
   public:
-    std::string data;
+    Block();
+
+    RubyValue call(linked_ptr<Binding> &);
+    RubyValue call(linked_ptr<Binding> &, const std::vector<RubyValue> &);
+
+    std::string code;
     std::vector<std::string> args;
 };
 

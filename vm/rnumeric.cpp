@@ -10,7 +10,7 @@
 RubyValue fixnum_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_multiply(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &, RubyValue);
-RubyValue fixnum_times(linked_ptr<Binding> &, RubyValue);
+RubyValue fixnum_times(linked_ptr<Binding> &, RubyValue, Block &);
 
 void RubyNumericEI::init(RubyEnvironment &_e)
 {
@@ -50,10 +50,10 @@ RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
 }
 
-RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self)
+RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
 {
   for (int i = 0; i < _self.fixnum; ++i)
-    /* XXX yield */ ;
+    _block.call(_b);
   return _self;
 }
 

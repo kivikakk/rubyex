@@ -86,7 +86,7 @@ class RubyBytecodeMethod : public RubyMethod
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
-    std::string data;
+    std::string code;
 
   protected:
     int args;
