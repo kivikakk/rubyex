@@ -61,7 +61,9 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 	// if we have a target, we need to be more direct
 	RubyMethod *method = is_target ? target.get_method(name, e) : context->get_method(name);
 
-	last_value = method->call(context->binding, is_target ? target : context->binding->context, arguments);	// boom
+	last_value = is_block ? 
+	  method->call(context->binding, is_target ? target : context->binding->context, arguments) :
+	  method->call(context->binding, is_target ? target : context->binding->context, arguments, block);	// boom
 	break;
       }
 

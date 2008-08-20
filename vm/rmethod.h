@@ -5,18 +5,38 @@
 #include <vector>
 #include "binding.h"
 #include "rvalue.h"
+#include "block.h"
 
+typedef RubyValue (*RCMethodBlockNoArgs)(linked_ptr<Binding> &, RubyValue, Block &);
 typedef RubyValue (*RCMethodNoArgs)(linked_ptr<Binding> &, RubyValue);
+typedef RubyValue (*RCMethodBlockArgs)(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 typedef RubyValue (*RCMethodArgs)(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 class RubyMethod
 {
   public:
+    static RubyMethod *Create(RCMethodBlockNoArgs);
     static RubyMethod *Create(RCMethodNoArgs);
+    static RubyMethod *Create(RCMethodBlockArgs, int);
     static RubyMethod *Create(RCMethodArgs, int);
 
-    virtual RubyValue call(linked_ptr<Binding> &, RubyValue);
+    virtual RubyValue call(linked_ptr<Binding> &, RubyValue);			// adds blank arglist.
+    virtual RubyValue call(linked_ptr<Binding> &, RubyValue, Block &);		// adds blank arglist.
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &) = 0;
+    virtual RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &) = 0;
+};
+
+class RubyMethodBlockNoArgs : public RubyMethod
+{
+  public:
+    RubyMethodBlockNoArgs(RCMethodBlockNoArgs);
+
+    RubyValue call(linked_ptr<Binding> &, RubyValue, Block &);					// actual impl.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// error.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// discard args.
+
+  protected:
+    RCMethodBlockNoArgs function;
 };
 
 class RubyMethodNoArgs : public RubyMethod
@@ -24,11 +44,25 @@ class RubyMethodNoArgs : public RubyMethod
   public:
     RubyMethodNoArgs(RCMethodNoArgs);
 
-    RubyValue call(linked_ptr<Binding> &, RubyValue);
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue);						// actual impl.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// discard args.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// discard block, args.
 
   protected:
     RCMethodNoArgs function;
+};
+
+class RubyMethodBlockArgs : public RubyMethod
+{
+  public:
+    RubyMethodBlockArgs(RCMethodBlockArgs, int);
+
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// error.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// actual impl.
+
+  protected:
+    RCMethodBlockArgs function;
+    int args;
 };
 
 class RubyMethodArgs : public RubyMethod
@@ -36,7 +70,8 @@ class RubyMethodArgs : public RubyMethod
   public:
     RubyMethodArgs(RCMethodArgs, int);
 
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// actual impl.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// discard block.
 
   protected:
     RCMethodArgs function;
@@ -49,6 +84,7 @@ class RubyBytecodeMethod : public RubyMethod
     RubyBytecodeMethod(int);
 
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
     std::string data;
 
