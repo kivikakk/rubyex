@@ -118,7 +118,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
       case I_PUSH_LAST:
 	switch (last_value.type) {
 	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
-	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->get_value()); break;
+	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->value); break;
 	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc track? */ last_value.object); break;
 	  case RubyValue::RV_NOTHING: /* XXX what? */ std::cerr << "I_PUSH_LAST instruction, but was given a RV_NOTHING RubyValue (uninitialised RubyValue somewhere?); confused!" << std::endl; break;
 	}

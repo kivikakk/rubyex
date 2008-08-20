@@ -20,6 +20,7 @@ RubyEnvironment::RubyEnvironment()
   RubyClassEI().init(*this);
   RubyBindingEI().init(*this);
   RubyTriEI().init(*this);
+  RubySymbolEI().init(*this);
 
   RubyNumericEI().init(*this);
   RubyStringEI().init(*this);

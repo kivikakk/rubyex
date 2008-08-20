@@ -27,7 +27,8 @@ class RubyEnvironment
 
     RubySymbol *get_symbol(const std::string &);
 
-    RubyClass *Object, *Module, *Class, *Binding, *Symbol, *Fixnum, *String;
+    RubyClass *Object, *Module, *Class;
+    RubyClass *Binding, *Symbol, *Fixnum, *String;
     RubyModule *Kernel;
 
     RubyObject *main;
