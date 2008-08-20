@@ -3,6 +3,7 @@
 
 #include "rei.h"
 #include "robject.h"
+#include "binding.h"
 
 class RubyBindingEI : public RubyEnvironmentInitializer
 {
@@ -13,7 +14,10 @@ class RubyBindingEI : public RubyEnvironmentInitializer
 class RubyBinding : public RubyObject
 {
   public:
-    RubyBinding(RubyEnvironment &);
+    RubyBinding(linked_ptr<Binding> &);
+
+  protected:
+    linked_ptr<Binding> binding;
 };
 
 #endif

@@ -41,8 +41,7 @@ RubyObject *RubyEnvironment::get_global_by_name(const std::string &_name) const
   if (module_exists(_name))
     return get_module_by_name(_name);
 
-  std::cerr << "ERROR: tried to get an inexistant global." << std::endl;
-  throw std::exception();
+  throw CannotFindGlobalError();
 }
 
 bool RubyEnvironment::class_exists(const std::string &_name) const

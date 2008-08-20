@@ -10,6 +10,6 @@ void RubyBindingEI::init(RubyEnvironment &_e)
   _e.Binding = rb_cBinding;
 }
 
-RubyBinding::RubyBinding(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "Binding"))
+RubyBinding::RubyBinding(linked_ptr<Binding> &_binding): RubyObject(new NamedLazyClass(_binding->environment, "Binding")), binding(_binding)
 { }
 

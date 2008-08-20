@@ -1,6 +1,7 @@
-#include "context.h"
 #include <iostream>
 #include <exception>
+#include "context.h"
+#include "rmethod.h"
 
 Context::Context(RubyEnvironment &_environment, RubyValue _context): binding(linked_ptr<Binding>(new Binding(_environment, _context)))
 { }
@@ -8,7 +9,7 @@ Context::Context(RubyEnvironment &_environment, RubyValue _context): binding(lin
 Context::Context(linked_ptr<Binding> &_binding): binding(_binding)
 { }
 
-RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
+RubyValue Context::entry_to_value(const Stack::StackEntry &_entry)
 {
   // We take control of StackEntry's memory. See a note in stack.cpp:pop_value about how we should do this better.
 
@@ -27,14 +28,14 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry) const
 
     case Stack::SE_INTEGER: return RubyValue::from_fixnum(_entry.integer);
     case Stack::SE_OBJECT: return RubyValue::from_object(_entry.object);
-    case Stack::SE_BLOCK:
-      std::cerr << ".. error?" << std::endl;
+    default:
+      std::cerr << "Context: trying to convert non-id/sym/int to RValue" << std::endl;
       throw;
   }
   throw;
 }
 
-RubyValue Context::resolve_identifier(const std::string &_identifier) const
+RubyValue Context::resolve_identifier(const std::string &_identifier)
 {
   // first look at locals.
   {
@@ -46,16 +47,20 @@ RubyValue Context::resolve_identifier(const std::string &_identifier) const
   // how about environment globals? (<< XXX seems conceptually incorrect - should they be exposed any other way, logically?)
   try {
     return RubyValue::from_object(binding->environment.get_global_by_name(_identifier));
-  } catch (std::exception)
+  } catch (CannotFindGlobalError)
   { }
 
   // methods
+  try {
+    return get_method(_identifier)->call(binding, binding->context, std::vector<RubyValue>());
+  } catch (std::exception)	// XXX: better defined exception.
+  { }
 
-  std::cerr << "Context::entry_to_value failing" << std::endl;
+  std::cerr << "Context::entry_to_value: failing" << std::endl;
   throw;
 }
 
-RubyMethod *Context::get_method(const std::string &_name)
+RubyMethod *Context::get_method(const std::string &_name) const
 {
   return binding->context.get_method(_name, binding->environment);
 }

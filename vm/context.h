@@ -20,10 +20,12 @@ class Context
     Context(RubyEnvironment &, RubyValue);
     Context(linked_ptr<Binding> &);
 
-    RubyValue entry_to_value(const Stack::StackEntry &) const;
-    RubyValue resolve_identifier(const std::string &) const;
+    RubyMethod *get_method(const std::string &) const;
 
-    RubyMethod *get_method(const std::string &);
+    RubyValue entry_to_value(const Stack::StackEntry &);
+    RubyValue resolve_identifier(const std::string &);
+    // these two not const - could result in method call.
+
     void assign(const std::string &, RubyValue);
 
     linked_ptr<Binding> binding;

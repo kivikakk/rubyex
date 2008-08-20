@@ -4,6 +4,7 @@
 #include <iostream>
 #include "rstring.h"
 #include "eval_hook.h"
+#include "rbinding.h"
 
 RubyValue kernel_binding(linked_ptr<Binding> &, RubyValue);
 RubyValue kernel_eval(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -28,7 +29,7 @@ void RubyKernelEI::init(RubyEnvironment &_e)
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return _b->environment.NIL;
+  return RubyValue::from_object(new RubyBinding(_b));
 }
 
 RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
