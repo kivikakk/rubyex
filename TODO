@@ -1,5 +1,5 @@
 Game plan:
- * function defns
+ * finish I_YIELD; then function defns
  * `if'
  * array, hash
  * stdio
