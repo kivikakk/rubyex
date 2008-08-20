@@ -88,12 +88,13 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
 
-	RubyBytecodeMethod method(arg_count);
+	RubyBytecodeMethod method;
+
 	while (arg_count--)
-	  r.read_string();	// XXX
+	  method.code.args.push_back(r.read_string());
 	
 	uint32 byte_count = r.read_uint32();
-	method.code = r.read_bytes(byte_count);
+	method.code.code = r.read_bytes(byte_count);
 	// XXX define
 	break;
       }

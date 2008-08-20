@@ -81,15 +81,12 @@ class RubyMethodArgs : public RubyMethod
 class RubyBytecodeMethod : public RubyMethod
 {
   public:
-    RubyBytecodeMethod(int);
+    RubyBytecodeMethod();
 
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
-    std::string code;
-
-  protected:
-    int args;
+    Block code;
 };
 
 #define ARGS_ARBITRARY (-1)
