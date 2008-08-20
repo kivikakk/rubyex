@@ -90,6 +90,6 @@ RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
 
 RubyValue object_class(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  
+  return RubyValue::from_object(_self.get_class(_b->environment));
 }
 
