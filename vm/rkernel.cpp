@@ -37,9 +37,22 @@ RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
   RubyValue first = _args[0];
   if (first.object->get_class() != _b->environment.String) {
     std::cerr << "Kernel::eval: tried to eval non-String" << std::endl;
-    throw;
+    throw; // XXX Exception
   }
-  return eval_hook(_b->environment, _b, _self, dynamic_cast<RubyString *>(first.object)->string_value);
+
+  linked_ptr<Binding> use_binding = _b;
+
+  if (_args.size() == 2) {
+    RubyValue second = _args[1];
+    if (second.object->get_class() != _b->environment.Binding) {
+      std::cerr << "Kernel::eval: second arg not a Binding?" << std::endl;
+      throw; // XXX exception
+    }
+
+    use_binding = dynamic_cast<RubyBinding *>(second.object)->binding;
+  }
+
+  return eval_hook(_b->environment, use_binding, _self, dynamic_cast<RubyString *>(first.object)->string_value);
 }
 
 RubyValue kernel_print(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

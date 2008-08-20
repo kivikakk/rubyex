@@ -16,7 +16,6 @@ class RubyBinding : public RubyObject
   public:
     RubyBinding(linked_ptr<Binding> &);
 
-  protected:
     linked_ptr<Binding> binding;
 };
 
