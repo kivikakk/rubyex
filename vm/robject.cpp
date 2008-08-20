@@ -65,7 +65,7 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   { }
 
   std::ostringstream oss;
-  oss << "#<" << _self.get_class(_b->environment)->get_name() << ":";
+  oss << "#<" << dynamic_cast<RubyString *>(object_inspect_to_s(_b, RubyValue::from_object(_self.get_class(_b->environment))).object /* XXX dirty hack? */)->string_value << ":";
   oss << std::dec << _self.object;
   oss << ">";
 

@@ -17,7 +17,7 @@ class RubyClass : public RubyModule, public LazyClass
 
     RubyMethod *find_method(const std::string &) const;
 
-    RubyObject *new_instance();
+    RubyObject *new_instance(RubyEnvironment &);
 
   protected:
     LazyClass *superklass;

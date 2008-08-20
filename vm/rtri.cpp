@@ -21,9 +21,9 @@ void RubyTriEI::init(RubyEnvironment &_e)
   _e.add_class("FalseClass", rb_cFalseClass);
   _e.add_class("NilClass", rb_cNilClass);
 
-  RubyObject *rb_oTrue =  rb_cTrueClass->new_instance(),
-	     *rb_oFalse = rb_cFalseClass->new_instance(),
-	     *rb_oNil =    rb_cNilClass->new_instance();
+  RubyObject *rb_oTrue =  rb_cTrueClass->new_instance(_e),
+	     *rb_oFalse = rb_cFalseClass->new_instance(_e),
+	     *rb_oNil =    rb_cNilClass->new_instance(_e);
   
   rb_oTrue->add_metaclass_method(_e, "inspect", RubyMethod::Create(true_inspect));
   rb_oFalse->add_metaclass_method(_e, "inspect", RubyMethod::Create(false_inspect));

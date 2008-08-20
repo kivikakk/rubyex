@@ -2,6 +2,7 @@
 #include "rclass.h"
 #include "renvironment.h"
 #include "rmethod.h"
+#include "rstring.h"
 
 RubyClass *RubyClass::create_class(RubyEnvironment &_e, const std::string &_name)
 {
@@ -40,9 +41,24 @@ RubyMethod *RubyClass::find_method(const std::string &_name) const
   throw;
 }
 
-RubyObject *RubyClass::new_instance()
+RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
 {
-  return new RubyObject(this);
+  // XXX TODO: refactor me later.
+  // XXX: this whole thing is so fishy.
+  //
+  if (this == _e.Module)
+    return new RubyModule(_e, "" /* XXX */);
+  else if (this == _e.Class)
+    return RubyClass::create_class(_e, "" /* XXX */);
+    // case _e.Binding: return new 
+  else if (this == _e.String)
+    return new RubyString(_e, "" /* XXX */);
+  else
+    return new RubyObject(this);
+
+  std::cerr << "RubyClass::new_instance(): OH DEAR." << std::endl;
+  // XXX InternalError?
+  throw;
 }
 
 RubyClass::RubyClass(RubyEnvironment &_e, LazyClass *_superklass, const std::string &_name): RubyModule(new NamedLazyClass(_e, "Class"), _name), superklass(_superklass)
@@ -65,7 +81,7 @@ void RubyClassEI::init(RubyEnvironment &_e)
 RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyClass *s = dynamic_cast<RubyClass *>(_self.object);
-  RubyObject *i = s->new_instance();
+  RubyObject *i = s->new_instance(_b->environment);
   return RubyValue::from_object(i);
 }
 
