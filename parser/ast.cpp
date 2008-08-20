@@ -96,7 +96,7 @@ void BooleanLiteralExpr::emit(std::ostream &o) const {
 }
 
 void BooleanLiteralExpr::push(std::ostream &o) const {
-  emit_instruction(o, I_EXECUTE);
+  emit_instruction(o, I_PUSH);
   emit_type(o, T_BOOLEAN_LITERAL);
   emit_bool(o, value);
 }
