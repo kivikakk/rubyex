@@ -43,6 +43,7 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
 
 RubyValue object_inspect_to_s(linked_ptr<Binding> &, RubyValue);
 RubyValue object_send(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue object_class(linked_ptr<Binding> &, RubyValue);
 
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
@@ -51,6 +52,8 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect_to_s));
   rb_cObject->add_method("to_s", RubyMethod::Create(object_inspect_to_s));
   rb_cObject->add_method("send", RubyMethod::Create(object_send, ARGS_ARBITRARY));
+
+  rb_cObject->add_method("class", RubyMethod::Create(object_class));
   rb_cObject->include_module(_e.Kernel);
 
   _e.add_class("Object", rb_cObject);
@@ -60,7 +63,7 @@ void RubyObjectEI::init(RubyEnvironment &_e)
 RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   try {
-    return RubyValue::from_object(new RubyString(_b->environment, _b->environment.get_name_by_global(_self.object)));
+    return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, _b->environment.get_name_by_global(_self.object))));
   } catch (CannotFindGlobalError)
   { }
 
@@ -69,7 +72,7 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   oss << std::dec << _self.object;
   oss << ">";
 
-  return RubyValue::from_object(new RubyString(_b->environment, oss.str()));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
 }
 
 RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -83,5 +86,10 @@ RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
   std::string function_name = dynamic_cast<RubyString *>(_args[0].object)->string_value;
   std::vector<RubyValue> rest = std::vector<RubyValue>(_args.begin() + 1, _args.end());
   return _self.call(_b, function_name, rest);
+}
+
+RubyValue object_class(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  
 }
 

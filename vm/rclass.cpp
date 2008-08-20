@@ -52,7 +52,7 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return RubyClass::create_class(_e, "" /* XXX */);
     // case _e.Binding: return new 
   else if (this == _e.String)
-    return new RubyString(_e, "" /* XXX */);
+    return _e.gc.track(new RubyString(_e, "" /* XXX */));
   else
     return new RubyObject(this);
 

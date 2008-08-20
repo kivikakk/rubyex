@@ -30,9 +30,9 @@ void RubyStringEI::init(RubyEnvironment &_e)
 RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   if (_args.size() == 0)
-    return RubyValue::from_object(new RubyString(_b->environment, ""));
+    return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, "")));
   else if (_args.size() == 1)
-    return RubyValue::from_object(new RubyString(_b->environment, dynamic_cast<RubyString *>(_args[0].object)->string_value));
+    return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, dynamic_cast<RubyString *>(_args[0].object)->string_value)));
   
   throw std::exception();	// TODO: Throw a real exception (ArgumentError)
 }
@@ -41,13 +41,13 @@ RubyValue string_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
 {
   RubyString *s1 = dynamic_cast<RubyString *>(_self.object),
 	     *s2 = dynamic_cast<RubyString *>(_args[0].object);
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, s1->string_value + s2->string_value)));
+  return RubyValue::from_object(_b->environment.gc.track(_b->environment.gc.track(new RubyString(_b->environment, s1->string_value + s2->string_value))));
 }
 
 RubyValue string_reverse(linked_ptr<Binding> &_b, RubyValue _self)
 {
   RubyString *r = dynamic_cast<RubyString *>(_self.object);
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, std::string(r->string_value.rbegin(), r->string_value.rend()))));
+  return RubyValue::from_object(_b->environment.gc.track(_b->environment.gc.track(new RubyString(_b->environment, std::string(r->string_value.rbegin(), r->string_value.rend())))));
 }
 
 RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
@@ -74,7 +74,7 @@ RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
     else
       o << (char)v[i];
   o << '"';
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, o.str())));
+  return RubyValue::from_object(_b->environment.gc.track(_b->environment.gc.track(new RubyString(_b->environment, o.str()))));
 }
 
 RubyValue string_to_s(linked_ptr<Binding> &_b, RubyValue _self)

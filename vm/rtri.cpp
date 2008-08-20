@@ -36,14 +36,14 @@ void RubyTriEI::init(RubyEnvironment &_e)
 }
 
 RubyValue true_inspect(linked_ptr<Binding> &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b->environment, "true")); }
+{ return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, "true"))); }
 
 RubyValue false_inspect(linked_ptr<Binding> &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b->environment, "false")); }
+{ return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, "false"))); }
 
 RubyValue nil_inspect(linked_ptr<Binding> &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b->environment, "nil")); }
+{ return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, "nil"))); }
 
 RubyValue nil_to_s(linked_ptr<Binding> &_b, RubyValue)
-{ return RubyValue::from_object(new RubyString(_b->environment, "")); }
+{ return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, ""))); }
 

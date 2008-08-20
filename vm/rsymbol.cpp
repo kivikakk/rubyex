@@ -20,12 +20,12 @@ void RubySymbolEI::init(RubyEnvironment &_e)
 
 RubyValue symbol_inspect(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return RubyValue::from_object(new RubyString(_b->environment, ":" + _self.symbol->value));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, ":" + _self.symbol->value)));
 }
 
 RubyValue symbol_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return RubyValue::from_object(new RubyString(_b->environment, _self.symbol->value));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, _self.symbol->value)));
 }
 
 RubySymbol::RubySymbol(const std::string &_value): value(_value)
