@@ -99,6 +99,15 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
 	break;
       }
 
+      case I_YIELD: {
+	std::cerr << "YIELD" << std::endl;
+
+	uint32 arg_count = r.read_uint32();
+	std::cerr << arg_count << " arg(s)" << std::endl;
+
+	break;
+      }
+
       case I_END:
 	std::cerr << "END unimplemented." << std::endl;
 	break;
