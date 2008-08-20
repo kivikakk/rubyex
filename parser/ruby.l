@@ -16,6 +16,8 @@
 
 %%
 
+#[^\n]*		{ }
+
 \"			{
 		  string_buf = "";
 		  doing_symbol = false;
