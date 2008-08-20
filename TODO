@@ -1,6 +1,6 @@
 Game plan:
- * blocks - make enumerators, etc.
  * function defns
+ * array, hash
  * stdio
  * irb
 
