@@ -66,17 +66,17 @@ line: 		NL	{ $$ = NULL; }
 	      | expr END_OF_FILE { $$ = $1; }
 ;
 
-expr:		funccall 		{ $$ = $1; }
+expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
+	      | YIELD arglist		{ $$ = new YieldExpr($2); }
+	      | YIELD '(' ')'		{ $$ = new YieldExpr(NULL); }
+	      | YIELD '(' arglist ')'	{ $$ = new YieldExpr($3); }
+	      |	funccall 		{ $$ = $1; }
 	      | funcdef			{ $$ = $1; }
 	      |	IDENTIFIER		{ $$ = $1; }
 	      |	FUNCTION_CALL 		{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      |	IDENTIFIER block 	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      |	FUNCTION_CALL block 	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      | IDENTIFIER '=' expr 	{ $$ = new AssignmentExpr($1, $3); }
-	      |	YIELD			{ $$ = new YieldExpr(NULL); }
-	      | YIELD arglist		{ $$ = new YieldExpr($2); }
-	      | YIELD '(' ')'		{ $$ = new YieldExpr(NULL); }
-	      | YIELD '(' arglist ')'	{ $$ = new YieldExpr($3); }
 	      |	SYMBOL			{ $$ = $1; }
 	      | literal			{ $$ = $1; }
 	      | expr '.' funccall 	{ $3->target = $1; $$ = $3; }

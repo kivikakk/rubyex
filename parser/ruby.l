@@ -60,6 +60,7 @@ false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_
 nil		{ yylval.nil_literal = new NilLiteralExpr(); return NIL_LITERAL; }
 
 yield		{ return YIELD; }
+yield\(		{ unput('('); return YIELD; }
 
 do[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return DO; }
 \{[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return '{'; }
