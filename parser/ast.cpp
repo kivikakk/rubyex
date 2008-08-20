@@ -202,6 +202,40 @@ void BlockExpr::push(std::ostream &o) const
   proc->emit(o);
 }
 
+YieldExpr::YieldExpr(ArgListExpr *_args)
+{
+  if (_args)
+    this->args = _args->args;	// we take responsibility here.
+}
+
+void YieldExpr::p() const
+{
+  std::cout << "yield";
+  if (this->args.size() > 0) {
+    std::cout << "(";
+    for (std::list<Expr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it) {
+      if (it != this->args.begin()) std::cout << ", ";
+      (*it)->p();
+    }
+    std::cout << ")";
+  }
+}
+
+void YieldExpr::emit(std::ostream &o) const
+{
+  for (std::list<Expr *>::const_reverse_iterator it = args.rbegin(); it != args.rend(); ++it)
+    (*it)->push(o);
+
+  emit_instruction(o, I_YIELD); 
+  emit_uint32(o, args.size());
+}
+
+void YieldExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
+
 FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block)
 {
   this->name = _name->id;

@@ -114,6 +114,18 @@ class BlockExpr : public Expr
     Procedure *proc;
 };
 
+class YieldExpr : public Expr
+{
+  public:
+    YieldExpr(ArgListExpr *);
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+
+    std::list<Expr *> args;
+};
+
 class FuncCallExpr : public Expr
 {
   public:

@@ -27,6 +27,7 @@ typedef enum
   I_CONSTRUCT_BLOCK	= 0x20,
   I_TARGET_DEF		= 0x21,
   I_DEF			= 0x22,
+  I_YIELD		= 0x23,
 
   I_END			= 0x30,
   I_POP			= 0x31,

@@ -27,6 +27,7 @@
 %token <floating_literal> FLOATING_LITERAL
 %token <boolean_literal> BOOLEAN_LITERAL
 %token <nil_literal> NIL_LITERAL
+%token <yield> YIELD
 
 %type <expr> line expr compiled_expr
 %type <block> block
@@ -65,27 +66,31 @@ line: 		NL	{ $$ = NULL; }
 	      | expr END_OF_FILE { $$ = $1; }
 ;
 
-expr:		funccall { $$ = $1; }
-	      | funcdef	{ $$ = $1; }
-	      |	IDENTIFIER	{ $$ = $1; }
-	      |	FUNCTION_CALL { $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      |	IDENTIFIER block { $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
-	      |	FUNCTION_CALL block { $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
-	      | IDENTIFIER '=' expr { $$ = new AssignmentExpr($1, $3); }
-	      |	SYMBOL	{ $$ = $1; }
-	      | literal	{ $$ = $1; }
-	      | expr '.' funccall { $3->target = $1; $$ = $3; }
-	      | expr '.' IDENTIFIER  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
+expr:		funccall 		{ $$ = $1; }
+	      | funcdef			{ $$ = $1; }
+	      |	IDENTIFIER		{ $$ = $1; }
+	      |	FUNCTION_CALL 		{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
+	      |	IDENTIFIER block 	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
+	      |	FUNCTION_CALL block 	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
+	      | IDENTIFIER '=' expr 	{ $$ = new AssignmentExpr($1, $3); }
+	      |	YIELD			{ $$ = new YieldExpr(NULL); }
+	      | YIELD arglist		{ $$ = new YieldExpr($2); }
+	      | YIELD '(' ')'		{ $$ = new YieldExpr(NULL); }
+	      | YIELD '(' arglist ')'	{ $$ = new YieldExpr($3); }
+	      |	SYMBOL			{ $$ = $1; }
+	      | literal			{ $$ = $1; }
+	      | expr '.' funccall 	{ $3->target = $1; $$ = $3; }
+	      | expr '.' IDENTIFIER  	{ $$ = new FuncCallExpr($1, $3, NULL, NULL); }
 	      | expr '.' FUNCTION_CALL  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
-	      | expr '.' IDENTIFIER block  { $$ = new FuncCallExpr($1, $3, NULL, $4); }
-	      | expr '.' FUNCTION_CALL block  { $$ = new FuncCallExpr($1, $3, NULL, $4); }
-	      | expr '+' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ArgListExpr($3), NULL); }
-	      | expr '-' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ArgListExpr($3), NULL); }
-	      | expr '*' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ArgListExpr($3), NULL); }
-	      | expr '/' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ArgListExpr($3), NULL); }
+	      | expr '.' IDENTIFIER block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '.' FUNCTION_CALL block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '+' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ArgListExpr($3), NULL); }
+	      | expr '-' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ArgListExpr($3), NULL); }
+	      | expr '*' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ArgListExpr($3), NULL); }
+	      | expr '/' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ArgListExpr($3), NULL); }
 	      | '-' expr %prec NEG	{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
-	      | expr '^' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ArgListExpr($3), NULL); }
-	      | '(' expr ')'	{ $$ = $2; }
+	      | expr '^' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ArgListExpr($3), NULL); }
+	      | '(' expr ')'		{ $$ = $2; }
 ;
 
 compiled_expr:	expr
@@ -95,17 +100,17 @@ compiled_expr:	expr
  * or has some parameters. Any inferred function call (e.g. 'gets')
  * will be treated like an IDENTIFIER in `expr', and we work it out
  * later. */
-funccall:	IDENTIFIER arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL);  }
-	      |	IDENTIFIER arglist block	{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
-	      |	FUNCTION_CALL arglist	{ $$ = new FuncCallExpr(NULL, $1, $2, NULL);  }
-	      |	FUNCTION_CALL arglist block	{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
-	      | IDENTIFIER '(' ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      | IDENTIFIER '(' ')' block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | IDENTIFIER '(' arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL);  }
-	      | IDENTIFIER '(' arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
-	      | FUNCTION_CALL ARG_BRACKET ')'	{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      | FUNCTION_CALL ARG_BRACKET ')' block	{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | FUNCTION_CALL ARG_BRACKET arglist ')'	{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
+funccall:	IDENTIFIER arglist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
+	      |	IDENTIFIER arglist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+	      |	FUNCTION_CALL arglist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
+	      |	FUNCTION_CALL arglist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+	      | IDENTIFIER '(' ')'				{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
+	      | IDENTIFIER '(' ')' block			{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
+	      | IDENTIFIER '(' arglist ')'			{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
+	      | IDENTIFIER '(' arglist ')' block		{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+	      | FUNCTION_CALL ARG_BRACKET ')'			{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
+	      | FUNCTION_CALL ARG_BRACKET ')' block		{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
+	      | FUNCTION_CALL ARG_BRACKET arglist ')'		{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
 	      | FUNCTION_CALL ARG_BRACKET arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
 ;
 
