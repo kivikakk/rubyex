@@ -94,7 +94,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	uint32 byte_count = r.read_uint32();
 	method->code.code = r.read_bytes(byte_count);
 
-	context->def_target->add_method(name, method);
+	context->def_target->def_method(name, method);
 	break;
       }
 

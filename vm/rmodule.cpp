@@ -23,12 +23,29 @@ const std::string &RubyModule::get_name() const
 
 void RubyModule::add_method(const std::string &_name, RubyMethod *_method)
 {
-  if (methods.find(_name) != methods.end()) {
+  if (has_method(_name)) {
     std::cerr << "ERROR: added a method where one exists already." << std::endl;
-    throw std::exception();
+    throw; // XXX
   }
 
   methods[_name] = _method;
+}
+
+void RubyModule::def_method(const std::string &_name, RubyMethod *_method)
+{
+  if (has_method(_name))
+    delete methods[_name];	// XXX: is this safe? Will the same method never be referred to twice?
+  methods[_name] = _method;
+}
+
+void RubyModule::remove_method(const std::string &_name)
+{
+  if (!has_method(_name)) {
+    std::cerr << "ERROR: tried to remove a method where one doesn't exist already." << std::endl;
+    throw;		// XXX
+  }
+  
+  methods.erase(_name);
 }
 
 void RubyModule::add_module_method(RubyEnvironment &_e, const std::string &_name, RubyMethod *_method)

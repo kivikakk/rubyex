@@ -15,6 +15,8 @@ typedef RubyValue (*RCMethodArgs)(linked_ptr<Binding> &, RubyValue, const std::v
 class RubyMethod
 {
   public:
+    virtual ~RubyMethod();
+
     static RubyMethod *Create(RCMethodBlockNoArgs);
     static RubyMethod *Create(RCMethodNoArgs);
     static RubyMethod *Create(RCMethodBlockArgs, int);

@@ -16,6 +16,8 @@ class RubyModule : public RubyObject
     virtual ~RubyModule();
 
     void add_method(const std::string &, RubyMethod *);
+    void def_method(const std::string &, RubyMethod *);
+    void remove_method(const std::string &);
     void add_module_method(RubyEnvironment &, const std::string &, RubyMethod *);
     void include_module(RubyModule *);
 

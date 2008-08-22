@@ -1,6 +1,9 @@
 #include "rmethod.h"
 #include <iostream>
 
+RubyMethod::~RubyMethod()
+{ }
+
 RubyMethod *RubyMethod::Create(RCMethodBlockNoArgs _function)
 { return new RubyMethodBlockNoArgs(_function); }
 
