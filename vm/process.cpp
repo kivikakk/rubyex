@@ -136,7 +136,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	}
 	break;
       }
-      case I_PUSH_LAST:
+      case I_PUSH_LAST: {
 	switch (last_value.type) {
 	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
 	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->value); break;
@@ -145,6 +145,23 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  default: std::cerr << "I_PUSH_LAST, but unknown RubyValue " << "(" << last_value.type << ")" << std::endl; throw;
 	}
 	break;
+      }
+      case I_JMP: {
+	uint32 jump_len = r.read_uint32();
+	r.skip_bytes(jump_len);
+	break;
+      }
+
+      case I_IF: {
+	RubyValue ev = s.pop_value(context);
+	uint32 true_branch_len = r.read_uint32();
+
+	if (ev.truthy(e))
+	  break;	// Don't skip over true branch.
+	
+	r.skip_bytes(true_branch_len);
+	break;
+      }
 
       default:
 	std::cerr << "unknown(" << in << ")" << std::endl; throw;

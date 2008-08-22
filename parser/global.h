@@ -31,6 +31,7 @@ typedef union {
   LiteralExpr *literal;
   FuncCallExpr *funccall;
   FuncDefExpr *funcdef;
+  ConditionalExpr *conditional;
 
   Procedure *procedure;
 } expu;

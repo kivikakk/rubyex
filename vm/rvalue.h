@@ -24,6 +24,8 @@ class RubyValue
     RubyClass *get_class(RubyEnvironment &_e) const;
     RubyMethod *get_method(const std::string &, RubyEnvironment &) const;
 
+    bool truthy(RubyEnvironment &) const;
+
     RubyValue call(linked_ptr<Binding> &, const std::string &) const;
     RubyValue call(linked_ptr<Binding> &, const std::string &, RubyValue) const;
     RubyValue call(linked_ptr<Binding> &, const std::string &, RubyValue, RubyValue) const;

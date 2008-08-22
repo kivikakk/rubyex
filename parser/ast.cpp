@@ -1,24 +1,25 @@
 #include "ast.h"
 
-void Procedure::p() const
-{
+void Procedure::p() const {
   for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it) {
     if (it != expressions.begin()) std::cout << "; ";
     (*it)->p();
   }
 }
 
-void Procedure::emit(std::ostream &o) const
-{
+void Procedure::emit(std::ostream &o) const {
+  // N.B. Procedure::emit doesn't give the length: you have to do it yourself.
+  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
+    (*it)->emit(o);
+}
+
+unsigned long Procedure::length() const {
   unsigned long bytes = 0;
 
   for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
     bytes += (*it)->emit_length();
-
-  emit_uint32(o, bytes);
-
-  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
-    (*it)->emit(o);
+  
+  return bytes;
 }
 
 void IdentifierExpr::p() const {
@@ -199,6 +200,7 @@ void BlockExpr::push(std::ostream &o) const
   } else
     emit_uint32(o, 0);
 
+  emit_uint32(o, proc->length());
   proc->emit(o);
 }
 
@@ -307,6 +309,11 @@ void AssignmentExpr::emit(std::ostream &o) const {
   emit_string(o, name);
 }
 
+void AssignmentExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
 FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, DefListExpr *_args, Procedure *_proc): target(_target), name(_name), args(_args), proc(_proc)
 { }
 
@@ -347,8 +354,68 @@ void FuncDefExpr::emit(std::ostream &o) const
   } else
     emit_uint32(o, 0);
 
+  emit_uint32(o, proc->length());
   proc->emit(o);
 }
+
+// ConditionalExpr
+
+ConditionalExpr::ConditionalExpr(Expr *_condition, Procedure *_on_true, Procedure *_on_false): condition(_condition), on_true(_on_true), on_false(_on_false)
+{ }
+
+void ConditionalExpr::p() const
+{
+  if (this->on_true)
+    std::cout << "if";
+  else if (this->on_false)
+    std::cout << "unless";
+  else
+    std::cout << "no_conditional??";
+
+  std::cout << " (";
+  this->condition->p();
+  std::cout << ")" << std::endl << "  ";
+
+  if (this->on_true) {
+    this->on_true->p();
+    std::cout << std::endl;
+
+    if (this->on_false) {
+      std::cout << "else" << std::endl << "  ";
+      this->on_false->p();
+      std::cout << std::endl;
+    }
+  } else {
+    this->on_false->p();
+    std::cout << std::endl;
+  }
+  std::cout << "end" << std::endl;
+}
+
+void ConditionalExpr::emit(std::ostream &o) const
+{
+  // XXX: unless? (we could just invert the result and switch on_t/on_f)
+
+  condition->push(o);
+  emit_instruction(o, I_IF);
+
+  if (!on_false)
+    emit_uint32(o, on_true->length());
+  else
+    // If there's an `else' section, we need to omit it in the true branch with a jump (I_JMP+len).
+    // Don't use sizeof(instruction_t) -- it's 4. (can't change enum underlying type)
+    emit_uint32(o, on_true->length() + 1 + sizeof(uint32));
+
+  on_true->emit(o);
+
+  if (on_false) {
+    emit_instruction(o, I_JMP);
+    emit_uint32(o, on_false->length());
+    on_false->emit(o);
+  }
+}
+
+// Program
 
 void Program::add_expression(Expr *expression) {
   if (expression) {

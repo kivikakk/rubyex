@@ -32,7 +32,10 @@ typedef enum
   I_END			= 0x30,
   I_POP			= 0x31,
   I_PUSH		= 0x32,
-  I_PUSH_LAST		= 0x33		// pushes the last val
+  I_PUSH_LAST		= 0x33,		// pushes the last val
+  I_JMP			= 0x34,
+
+  I_IF			= 0x40,
 } instruction_t;
 
 #endif

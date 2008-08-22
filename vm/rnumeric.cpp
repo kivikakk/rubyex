@@ -9,6 +9,13 @@
 
 RubyValue fixnum_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_multiply(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_neq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_lt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_gt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_le(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_ge(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &, RubyValue);
 RubyValue fixnum_times(linked_ptr<Binding> &, RubyValue, Block &);
 RubyValue fixnum_upto(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
@@ -20,6 +27,12 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   // TODO: undefine Fixnum's `new'? or just redefine Numeric#new to throw a method not found error?
   rb_cFixnum->add_method("+", RubyMethod::Create(fixnum_add, 1));
   rb_cFixnum->add_method("*", RubyMethod::Create(fixnum_multiply, 1));
+  rb_cFixnum->add_method("!=", RubyMethod::Create(fixnum_neq, 1));
+  rb_cFixnum->add_method("==", RubyMethod::Create(fixnum_eq, 1));
+  rb_cFixnum->add_method("<", RubyMethod::Create(fixnum_lt, 1));
+  rb_cFixnum->add_method(">", RubyMethod::Create(fixnum_gt, 1));
+  rb_cFixnum->add_method("<=", RubyMethod::Create(fixnum_le, 1));
+  rb_cFixnum->add_method(">=", RubyMethod::Create(fixnum_ge, 1));
 
   rb_cFixnum->add_method("inspect", RubyMethod::Create(fixnum_inspect_to_s));
   rb_cFixnum->add_method("to_s", RubyMethod::Create(fixnum_inspect_to_s));
@@ -33,17 +46,30 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   _e.add_class("Float", rb_cFloat);
 }
 
+// XXX all these funcs need typechecks and we need to think of bignums.
 RubyValue fixnum_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{
-  // XXX: typecheck `operand'
-  return RubyValue::from_fixnum(_self.fixnum + _operand[0].fixnum); // XXX bignum
-}
+{ return RubyValue::from_fixnum(_self.fixnum + _operand[0].fixnum); }
 
 RubyValue fixnum_multiply(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{
-  // XXX: typecheck `operand'
-  return RubyValue::from_fixnum(_self.fixnum * _operand[0].fixnum); // XXX bignum
-}
+{ return RubyValue::from_fixnum(_self.fixnum * _operand[0].fixnum); }
+
+RubyValue fixnum_neq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return _b->environment.get_truth(_self.fixnum != _operand[0].fixnum); }
+
+RubyValue fixnum_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return _b->environment.get_truth(_self.fixnum == _operand[0].fixnum); }
+
+RubyValue fixnum_lt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return _b->environment.get_truth(_self.fixnum < _operand[0].fixnum); }
+
+RubyValue fixnum_gt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return _b->environment.get_truth(_self.fixnum > _operand[0].fixnum); }
+
+RubyValue fixnum_le(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return _b->environment.get_truth(_self.fixnum <= _operand[0].fixnum); }
+
+RubyValue fixnum_ge(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return _b->environment.get_truth(_self.fixnum >= _operand[0].fixnum); }
 
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {

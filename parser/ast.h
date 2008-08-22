@@ -21,6 +21,7 @@ class Procedure : public PrettyPrint, public Emitter
 
     void p() const;
     void emit(std::ostream &) const;
+    unsigned long length() const;
 };
 
 class IdentifierExpr : public Expr
@@ -148,6 +149,7 @@ class AssignmentExpr : public Expr
 
     void p() const;
     void emit(std::ostream &) const;
+    void push(std::ostream &) const;
 
     std::string name;
     Expr *value;
@@ -165,6 +167,18 @@ class FuncDefExpr : public Expr
     IdentifierExpr *name;
     DefListExpr *args;
     Procedure *proc;
+};
+
+class ConditionalExpr : public Expr
+{
+  public:
+    ConditionalExpr(Expr *, Procedure *, Procedure *);
+
+    Expr *condition;
+    Procedure *on_true, *on_false;
+
+    void p() const;
+    void emit(std::ostream &) const;
 };
 
 class Program : public PrettyPrint, public Emitter

@@ -7,7 +7,7 @@
 
 %option yywrap
 
-%x dbstr context_finish starting_block_args arglist_begins
+%x dbstr sstr context_finish starting_block_args arglist_begins
 %s block_args
 
 %{
@@ -53,7 +53,33 @@
 		    string_buf += *yptr++;
 		}
 
+'			{
+		  string_buf = "";
+		  doing_symbol = false;
+		  BEGIN(sstr);
+		}
+
+<sstr>'			{
+		  BEGIN(INITIAL);
+		  if (doing_symbol) {
+		    yylval.symbol = new SymbolExpr(string_buf);
+		    return SYMBOL;
+		  }
+
+		  yylval.string_literal = new StringLiteralExpr(string_buf);
+		  return STRING_LITERAL;
+		}
+
+==		{ return EQ; }
+!=		{ return NEQ; }
+\<=		{ return LE; }
+>=		{ return GE; }
+
 def		{ return DEF; }
+if		{ return IF; }
+else		{ return ELSE; }
+elsif		{ return ELSIF; }
+unless		{ return UNLESS; }
 
 true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }
 false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_LITERAL; }
@@ -147,6 +173,11 @@ end			{
 		  string_buf = "";
 		  doing_symbol = true;
 		  BEGIN(dbstr);
+		}
+:'			{
+		  string_buf = "";
+		  doing_symbol = true;
+		  BEGIN(sstr);
 		}
 
 [\t ]+		{ }

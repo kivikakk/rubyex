@@ -54,6 +54,23 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
   }
 }
 
+bool RubyValue::truthy(RubyEnvironment &_e) const
+{
+  switch (type) {
+    case RubyValue::RV_FIXNUM: return true;
+    case RubyValue::RV_SYMBOL: return true;
+    case RubyValue::RV_OBJECT: {
+      if (object == _e.FALSE.object)
+	return false;
+      else if (object == _e.NIL.object)
+	return false;
+
+      // Every other object is truthy.
+      return true;
+    }
+    default: std::cerr << "RubyValue::truthy: my type is unknown" << std::endl; throw;
+  }
+}
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name) const
 { return get_method(_name, _b->environment)->call(_b, *this); }
 

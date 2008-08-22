@@ -76,3 +76,8 @@ std::string Reader::read_bytes(unsigned long _l)
   delete [] c;
   return s;
 }
+
+void Reader::skip_bytes(unsigned long _l)
+{
+  input.seekg(_l, std::ios::cur);
+}

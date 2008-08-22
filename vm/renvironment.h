@@ -24,6 +24,7 @@ class RubyEnvironment
     RubyModule *get_module_by_name(const std::string &) const;
 
     const std::string &get_name_by_global(RubyObject *) const;
+    inline RubyValue get_truth(bool _t) const { return _t ? TRUE : FALSE; }
 
     RubySymbol *get_symbol(const std::string &);
 

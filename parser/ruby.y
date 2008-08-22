@@ -20,7 +20,7 @@
 %token END_OF_FILE 0 "end of file"
 %token <symbol> SYMBOL
 
-%token DEF
+%token DEF IF ELSE ELSIF UNLESS
 
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
@@ -36,15 +36,20 @@
 %type <literal> literal
 %type <funccall> funccall
 %type <funcdef> funcdef
+%type <conditional> conditional
 
-%type <procedure> block_content block_line funcdef_content funcdef_line
+%type <procedure> sub_content sub_line otherwise
 
-%left '<' '>' '=' NE LE GE
+/* Note this implies EQ/NEQ get applied *after* everything else
+ * is collapsed - our wanted behaviour. */
+%nonassoc EQ NEQ
+%left '<' '>' LE GE
 %left '+' '-'
 %left '*' '/'
 %left NEG
-%right '^'
-/* this is not exponentation in ruby; TODO */
+%right EXP
+
+%left '='
 
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL
 %nonassoc '.'
@@ -90,7 +95,14 @@ expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | expr '/' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ArgListExpr($3), NULL); }
 	      | '-' expr %prec NEG	{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
 	      | expr '^' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ArgListExpr($3), NULL); }
+	      | expr EQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ArgListExpr($3), NULL); }
+	      | expr NEQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ArgListExpr($3), NULL); }
+	      | expr '<' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<"), new ArgListExpr($3), NULL); }
+	      | expr '>' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">"), new ArgListExpr($3), NULL); }
+	      | expr LE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ArgListExpr($3), NULL); }
+	      | expr GE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ArgListExpr($3), NULL); }
 	      | '(' expr ')'		{ $$ = $2; }
+	      | conditional		{ $$ = $1; }
 ;
 
 compiled_expr:	expr
@@ -125,21 +137,12 @@ deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 ;
 
 block:		
-	      DO block_arguments block_content END	{ $$ = new BlockExpr($3); $$->args = $2; }
-	      |	'{' block_arguments block_content '}'	{ $$ = new BlockExpr($3); $$->args = $2; }
-;
-
-block_content:	{ enter_context(); } block_line { exit_context(); } { $$ = $2; }
-;
-
-block_line:	/* empty */		{ $$ = new Procedure(); }
-	      |	block_line { enter_context_line(); } line { exit_context_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
+	      DO block_arguments sub_content END	{ $$ = new BlockExpr($3); $$->args = $2; }
+	      |	'{' block_arguments sub_content '}'	{ $$ = new BlockExpr($3); $$->args = $2; }
 ;
 
 block_arguments:
-	      BLOCK_ARGUMENT_START
-	      block_argument_contents
-	      BLOCK_ARGUMENT_END	{ $$ = $2; }
+	      BLOCK_ARGUMENT_START block_argument_contents BLOCK_ARGUMENT_END	{ $$ = $2; }
 ;
 
 block_argument_contents:
@@ -147,28 +150,40 @@ block_argument_contents:
 	      | deflist		{ $$ = $1; }
 ;
 
-funcdef:	DEF FUNCTION_CALL funcdef_args funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $3, $4); }
-	      |	DEF IDENTIFIER funcdef_args ';' funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $3, $5); }
-	      |	DEF IDENTIFIER funcdef_args NL funcdef_content END { $$ = new FuncDefExpr(NULL, $2, $3, $5); }
+funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END 	{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
+	      |	DEF IDENTIFIER funcdef_args ';' sub_content END { $$ = new FuncDefExpr(NULL, $2, $3, $5); }
+	      |	DEF IDENTIFIER funcdef_args NL sub_content END 	{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
 ;
 
-funcdef_args:	/* empty */	{ $$ = NULL; }
+funcdef_args:	/* empty */		{ $$ = NULL; }
 	      | ARG_BRACKET ')'		{ $$ = NULL; }
 	      | ARG_BRACKET deflist ')'	{ $$ = $2; }
-	      | deflist	{ $$ = $1; }
+	      | deflist			{ $$ = $1; }
 ;
 
-funcdef_content:	{ enter_context(); } funcdef_line { exit_context(); } { $$ = $2; }
+conditional:	IF expr ';' sub_content otherwise END 	{ $$ = new ConditionalExpr($2, $4, $5); }
+	      |	IF expr NL sub_content otherwise END	{ $$ = new ConditionalExpr($2, $4, $5); }
 ;
 
-funcdef_line:	/* empty */		{ $$ = new Procedure(); }
-	      | funcdef_line { enter_context_line(); } line { exit_context_line(); } { if ($3) $1->expressions.push_back($3); $$ = $1; }
+otherwise:	/* empty */				{ $$ = NULL; }
+	      | ELSE sub_content			{ $$ = $2; }
+	      | ELSIF expr ';' sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
+	      | ELSIF expr NL sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
 ;
 
-literal:	STRING_LITERAL	{ $$ = $1; }
-	      |	INTEGER_LITERAL	{ $$ = $1; }
+sub_content:	{ enter_context(); } sub_line { exit_context(); } { $$ = $2; }
+;
+
+sub_line:	/* empty */		{ $$ = new Procedure(); }
+	      |	sub_line 	{ enter_context_line(); } 
+		line 		{ exit_context_line(); }
+				{ if ($3) $1->expressions.push_back($3); $$ = $1; }
+;
+
+literal:	STRING_LITERAL		{ $$ = $1; }
+	      |	INTEGER_LITERAL		{ $$ = $1; }
 	      | FLOATING_LITERAL	{ $$ = $1; }
-	      | BOOLEAN_LITERAL	{ $$ = $1; }
-	      | NIL_LITERAL	{ $$ = $1; }
+	      | BOOLEAN_LITERAL		{ $$ = $1; }
+	      | NIL_LITERAL		{ $$ = $1; }
 ;
 
