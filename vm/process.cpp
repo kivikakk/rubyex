@@ -49,7 +49,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	uint32 arg_count = r.read_uint32();
 
 	RubyValue target;
-	Block block(NULL);	// purposefully temporary.
+	Block block(NULL, NULL);	// purposefully temporary.
 
 	if (is_target) target = s.pop_value(context);
 	if (is_block) block = s.pop_block();
@@ -68,7 +68,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
 
       case I_CONSTRUCT_BLOCK: {
-	Block block(context->def_target);	// takes def_target of surroundings.
+	Block block(context->def_target, yield_block);	// takes def_target of surroundings.
 
 	uint32 arg_count = r.read_uint32();
 	while (arg_count--)
@@ -110,6 +110,12 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	while (arg_count--)
 	  arguments.push_back(s.pop_value(context));
 
+	// here we yield to our yield_block.
+	// but we need to pass the block of the place that yielded to us.
+	// def a(n)
+	// 	yield 1
+	// 	a(n + 1) {|e| yield e}	<- this yield should yield the same as the line above
+	// end
 	last_value = yield_block->call(context->binding, arguments);
 
 	break;

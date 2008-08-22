@@ -6,6 +6,8 @@
 #include "renvironment.h"
 #include "rvalue.h"
 
+class Block;
+
 class Binding
 {
   public:

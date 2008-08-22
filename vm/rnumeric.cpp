@@ -80,7 +80,7 @@ RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 
 RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
 {
-  for (int i = 0; i < _self.fixnum; ++i)
+  for (long i = 0; i < _self.fixnum; ++i)
     _block.call(_b);
   return _self;
 }

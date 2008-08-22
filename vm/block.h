@@ -9,7 +9,7 @@
 class Block
 {
   public:
-    Block(RubyClass *);
+    Block(RubyClass *, Block *);
 
     RubyValue call(linked_ptr<Binding> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue);
@@ -19,6 +19,7 @@ class Block
     std::string code;
     std::vector<std::string> args;
     RubyClass *def_target;
+    Block *caller_block;
 };
 
 #endif

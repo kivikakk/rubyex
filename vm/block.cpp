@@ -5,7 +5,7 @@
 #include "context.h"
 #include "process.h"
 
-Block::Block(RubyClass *_def_target): def_target(_def_target)
+Block::Block(RubyClass *_def_target, Block *_caller_block): def_target(_def_target), caller_block(_caller_block)
 { }
 
 RubyValue Block::call(linked_ptr<Binding> &_b)
@@ -43,7 +43,8 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
   for (unsigned int i = given_args_to_add; i < this->args.size(); ++i)
     c->assign(this->args[i], _b->environment.NIL);
 
-  RubyValue ret_val = process(_b->environment, r, c, NULL);
+  // we use caller_block for the Block, if one's been given.
+  RubyValue ret_val = process(_b->environment, r, c, caller_block);
 
   delete c;
 
