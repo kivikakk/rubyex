@@ -84,6 +84,7 @@ expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | IDENTIFIER '=' expr 	{ $$ = new AssignmentExpr($1, $3); }
 	      |	SYMBOL			{ $$ = $1; }
 	      | literal			{ $$ = $1; }
+	      | IDENTIFIER '[' exprlist ']'	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | expr '[' exprlist ']'	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | expr '.' funccall 	{ $3->target = $1; $$ = $3; }
 	      | expr '.' IDENTIFIER  	{ $$ = new FuncCallExpr($1, $3, NULL, NULL); }
