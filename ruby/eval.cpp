@@ -24,6 +24,6 @@ RubyValue eval_hook(RubyEnvironment &_e, linked_ptr<Binding> _binding, RubyValue
   Reader reader(iss);
 
   Context *c = new Context(_binding);
-  return process(_e, reader, c);
+  return process(_e, reader, c, NULL);
 }
 

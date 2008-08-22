@@ -24,7 +24,7 @@ int twophase(int, char **)
   Reader reader(iss);
   Context *c = new Context(e, RubyValue::from_object(e.main));
 
-  process(e, reader, c);
+  process(e, reader, c, NULL);
 
   return 0;
 }

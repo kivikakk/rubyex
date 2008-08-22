@@ -6,7 +6,7 @@ int main(int argc, char **argv)
   Reader r(std::cin);
   Context *c = new Context(e, RubyValue::from_object(e.main));
 
-  process(e, r, c);
+  process(e, r, c, NULL);
 
   return 0;
 }

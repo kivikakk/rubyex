@@ -49,7 +49,7 @@ int irb(int, char **)
     std::istringstream iss(bytecode.str());
     Reader reader(iss);
 
-    RubyValue result = process(e, reader, c);
+    RubyValue result = process(e, reader, c, NULL);
     std::cout << "=> ";
     RubyValue inspection = result.call(c->binding, "inspect");
     std::cout << dynamic_cast<RubyString *>(inspection.object)->string_value

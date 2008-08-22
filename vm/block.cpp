@@ -43,10 +43,30 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
   for (unsigned int i = given_args_to_add; i < this->args.size(); ++i)
     c->assign(this->args[i], _b->environment.NIL);
 
-  RubyValue ret_val = process(_b->environment, r, c);
+  RubyValue ret_val = process(_b->environment, r, c, NULL);
 
   delete c;
 
+  return ret_val;
+}
+
+RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_args, Block &_block)
+{
+  std::istringstream iss(this->code);
+  Reader r = Reader(iss);
+
+  Context *c = new Context(_b->environment, _b->context);
+
+  unsigned int given_args_to_add = std::min(this->args.size(), _args.size());
+  for (unsigned int i = 0; i < given_args_to_add; ++i)
+    c->assign(this->args[i], _args[i]);
+  
+  for (unsigned int i = given_args_to_add; i < this->args.size(); ++i)
+    c->assign(this->args[i], _b->environment.NIL);
+
+  RubyValue ret_val = process(_b->environment, r, c, &_block);
+
+  delete c;
   return ret_val;
 }
 

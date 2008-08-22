@@ -6,6 +6,6 @@
 #include "reader.h"
 #include "context.h"
 
-RubyValue process(RubyEnvironment &, Reader &, Context *);
+RubyValue process(RubyEnvironment &, Reader &, Context *, Block *);
 
 #endif

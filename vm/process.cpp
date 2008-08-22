@@ -5,7 +5,7 @@
 #include "rnumeric.h"
 #include "rmethod.h"
 
-RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
+RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_block)
 {
   Stack s;
   RubyValue last_value = e.NIL;
@@ -100,10 +100,18 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context)
       }
 
       case I_YIELD: {
-	std::cerr << "YIELD" << std::endl;
+	if (!yield_block) {
+	  std::cerr << "I_YIELD: LocalJumpError: no block given" << std::endl;	// XXX LocalJumpError
+	  throw;
+	}
 
 	uint32 arg_count = r.read_uint32();
-	std::cerr << arg_count << " arg(s)" << std::endl;
+
+	std::vector<RubyValue> arguments;
+	while (arg_count--)
+	  arguments.push_back(s.pop_value(context));
+
+	last_value = yield_block->call(context->binding, arguments);
 
 	break;
       }
