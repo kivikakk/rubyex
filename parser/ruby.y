@@ -31,7 +31,7 @@
 
 %type <expr> line expr compiled_expr
 %type <block> block
-%type <arglist> arglist
+%type <exprlist> exprlist
 %type <deflist> deflist block_arguments block_argument_contents funcdef_args
 %type <literal> literal
 %type <funccall> funccall
@@ -56,6 +56,7 @@
 %left '(' ')'
 %left DO END
 %left '{' '}'
+%left '[' ']'
 
 %%
 
@@ -72,9 +73,9 @@ line: 		NL	{ $$ = NULL; }
 ;
 
 expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
-	      | YIELD arglist		{ $$ = new YieldExpr($2); }
+	      | YIELD exprlist		{ $$ = new YieldExpr($2); }
 	      | YIELD '(' ')'		{ $$ = new YieldExpr(NULL); }
-	      | YIELD '(' arglist ')'	{ $$ = new YieldExpr($3); }
+	      | YIELD '(' exprlist ')'	{ $$ = new YieldExpr($3); }
 	      |	funccall 		{ $$ = $1; }
 	      | funcdef			{ $$ = $1; }
 	      |	IDENTIFIER		{ $$ = $1; }
@@ -89,19 +90,20 @@ expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | expr '.' FUNCTION_CALL  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
 	      | expr '.' IDENTIFIER block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
 	      | expr '.' FUNCTION_CALL block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
-	      | expr '+' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ArgListExpr($3), NULL); }
-	      | expr '-' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ArgListExpr($3), NULL); }
-	      | expr '*' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ArgListExpr($3), NULL); }
-	      | expr '/' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ArgListExpr($3), NULL); }
+	      | expr '+' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($3), NULL); }
+	      | expr '-' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ExprList($3), NULL); }
+	      | expr '*' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ExprList($3), NULL); }
+	      | expr '/' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ExprList($3), NULL); }
 	      | '-' expr %prec NEG	{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
-	      | expr '^' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ArgListExpr($3), NULL); }
-	      | expr EQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ArgListExpr($3), NULL); }
-	      | expr NEQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ArgListExpr($3), NULL); }
-	      | expr '<' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<"), new ArgListExpr($3), NULL); }
-	      | expr '>' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">"), new ArgListExpr($3), NULL); }
-	      | expr LE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ArgListExpr($3), NULL); }
-	      | expr GE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ArgListExpr($3), NULL); }
+	      | expr '^' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ExprList($3), NULL); }
+	      | expr EQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ExprList($3), NULL); }
+	      | expr NEQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ExprList($3), NULL); }
+	      | expr '<' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<"), new ExprList($3), NULL); }
+	      | expr '>' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">"), new ExprList($3), NULL); }
+	      | expr LE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ExprList($3), NULL); }
+	      | expr GE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
 	      | '(' expr ')'		{ $$ = $2; }
+	      | '[' exprlist ']'	{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
 	      | conditional		{ $$ = $1; }
 ;
 
@@ -112,23 +114,23 @@ compiled_expr:	expr
  * or has some parameters. Any inferred function call (e.g. 'gets')
  * will be treated like an IDENTIFIER in `expr', and we work it out
  * later. */
-funccall:	IDENTIFIER arglist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
-	      |	IDENTIFIER arglist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
-	      |	FUNCTION_CALL arglist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
-	      |	FUNCTION_CALL arglist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+funccall:	IDENTIFIER exprlist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
+	      |	IDENTIFIER exprlist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+	      |	FUNCTION_CALL exprlist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
+	      |	FUNCTION_CALL exprlist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
 	      | IDENTIFIER '(' ')'				{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      | IDENTIFIER '(' ')' block			{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | IDENTIFIER '(' arglist ')'			{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
-	      | IDENTIFIER '(' arglist ')' block		{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+	      | IDENTIFIER '(' exprlist ')'			{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
+	      | IDENTIFIER '(' exprlist ')' block		{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
 	      | FUNCTION_CALL ARG_BRACKET ')'			{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
 	      | FUNCTION_CALL ARG_BRACKET ')' block		{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | FUNCTION_CALL ARG_BRACKET arglist ')'		{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
-	      | FUNCTION_CALL ARG_BRACKET arglist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+	      | FUNCTION_CALL ARG_BRACKET exprlist ')'		{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
+	      | FUNCTION_CALL ARG_BRACKET exprlist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
 ;
 
-/* arglist is one or more, in line with funccall. */
-arglist:	compiled_expr			{ $$ = new ArgListExpr($1); }
-	      |	arglist ',' compiled_expr	{ $$ = new ArgListExpr($1, $3); }
+/* exprlist is one or more, in line with funccall. */
+exprlist:	compiled_expr			{ $$ = new ExprList($1); }
+	      |	exprlist ',' compiled_expr	{ $$ = new ExprList($1, $3); }
 ;
 
 /* deflist is for function/block argument definitions. one or more. */

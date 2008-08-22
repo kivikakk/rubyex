@@ -16,7 +16,7 @@ yy_buffer_state *yy_scan_string(const char *);
 
 typedef union {
   Expr *expr;
-  ArgListExpr *arglist;
+  ExprList *exprlist;
   DefListExpr *deflist;
   BlockExpr *block;
 

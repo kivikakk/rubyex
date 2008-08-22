@@ -82,11 +82,11 @@ class NilLiteralExpr : public LiteralExpr
     void push(std::ostream &) const;
 };
 
-class ArgListExpr : public Expr
+class ExprList : public Expr
 {
   public:
-    ArgListExpr(Expr *);
-    ArgListExpr(ArgListExpr *, Expr *);
+    ExprList(Expr *);
+    ExprList(ExprList *, Expr *);
 
     std::list<Expr *> args;
 };
@@ -118,7 +118,7 @@ class BlockExpr : public Expr
 class YieldExpr : public Expr
 {
   public:
-    YieldExpr(ArgListExpr *);
+    YieldExpr(ExprList *);
 
     void p() const;
     void emit(std::ostream &) const;
@@ -130,7 +130,7 @@ class YieldExpr : public Expr
 class FuncCallExpr : public Expr
 {
   public:
-    FuncCallExpr(Expr *, IdentifierExpr *, ArgListExpr *, BlockExpr *);
+    FuncCallExpr(Expr *, IdentifierExpr *, ExprList *, BlockExpr *);
 
     void p() const;
     void emit(std::ostream &) const;

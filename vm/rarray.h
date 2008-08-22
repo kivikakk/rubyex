@@ -17,6 +17,7 @@ class RubyArray : public RubyObject
     RubyArray(RubyEnvironment &);
     RubyArray(RubyEnvironment &, long);
     RubyArray(RubyEnvironment &, long, RubyValue);
+    RubyArray(RubyEnvironment &, const std::vector<RubyValue> &);
 
     std::vector<RubyValue> data;
 };

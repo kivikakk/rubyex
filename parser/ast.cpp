@@ -139,12 +139,12 @@ void NilLiteralExpr::push(std::ostream &o) const {
   emit_type(o, T_NIL_LITERAL);
 }
 
-ArgListExpr::ArgListExpr(Expr *first) {
+ExprList::ExprList(Expr *first) {
   this->args.push_back(first);
   // FuncCallExpr will be responsible for this->args' members later.
 }
 
-ArgListExpr::ArgListExpr(ArgListExpr *combine, Expr *also) {
+ExprList::ExprList(ExprList *combine, Expr *also) {
   for (std::list<Expr *>::iterator it = combine->args.begin(); it != combine->args.end(); ++it)
     this->args.push_back(*it);
   this->args.push_back(also);
@@ -204,7 +204,7 @@ void BlockExpr::push(std::ostream &o) const
   proc->emit(o);
 }
 
-YieldExpr::YieldExpr(ArgListExpr *_args)
+YieldExpr::YieldExpr(ExprList *_args)
 {
   if (_args)
     this->args = _args->args;	// we take responsibility here.
@@ -238,7 +238,7 @@ void YieldExpr::push(std::ostream &o) const {
 }
 
 
-FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ArgListExpr *_args, BlockExpr *_block): target(_target), block(_block)
+FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ExprList *_args, BlockExpr *_block): target(_target), block(_block)
 {
   this->name = _name->id;
   if (_args)
