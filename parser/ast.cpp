@@ -139,6 +139,9 @@ void NilLiteralExpr::push(std::ostream &o) const {
   emit_type(o, T_NIL_LITERAL);
 }
 
+ExprList::ExprList()
+{ }
+
 ExprList::ExprList(Expr *first) {
   this->args.push_back(first);
   // FuncCallExpr will be responsible for this->args' members later.

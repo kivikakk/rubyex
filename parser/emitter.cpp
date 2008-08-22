@@ -5,12 +5,12 @@
 
 void Emitter::push(std::ostream &) const
 {
-  std::cerr << "Error! " << typeid(this).name() << " doesn't know how to push()." << std::endl;
+  std::cerr << "Error! " << typeid(*this).name() << " doesn't know how to push()." << std::endl;
 }
 
 void Emitter::emit(std::ostream &) const
 {
-  std::cerr << "Error! " << typeid(this).name() << " doesn't know how to emit()." << std::endl;
+  std::cerr << "Error! " << typeid(*this).name() << " doesn't know how to emit()." << std::endl;
 }
 
 unsigned long Emitter::emit_length() const

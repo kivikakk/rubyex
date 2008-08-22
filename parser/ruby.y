@@ -31,7 +31,7 @@
 
 %type <expr> line expr compiled_expr
 %type <block> block
-%type <exprlist> exprlist
+%type <exprlist> exprlist opt_exprlist
 %type <deflist> deflist block_arguments block_argument_contents funcdef_args
 %type <literal> literal
 %type <funccall> funccall
@@ -74,8 +74,7 @@ line: 		NL	{ $$ = NULL; }
 
 expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | YIELD exprlist		{ $$ = new YieldExpr($2); }
-	      | YIELD '(' ')'		{ $$ = new YieldExpr(NULL); }
-	      | YIELD '(' exprlist ')'	{ $$ = new YieldExpr($3); }
+	      | YIELD '(' opt_exprlist ')'	{ $$ = new YieldExpr($3); }
 	      |	funccall 		{ $$ = $1; }
 	      | funcdef			{ $$ = $1; }
 	      |	IDENTIFIER		{ $$ = $1; }
@@ -85,6 +84,7 @@ expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | IDENTIFIER '=' expr 	{ $$ = new AssignmentExpr($1, $3); }
 	      |	SYMBOL			{ $$ = $1; }
 	      | literal			{ $$ = $1; }
+	      | expr '[' exprlist ']'	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | expr '.' funccall 	{ $3->target = $1; $$ = $3; }
 	      | expr '.' IDENTIFIER  	{ $$ = new FuncCallExpr($1, $3, NULL, NULL); }
 	      | expr '.' FUNCTION_CALL  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
@@ -103,7 +103,7 @@ expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | expr LE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ExprList($3), NULL); }
 	      | expr GE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
 	      | '(' expr ')'		{ $$ = $2; }
-	      | '[' exprlist ']'	{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
+	      | '[' opt_exprlist ']'	{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
 	      | conditional		{ $$ = $1; }
 ;
 
@@ -131,6 +131,11 @@ funccall:	IDENTIFIER exprlist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
 /* exprlist is one or more, in line with funccall. */
 exprlist:	compiled_expr			{ $$ = new ExprList($1); }
 	      |	exprlist ',' compiled_expr	{ $$ = new ExprList($1, $3); }
+;
+
+opt_exprlist:
+		/* empty */			{ $$ = new ExprList(); }
+	      | exprlist			{ $$ = $1; }
 ;
 
 /* deflist is for function/block argument definitions. one or more. */

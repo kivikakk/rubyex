@@ -85,6 +85,7 @@ class NilLiteralExpr : public LiteralExpr
 class ExprList : public Expr
 {
   public:
+    ExprList();
     ExprList(Expr *);
     ExprList(ExprList *, Expr *);
 
