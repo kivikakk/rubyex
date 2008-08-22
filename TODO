@@ -1,6 +1,5 @@
 Game plan:
- * `if'
  * array, hash
  * stdio
+ * exceptions
  * irb
-
