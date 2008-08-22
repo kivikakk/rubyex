@@ -102,7 +102,7 @@ RubyValue RubyMethodArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const s
 
 // byte ccode
 
-RubyBytecodeMethod::RubyBytecodeMethod()
+RubyBytecodeMethod::RubyBytecodeMethod(RubyClass *_def_target): code(_def_target)
 { }
 
 RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

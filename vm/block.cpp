@@ -5,7 +5,7 @@
 #include "context.h"
 #include "process.h"
 
-Block::Block(): def_target(NULL)
+Block::Block(RubyClass *_def_target): def_target(_def_target)
 { }
 
 RubyValue Block::call(linked_ptr<Binding> &_b)

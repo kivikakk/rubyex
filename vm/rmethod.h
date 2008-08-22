@@ -81,7 +81,7 @@ class RubyMethodArgs : public RubyMethod
 class RubyBytecodeMethod : public RubyMethod
 {
   public:
-    RubyBytecodeMethod();
+    RubyBytecodeMethod(RubyClass *);
 
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);

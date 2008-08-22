@@ -9,7 +9,7 @@
 class Block
 {
   public:
-    Block();
+    Block(RubyClass *);
 
     RubyValue call(linked_ptr<Binding> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue);

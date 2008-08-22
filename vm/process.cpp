@@ -49,7 +49,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	uint32 arg_count = r.read_uint32();
 
 	RubyValue target;
-	Block block; 
+	Block block(NULL);	// purposefully temporary.
 
 	if (is_target) target = s.pop_value(context);
 	if (is_block) block = s.pop_block();
@@ -68,7 +68,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
 
       case I_CONSTRUCT_BLOCK: {
-	Block block;
+	Block block(context->def_target);	// takes def_target of surroundings.
 
 	uint32 arg_count = r.read_uint32();
 	while (arg_count--)
@@ -86,7 +86,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
 
-	RubyBytecodeMethod method;
+	RubyBytecodeMethod method(context->def_target);		// no target, runs in same context as here
 
 	while (arg_count--)
 	  method.code.args.push_back(r.read_string());
