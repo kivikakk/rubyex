@@ -107,13 +107,13 @@ RubyBytecodeMethod::RubyBytecodeMethod(RubyClass *_def_target): code(_def_target
 
 RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  std::cerr << "whoops, RubyBytecodeMethod::call is certainly unimplemented." << std::endl;
-  throw;
+  // XXX: I notice self is being lost here.
+  return code.call(_b, _args);
 }
 
 RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
 {
-  std::cerr << "whoops, RubyBytecodeMethod::call is certainly unimplemented." << std::endl;
-  throw;
+  // XXX: Here too!
+  return code.call(_b, _args, _block);
 }
 

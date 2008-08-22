@@ -86,14 +86,15 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
 
-	RubyBytecodeMethod method(context->def_target);		// no target, runs in same context as here
+	RubyBytecodeMethod *method = new RubyBytecodeMethod(context->def_target);		// no target, runs in same context as here
 
 	while (arg_count--)
-	  method.code.args.push_back(r.read_string());
+	  method->code.args.push_back(r.read_string());
 	
 	uint32 byte_count = r.read_uint32();
-	method.code.code = r.read_bytes(byte_count);
-	// XXX define
+	method->code.code = r.read_bytes(byte_count);
+
+	context->def_target->add_method(name, method);
 	break;
       }
 
