@@ -68,7 +68,11 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   { }
 
   std::ostringstream oss;
-  oss << "#<" << dynamic_cast<RubyString *>(object_inspect_to_s(_b, RubyValue::from_object(_self.get_class(_b->environment))).object /* XXX dirty hack? */)->string_value << ":";
+  oss << "#<"
+    << RubyValue::from_object(_self.get_class(_b->environment))
+      .call(_b, "inspect")
+      .get_special<RubyString>()->string_value
+    << ":";
   oss << std::dec << _self.object;
   oss << ">";
 
@@ -83,7 +87,7 @@ RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
     throw;	// boom. XXX TypeError
   }
 
-  std::string function_name = dynamic_cast<RubyString *>(_args[0].object)->string_value;
+  std::string function_name = _args[0].get_special<RubyString>()->string_value;
   std::vector<RubyValue> rest = std::vector<RubyValue>(_args.begin() + 1, _args.end());
   return _self.call(_b, function_name, rest);
 }

@@ -49,17 +49,17 @@ RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
       throw; // XXX exception
     }
 
-    use_binding = dynamic_cast<RubyBinding *>(second.object)->binding;
+    use_binding = second.get_special<RubyBinding>()->binding;
   }
 
-  return eval_hook(_b->environment, use_binding, _self, dynamic_cast<RubyString *>(first.object)->string_value);
+  return eval_hook(_b->environment, use_binding, _self, first.get_special<RubyString>()->string_value);
 }
 
 RubyValue kernel_print(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     if (it->object->get_class() == _b->environment.String)	// PlaysForSure
-      std::cout << dynamic_cast<RubyString *>(it->object)->string_value;
+      std::cout << it->get_special<RubyString>()->string_value;
   }
 
   return _b->environment.NIL;
@@ -79,7 +79,7 @@ RubyValue kernel_puts(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
     else
       result_val = it->call(_b, "to_s");
 
-    result = dynamic_cast<RubyString *>(result_val.object);
+    result = result_val.get_special<RubyString>();
 
     std::string s = result->string_value;
     if (result->string_value.find("\n") != s.length() - 1)

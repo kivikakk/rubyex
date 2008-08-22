@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 #include "rsymbol.h"
 #include "linked_ptr.h"
 
@@ -25,6 +26,15 @@ class RubyValue
     RubyMethod *get_method(const std::string &, RubyEnvironment &) const;
 
     bool truthy(RubyEnvironment &) const;
+    long get_fixnum() const;
+    template <typename X> X *get_special() const
+    {
+      if (type != RV_OBJECT) {
+	std::cerr << "RubyValue::get_special: not an object" << std::endl;
+	throw; /* XXX */
+      }
+      return dynamic_cast<X *>(object);
+    }
 
     RubyValue call(linked_ptr<Binding> &, const std::string &) const;
     RubyValue call(linked_ptr<Binding> &, const std::string &, RubyValue) const;

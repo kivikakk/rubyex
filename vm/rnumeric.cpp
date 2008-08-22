@@ -46,54 +46,50 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   _e.add_class("Float", rb_cFloat);
 }
 
-// XXX all these funcs need typechecks and we need to think of bignums.
+// XXX bignum
 RubyValue fixnum_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return RubyValue::from_fixnum(_self.fixnum + _operand[0].fixnum); }
+{ return RubyValue::from_fixnum(_self.get_fixnum() + _operand[0].get_fixnum()); }
 
 RubyValue fixnum_multiply(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return RubyValue::from_fixnum(_self.fixnum * _operand[0].fixnum); }
+{ return RubyValue::from_fixnum(_self.get_fixnum() * _operand[0].get_fixnum()); }
 
 RubyValue fixnum_neq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.fixnum != _operand[0].fixnum); }
+{ return _b->environment.get_truth(_self.get_fixnum() != _operand[0].get_fixnum()); }
 
 RubyValue fixnum_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.fixnum == _operand[0].fixnum); }
+{ return _b->environment.get_truth(_self.get_fixnum() == _operand[0].get_fixnum()); }
 
 RubyValue fixnum_lt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.fixnum < _operand[0].fixnum); }
+{ return _b->environment.get_truth(_self.get_fixnum() < _operand[0].get_fixnum()); }
 
 RubyValue fixnum_gt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.fixnum > _operand[0].fixnum); }
+{ return _b->environment.get_truth(_self.get_fixnum() > _operand[0].get_fixnum()); }
 
 RubyValue fixnum_le(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.fixnum <= _operand[0].fixnum); }
+{ return _b->environment.get_truth(_self.get_fixnum() <= _operand[0].get_fixnum()); }
 
 RubyValue fixnum_ge(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.fixnum >= _operand[0].fixnum); }
+{ return _b->environment.get_truth(_self.get_fixnum() >= _operand[0].get_fixnum()); }
 
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   std::ostringstream oss;
-  oss << _self.fixnum;
+  oss << _self.get_fixnum();
   return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
 }
 
 RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
 {
-  for (long i = 0; i < _self.fixnum; ++i)
+  for (long i = 0; i < _self.get_fixnum(); ++i)
     _block.call(_b);
   return _self;
 }
 
 RubyValue fixnum_upto(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_top, Block &_block)
 {
-  long top = _top[0].fixnum;
-  if (_top[0].type != RubyValue::RV_FIXNUM) {	// XXX: Bignum?
-    std::cerr << "fixnum_upto: not a numeric argument" << std::endl;	// XXX: exception
-    throw;
-  }
+  long top = _top[0].get_fixnum();
 
-  for (long i = _self.fixnum; i <= top; ++i)
+  for (long i = _self.get_fixnum(); i <= top; ++i)
     _block.call(_b, RubyValue::from_fixnum(i));
   return _self;
 }

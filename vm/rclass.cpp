@@ -3,6 +3,7 @@
 #include "renvironment.h"
 #include "rmethod.h"
 #include "rstring.h"
+#include "rarray.h"
 
 RubyClass *RubyClass::create_class(RubyEnvironment &_e, const std::string &_name)
 {
@@ -53,6 +54,8 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     // case _e.Binding: return new 
   else if (this == _e.String)
     return _e.gc.track(new RubyString(_e, "" /* XXX */));
+  else if (this == _e.Array)
+    return _e.gc.track(new RubyArray(_e));
   else
     return new RubyObject(this);
 
@@ -80,7 +83,7 @@ void RubyClassEI::init(RubyEnvironment &_e)
 
 RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  RubyClass *s = dynamic_cast<RubyClass *>(_self.object);
+  RubyClass *s = _self.get_special<RubyClass>();
   RubyObject *i = s->new_instance(_b->environment);
   return RubyValue::from_object(i);
 }

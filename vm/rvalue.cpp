@@ -71,6 +71,17 @@ bool RubyValue::truthy(RubyEnvironment &_e) const
     default: std::cerr << "RubyValue::truthy: my type is unknown" << std::endl; throw;
   }
 }
+
+long RubyValue::get_fixnum() const
+{
+  if (type != RubyValue::RV_FIXNUM) {
+    std::cerr << "RubyValue::get_fixnum: not a Fixnum!" << std::endl;
+    // XXX throw an exception here.
+    throw;
+  }
+
+  return fixnum;
+}
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name) const
 { return get_method(_name, _b->environment)->call(_b, *this); }
 

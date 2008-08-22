@@ -1,13 +1,14 @@
+#include <iostream>
+#include <algorithm>
+#include <functional>
 #include "renvironment.h"
 #include "rstring.h"
 #include "rnumeric.h"
 #include "rkernel.h"
 #include "rbinding.h"
 #include "rtri.h"
+#include "rarray.h"
 #include "stlext.h"
-#include <iostream>
-#include <algorithm>
-#include <functional>
 
 RubyEnvironment::RubyEnvironment()
 {
@@ -24,6 +25,7 @@ RubyEnvironment::RubyEnvironment()
 
   RubyNumericEI().init(*this);
   RubyStringEI().init(*this);
+  RubyArrayEI().init(*this);
 
   main = new RubyObject(new NamedLazyClass(*this, "Object"));
 }
