@@ -83,8 +83,6 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
       // I_TARGET_DEF
       case I_DEF: {
-	std::cerr << "DEF" << std::endl;
-	
 	std::string name = r.read_string();
 	uint32 arg_count = r.read_uint32();
 

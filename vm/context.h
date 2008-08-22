@@ -17,7 +17,7 @@
 class Context
 {
   public:
-    Context(RubyEnvironment &, RubyValue);
+    Context(RubyEnvironment &, RubyValue, RubyClass *);
     Context(linked_ptr<Binding> &);
 
     RubyMethod *get_method(const std::string &) const;
@@ -29,6 +29,7 @@ class Context
     void assign(const std::string &, RubyValue);
 
     linked_ptr<Binding> binding;
+    RubyClass *def_target;		// where `def' points to.
 };
 
 #endif

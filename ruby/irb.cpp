@@ -24,7 +24,7 @@ int irb(int, char **)
   pb = &p;
 
   RubyEnvironment e;
-  Context *c = new Context(e, RubyValue::from_object(e.main));
+  Context *c = new Context(e, RubyValue::from_object(e.main), e.Object);
 
   line_count = 0;
   while (true) {

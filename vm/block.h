@@ -18,6 +18,7 @@ class Block
 
     std::string code;
     std::vector<std::string> args;
+    RubyClass *def_target;
 };
 
 #endif

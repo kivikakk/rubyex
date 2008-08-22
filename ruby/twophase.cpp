@@ -22,7 +22,7 @@ int twophase(int, char **)
   std::istringstream iss(oss.str());
   RubyEnvironment e;
   Reader reader(iss);
-  Context *c = new Context(e, RubyValue::from_object(e.main));
+  Context *c = new Context(e, RubyValue::from_object(e.main), e.Object);
 
   process(e, reader, c, NULL);
 
