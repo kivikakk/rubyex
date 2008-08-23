@@ -47,11 +47,7 @@
 
 <dbstr>\\(.|\n)	string_buf += yytext[1];
 
-<dbstr>[^\\\n\"]+		{
-		  char *yptr = yytext;
-		  while (*yptr)
-		    string_buf += *yptr++;
-		}
+<dbstr>[^\\\n\"]+	string_buf += yytext;
 
 '			{
 		  string_buf = "";
@@ -69,6 +65,10 @@
 		  yylval.string_literal = new StringLiteralExpr(string_buf);
 		  return STRING_LITERAL;
 		}
+<sstr>\n		string_buf += '\n';
+<sstr>\\('|\\)		string_buf += yytext[1];
+<sstr>\\[^'\\]		string_buf += yytext;
+<sstr>[^\\\n\']+	string_buf += yytext;
 
 ==		{ return EQ; }
 !=		{ return NEQ; }
