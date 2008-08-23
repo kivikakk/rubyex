@@ -12,10 +12,30 @@
 %s block_args
 
 %{
-  std::string string_buf; bool doing_symbol = false;
+  std::string string_buf;
+  bool doing_symbol = false;
+
+  typedef struct {
+    std::string identifier;
+    int literal;
+  } ident_t;
 %}
 
+
 %%
+
+==		{ return EQ; }
+!=		{ return NEQ; }
+\<=		{ return LE; }
+>=		{ return GE; }
+
+=>		{ return ASSOC; }
+
+def		{ return DEF; }
+if		{ return IF; }
+else		{ return ELSE; }
+elsif		{ return ELSIF; }
+unless		{ return UNLESS; }
 
 #[^\n]*		{ }
 
@@ -70,19 +90,6 @@
 <sstr>\\('|\\)		string_buf += yytext[1];
 <sstr>\\[^'\\]		string_buf += yytext;
 <sstr>[^\\\n\']+	string_buf += yytext;
-
-==		{ return EQ; }
-!=		{ return NEQ; }
-\<=		{ return LE; }
->=		{ return GE; }
-
-=>		{ return ASSOC; }
-
-def		{ return DEF; }
-if		{ return IF; }
-else		{ return ELSE; }
-elsif		{ return ELSIF; }
-unless		{ return UNLESS; }
 
 true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }
 false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_LITERAL; }
@@ -195,6 +202,7 @@ end			{
 			yylval.identifier = new IdentifierExpr(s);
 			if (s == "do") {
 			  std::cerr << "Returning DO by backdoor" << std::endl; // XXX XXX
+			  unput('{');
 			  return DO;
 			}
 			unput('{'); unput(')'); unput('(');
