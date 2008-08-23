@@ -147,10 +147,22 @@ ExprList::ExprList(Expr *first) {
   // FuncCallExpr will be responsible for this->args' members later.
 }
 
+ExprList::ExprList(Expr *first, Expr *second) {
+  this->args.push_back(first); this->args.push_back(second);
+  // FuncCallExpr will be responsible for this->args' members later.
+}
+
 ExprList::ExprList(ExprList *combine, Expr *also) {
-  for (std::list<Expr *>::iterator it = combine->args.begin(); it != combine->args.end(); ++it)
-    this->args.push_back(*it);
+  this->args = combine->args;
   this->args.push_back(also);
+
+  delete combine;
+}
+
+ExprList::ExprList(ExprList *combine, Expr *also, Expr *and_even) {
+  this->args = combine->args;
+  this->args.push_back(also);
+  this->args.push_back(and_even);
 
   delete combine;
 }
@@ -168,8 +180,7 @@ DefListExpr::DefListExpr(IdentifierExpr *first) {
 }
 
 DefListExpr::DefListExpr(DefListExpr *combine, IdentifierExpr *also) {
-  for (std::list<IdentifierExpr *>::iterator it = combine->args.begin(); it != combine->args.end(); ++it)
-    this->args.push_back(*it);
+  this->args = combine->args;
   this->args.push_back(also);
 
   delete combine;

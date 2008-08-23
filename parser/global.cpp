@@ -32,3 +32,12 @@ bool in_context()
   return (context_depths > 0);
 }
 
+std::string filter_underscores(const std::string &_in)
+{
+  std::string s = _in;
+  unsigned long idx;
+  while ((idx = s.find('_')) != std::string::npos)
+    s.erase(idx, 1);
+  return s;
+}
+

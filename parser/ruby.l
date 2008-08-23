@@ -75,6 +75,8 @@
 \<=		{ return LE; }
 >=		{ return GE; }
 
+=>		{ return ASSOC; }
+
 def		{ return DEF; }
 if		{ return IF; }
 else		{ return ELSE; }
@@ -135,11 +137,13 @@ end			{
 		  return '}';
 		}
 
--?[0-9]+\.[0-9]+	{ yylval.floating_literal = new FloatingLiteralExpr(atof(yytext)); return FLOATING_LITERAL; }
+-?[0-9][0-9_]*[0-9]\.[0-9][0-9_]*[0-9]	{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; /* Not happy with this. */ }
+-?[0-9]\.[0-9][0-9_]*[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
+-?[0-9][0-9_]*[0-9]\.[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
+-?[0-9]\.[0-9]				{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
 
--?[0-9]+			{ yylval.integer_literal = new IntegerLiteralExpr(atoi(yytext)); return INTEGER_LITERAL; }
-
-
+-?[0-9][0-9_]*[0-9]			{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
+-?[0-9]					{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
 
 
 [a-zA-Z][a-zA-Z0-9_]*[!?]\(?	{

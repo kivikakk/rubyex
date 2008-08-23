@@ -44,5 +44,7 @@ void enter_context(); void enter_context_line();
 void exit_context(); void exit_context_line();
 bool in_context();
 
+std::string filter_underscores(const std::string &);
+
 #endif
 

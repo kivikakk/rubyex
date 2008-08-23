@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <list>
+#include <map>
 #include "pretty.h"
 #include "emitter.h"
 
@@ -82,18 +83,20 @@ class NilLiteralExpr : public LiteralExpr
     void push(std::ostream &) const;
 };
 
-class ExprList : public Expr
+class ExprList
 {
   public:
     ExprList();
     ExprList(Expr *);
+    ExprList(Expr *, Expr *);
     ExprList(ExprList *, Expr *);
+    ExprList(ExprList *, Expr *, Expr *);
     virtual ~ExprList();
 
     std::list<Expr *> args;
 };
 
-class DefListExpr : public Expr
+class DefListExpr
 {
   public:
     DefListExpr(IdentifierExpr *);

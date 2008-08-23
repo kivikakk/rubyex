@@ -3,3 +3,6 @@ Game plan:
  * stdio
  * exceptions
  * irb
+
+Minor things:
+ * our float range sucks (double). Fix.

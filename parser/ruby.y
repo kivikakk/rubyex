@@ -31,7 +31,7 @@
 
 %type <expr> line expr compiled_expr
 %type <block> block
-%type <exprlist> exprlist opt_exprlist
+%type <exprlist> exprlist opt_exprlist hashlist
 %type <deflist> deflist block_arguments block_argument_contents funcdef_args
 %type <literal> literal
 %type <funccall> funccall
@@ -52,7 +52,7 @@
 %left '='
 
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL
-%nonassoc '.'
+%nonassoc '.' ASSOC
 %left '(' ')'
 %left DO END
 %left '{' '}'
@@ -105,6 +105,7 @@ expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
 	      | expr GE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
 	      | '(' expr ')'		{ $$ = $2; }
 	      | '[' opt_exprlist ']'	{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
+	      | '{' hashlist '}'	{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
 	      | conditional		{ $$ = $1; }
 ;
 
@@ -134,14 +135,18 @@ exprlist:	compiled_expr			{ $$ = new ExprList($1); }
 	      |	exprlist ',' compiled_expr	{ $$ = new ExprList($1, $3); }
 ;
 
-opt_exprlist:
-		/* empty */			{ $$ = new ExprList(); }
+opt_exprlist:	/* empty */			{ $$ = new ExprList(); }
 	      | exprlist			{ $$ = $1; }
 ;
 
 /* deflist is for function/block argument definitions. one or more. */
 deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 	      | deflist ',' IDENTIFIER	{ $$ = new DefListExpr($1, $3); }
+;
+
+hashlist:	/* empty */					{ $$ = new ExprList(); }
+	      | compiled_expr ASSOC compiled_expr		{ $$ = new ExprList($1, $3); }
+	      | hashlist ',' compiled_expr ASSOC compiled_expr	{ $$ = new ExprList($1, $3, $5); }
 ;
 
 block:		
