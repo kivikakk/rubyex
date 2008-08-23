@@ -9,6 +9,8 @@
 
 RubyValue fixnum_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_multiply(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_subtract(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue fixnum_divide(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_neq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_lt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -27,6 +29,8 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   // TODO: undefine Fixnum's `new'? or just redefine Numeric#new to throw a method not found error?
   rb_cFixnum->add_method("+", RubyMethod::Create(fixnum_add, 1));
   rb_cFixnum->add_method("*", RubyMethod::Create(fixnum_multiply, 1));
+  rb_cFixnum->add_method("-", RubyMethod::Create(fixnum_subtract, 1));
+  rb_cFixnum->add_method("/", RubyMethod::Create(fixnum_divide, 1));
   rb_cFixnum->add_method("!=", RubyMethod::Create(fixnum_neq, 1));
   rb_cFixnum->add_method("==", RubyMethod::Create(fixnum_eq, 1));
   rb_cFixnum->add_method("<", RubyMethod::Create(fixnum_lt, 1));
@@ -52,6 +56,12 @@ RubyValue fixnum_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
 
 RubyValue fixnum_multiply(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 { return RubyValue::from_fixnum(_self.get_fixnum() * _operand[0].get_fixnum()); }
+
+RubyValue fixnum_subtract(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return RubyValue::from_fixnum(_self.get_fixnum() - _operand[0].get_fixnum()); }
+
+RubyValue fixnum_divide(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
+{ return RubyValue::from_fixnum(_self.get_fixnum() / _operand[0].get_fixnum()); }
 
 RubyValue fixnum_neq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 { return _b->environment.get_truth(_self.get_fixnum() != _operand[0].get_fixnum()); }
@@ -81,7 +91,7 @@ RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
 {
   for (long i = 0; i < _self.get_fixnum(); ++i)
-    _block.call(_b);
+    _block.call(_b, RubyValue::from_fixnum(i));
   return _self;
 }
 

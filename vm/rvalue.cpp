@@ -6,6 +6,13 @@
 RubyValue::RubyValue(): type(RV_NOTHING)
 { }
 
+bool RubyValue::operator <(const RubyValue &_rhs) const
+{
+  if (type != _rhs.type)
+    return type < _rhs.type;
+  return fixnum < _rhs.fixnum;
+}
+
 RubyValue RubyValue::from_fixnum(long _value)
 { return RubyValue(_value); }
 

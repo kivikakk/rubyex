@@ -94,7 +94,7 @@ RubyValue array_inspect(linked_ptr<Binding> &_b, RubyValue _self)
     else
       start = false;
 
-      oss << it->call(_b, "inspect").get_special<RubyString>()->string_value;
+    oss << it->call(_b, "inspect").get_special<RubyString>()->string_value;
   }
   oss << "]";
 

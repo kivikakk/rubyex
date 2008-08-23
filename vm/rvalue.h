@@ -18,6 +18,8 @@ class RubyValue
   public:
     RubyValue();
 
+    bool operator <(const RubyValue &) const;	// needed to use RV as a STL map key
+
     static RubyValue from_fixnum(long);
     static RubyValue from_symbol(RubySymbol *);
     static RubyValue from_object(RubyObject *);

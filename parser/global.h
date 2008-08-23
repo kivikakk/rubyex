@@ -2,7 +2,7 @@
 #define GLOBAL_H
 
 #ifndef DEBUG
-#define DEBUG true
+#define DEBUG false
 #endif
 
 #define IF_DEBUG if (DEBUG)

@@ -8,6 +8,7 @@
 #include "rbinding.h"
 #include "rtri.h"
 #include "rarray.h"
+#include "rhash.h"
 #include "stlext.h"
 
 RubyEnvironment::RubyEnvironment()
@@ -26,6 +27,7 @@ RubyEnvironment::RubyEnvironment()
   RubyNumericEI().init(*this);
   RubyStringEI().init(*this);
   RubyArrayEI().init(*this);
+  RubyHashEI().init(*this);
 
   main = new RubyObject(new NamedLazyClass(*this, "Object"));
 }

@@ -178,15 +178,29 @@ end			{
 
 		/* There's gotta be a more succint way to do these. */
 
--?[0-9][0-9_]*[0-9]\.[0-9][0-9_]*[0-9]	{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
--?[0-9]\.[0-9][0-9_]*[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
--?[0-9][0-9_]*[0-9]\.[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
--?[0-9]\.[0-9]				{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
+  /*
+[ \t]-?[0-9][0-9_]*[0-9]\.[0-9][0-9_]*[0-9]	{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
+[ \t]-?[0-9]\.[0-9][0-9_]*[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
+[ \t]-?[0-9][0-9_]*[0-9]\.[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
+[ \t]-?[0-9]\.[0-9]				{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
 
--?[0-9][0-9_]*[0-9]			{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
--?[0-9]					{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
+[ \t]-?[0-9][0-9_]*[0-9]			{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
+[ \t]-?[0-9]					{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
+  */
 
+  /* This is one way by which we can get seemingly correct results for
+   * `n-3', `n -3', `n - 3', etc. But here, it's horribly ugly and
+   * probably not done right. TODO: The above code is for allowing
+   * underscores in number literals. We need to recombine these rules
+   * (i.e. refactor both above and below somehow, then combine) without
+   * things going everywhere. */
 
+[0-9]+\.[0-9]+			{ yylval.floating_literal = 	new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); 	return FLOATING_LITERAL; }
+[0-9]+				{ yylval.integer_literal = 	new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); 	return INTEGER_LITERAL; }
+^-[0-9]+\.[0-9]+		{ yylval.floating_literal = 	new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); 	return FLOATING_LITERAL; }
+^-[0-9]+			{ yylval.integer_literal = 	new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); 	return INTEGER_LITERAL; }
+[ \t]-[0-9]+\.[0-9]+		{ yylval.floating_literal = 	new FloatingLiteralExpr(atof(filter_underscores(yytext + 1).c_str())); 	return FLOATING_LITERAL; }
+[ \t]-[0-9]+			{ yylval.integer_literal = 	new IntegerLiteralExpr(atoi(filter_underscores(yytext + 1).c_str())); 	return INTEGER_LITERAL; }
 
       /* XXX: should we include keyword checks here? */
 
