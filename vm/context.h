@@ -18,7 +18,7 @@ class Context
 {
   public:
     Context(RubyEnvironment &, RubyValue, RubyClass *);
-    Context(linked_ptr<Binding> &);
+    Context(linked_ptr<Binding> &, RubyClass *);
 
     RubyMethod *get_method(const std::string &) const;
 
