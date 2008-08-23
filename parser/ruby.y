@@ -145,8 +145,8 @@ deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 ;
 
 block:		
-	      DO block_arguments sub_content END	{ $$ = new BlockExpr($3); $$->args = $2; }
-	      |	'{' block_arguments sub_content '}'	{ $$ = new BlockExpr($3); $$->args = $2; }
+	      DO block_arguments sub_content END	{ $$ = new BlockExpr($3); $$->take_deflist($2); }
+	      |	'{' block_arguments sub_content '}'	{ $$ = new BlockExpr($3); $$->take_deflist($2); }
 ;
 
 block_arguments:

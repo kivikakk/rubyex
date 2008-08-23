@@ -88,6 +88,7 @@ class ExprList : public Expr
     ExprList();
     ExprList(Expr *);
     ExprList(ExprList *, Expr *);
+    virtual ~ExprList();
 
     std::list<Expr *> args;
 };
@@ -97,8 +98,7 @@ class DefListExpr : public Expr
   public:
     DefListExpr(IdentifierExpr *);
     DefListExpr(DefListExpr *, IdentifierExpr *);
-
-    void p() const; 
+    virtual ~DefListExpr();
 
     std::list<IdentifierExpr *> args;
 };
@@ -108,11 +108,14 @@ class BlockExpr : public Expr
   public:
     BlockExpr();
     BlockExpr(Procedure *);
+    virtual ~BlockExpr();
+
+    void take_deflist(DefListExpr *);
 
     void p() const;
     void push(std::ostream &) const;
 
-    DefListExpr *args;
+    std::list<IdentifierExpr *> args;
     Procedure *proc;
 };
 
@@ -132,6 +135,7 @@ class FuncCallExpr : public Expr
 {
   public:
     FuncCallExpr(Expr *, IdentifierExpr *, ExprList *, BlockExpr *);
+    virtual ~FuncCallExpr();
 
     void p() const;
     void emit(std::ostream &) const;
@@ -147,6 +151,7 @@ class AssignmentExpr : public Expr
 {
   public:
     AssignmentExpr(IdentifierExpr *, Expr *);
+    virtual ~AssignmentExpr();
 
     void p() const;
     void emit(std::ostream &) const;
@@ -160,13 +165,14 @@ class FuncDefExpr : public Expr
 {
   public:
     FuncDefExpr(Expr *, IdentifierExpr *, DefListExpr *, Procedure *);
+    virtual ~FuncDefExpr();
 
     void p() const;
     void emit(std::ostream &) const;
 
     Expr *target;
     IdentifierExpr *name;
-    DefListExpr *args;
+    std::list<IdentifierExpr *> args;
     Procedure *proc;
 };
 
@@ -174,6 +180,7 @@ class ConditionalExpr : public Expr
 {
   public:
     ConditionalExpr(Expr *, Procedure *, Procedure *);
+    virtual ~ConditionalExpr();
 
     Expr *condition;
     Procedure *on_true, *on_false;
@@ -187,6 +194,7 @@ class Program : public PrettyPrint, public Emitter
   public:
     Program();
     Program(std::ostream &);
+    virtual ~Program();
     Expr *operator[](int);
 
     void add_expression(Expr *);

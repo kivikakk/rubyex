@@ -42,7 +42,7 @@ int irb(int, char **)
     yy_scan_string(input.c_str());
     bytecode.str("");
     p.reset_emitted_flag();
-    int r = yyparse(&p);
+    int r = yyparse(pb);
     if (r != 0)
       return r;
     

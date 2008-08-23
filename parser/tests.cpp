@@ -478,7 +478,7 @@ void _block_args()
   ASSERT(simple->target == NULL);
   ASSERT(simple->name == "simple");
   $(BlockExpr, simple_block, simple->block);
-  ASSERT(!simple_block->args || simple_block->args->args.size() == 0);
+  ASSERT(simple_block->args.size() == 0);
   ASSERT(simple_block->proc->expressions.size() == 0);
 
 
@@ -487,9 +487,8 @@ void _block_args()
   ASSERT(one->target == NULL);
   ASSERT(one->name == "one");
   $(BlockExpr, one_block, one->block);
-  $(DefListExpr, one_block_args, one_block->args);
-  ASSERT(one_block_args->args.size() == 1);
-  $(IdentifierExpr, a, *one_block_args->args.begin());
+  ASSERT(one_block->args.size() == 1);
+  $(IdentifierExpr, a, *one_block->args.begin());
   ASSERT(a->id == "a");
   ASSERT(one_block->proc->expressions.size() == 1);
   $(IdentifierExpr, pink, *one_block->proc->expressions.begin());
@@ -500,9 +499,8 @@ void _block_args()
   ASSERT(many->target == NULL);
   ASSERT(many->name == "many");
   $(BlockExpr, many_block, many->block);
-  $(DefListExpr, many_block_args, many_block->args);
-  ASSERT(many_block_args->args.size() == 3);
-  std::list<IdentifierExpr *>::const_iterator it = many_block_args->args.begin();
+  ASSERT(many_block->args.size() == 3);
+  std::list<IdentifierExpr *>::iterator it = many_block->args.begin();
   { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "x"); } ++it;
   { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "y"); } ++it;
   { $(IdentifierExpr, itx, *it); ASSERT(itx->id == "z"); }

@@ -155,6 +155,14 @@ ExprList::ExprList(ExprList *combine, Expr *also) {
   delete combine;
 }
 
+ExprList::~ExprList() {
+  // NOTE: WE DO NOTHING!
+  // this->args is taken directly by all of the objects that use us!
+  // If we eliminated our arguments, we'd be in trouble when combining with
+  // ourselves also (since that `delete's the one we combined with,
+  // see ExprList(ExprList*, Expr*) above.
+}
+
 DefListExpr::DefListExpr(IdentifierExpr *first) {
   this->args.push_back(first);
 }
@@ -167,25 +175,38 @@ DefListExpr::DefListExpr(DefListExpr *combine, IdentifierExpr *also) {
   delete combine;
 }
 
-void DefListExpr::p() const
+DefListExpr::~DefListExpr() {
+  // See ~ExprList() for an explanation.
+}
+
+BlockExpr::BlockExpr(): proc(NULL)
+{ }
+
+BlockExpr::BlockExpr(Procedure *_proc): proc(_proc)
+{ }
+
+BlockExpr::~BlockExpr()
 {
-  for (std::list<IdentifierExpr *>::const_iterator it = this->args.begin(); it != this->args.end(); ++it) {
-    if (it != this->args.begin()) std::cout << ", ";
-    (*it)->p();
+  delete proc;
+}
+
+void BlockExpr::take_deflist(DefListExpr *_dl)
+{
+  // this may be called with NULLs. (see `block:' section of ruby.y)
+  if (_dl) {
+    args = _dl->args;		// responsibility.
+    delete _dl;
   }
 }
 
-BlockExpr::BlockExpr(): args(NULL), proc(NULL)
-{ }
-
-BlockExpr::BlockExpr(Procedure *_proc): args(NULL), proc(_proc)
-{ }
-
 void BlockExpr::p() const
 {
-  if (args) {
+  if (args.size() > 0) {
     std::cout << "|";
-    args->p();
+    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it) {
+      if (it != args.begin()) std::cout << ", ";
+      (*it)->p();
+    }
     std::cout << "| ";
   }
 
@@ -196,9 +217,9 @@ void BlockExpr::push(std::ostream &o) const
 {
   emit_instruction(o, I_CONSTRUCT_BLOCK);
   
-  if (args) {
-    emit_uint32(o, args->args.size());
-    for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it)
+  if (args.size() > 0) {
+    emit_uint32(o, args.size());
+    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it)
       emit_string(o, (*it)->id);
   } else
     emit_uint32(o, 0);
@@ -209,8 +230,10 @@ void BlockExpr::push(std::ostream &o) const
 
 YieldExpr::YieldExpr(ExprList *_args)
 {
-  if (_args)
+  if (_args) {
     this->args = _args->args;	// we take responsibility here.
+    delete _args;
+  }
 }
 
 void YieldExpr::p() const
@@ -244,11 +267,22 @@ void YieldExpr::push(std::ostream &o) const {
 FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ExprList *_args, BlockExpr *_block): target(_target), block(_block)
 {
   this->name = _name->id;
-  if (_args)
+  if (_args) {
     this->args = _args->args;	// we take responsibility here.
+    delete _args;
+  }
 
   delete _name;
 }
+
+FuncCallExpr::~FuncCallExpr()
+{
+  delete target;
+  for (std::list<Expr *>::iterator it = this->args.begin(); it != this->args.end(); ++it)
+    delete *it;
+  delete block;
+}
+  
 
 void FuncCallExpr::p() const
 {
@@ -301,6 +335,10 @@ AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
   delete _name;
 }
 
+AssignmentExpr::~AssignmentExpr() {
+  delete value;
+}
+
 void AssignmentExpr::p() const {
   std::cout << this->name << " = ";
   this->value->p();
@@ -317,8 +355,23 @@ void AssignmentExpr::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH_LAST);
 }
 
-FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, DefListExpr *_args, Procedure *_proc): target(_target), name(_name), args(_args), proc(_proc)
-{ }
+FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, DefListExpr *_args, Procedure *_proc): target(_target), name(_name), proc(_proc)
+{
+  if (_args) {
+    this->args = _args->args;
+    delete _args;		// responsibility.
+  }
+}
+
+FuncDefExpr::~FuncDefExpr()
+{
+  for (std::list<IdentifierExpr *>::iterator it = args.begin(); it != args.end(); ++it)
+    delete *it;
+  delete target;
+  delete name;
+  delete proc;
+}
+  
 
 void FuncDefExpr::p() const
 {
@@ -329,10 +382,10 @@ void FuncDefExpr::p() const
     std::cout << ").";
   }
   name->p();
-  if (args) {
+  if (args.size() > 0) {
     std::cout << "(";
-    for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it) {
-      if (it != args->args.begin()) std::cout << ", ";
+    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it) {
+      if (it != args.begin()) std::cout << ", ";
       (*it)->p();
     }
     std::cout << ")";
@@ -350,9 +403,9 @@ void FuncDefExpr::emit(std::ostream &o) const
   emit_instruction(o, target ? I_TARGET_DEF : I_DEF);
   emit_string(o, name->id);
   // if these change from identifiers, might we need to push them instead? I'm not sure what's semantically more correct.
-  if (args) {
-    emit_uint32(o, args->args.size());
-    for (std::list<IdentifierExpr *>::const_iterator it = args->args.begin(); it != args->args.end(); ++it)
+  if (args.size() > 0) {
+    emit_uint32(o, args.size());
+    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it)
       emit_string(o, (*it)->id);
   } else
     emit_uint32(o, 0);
@@ -365,6 +418,15 @@ void FuncDefExpr::emit(std::ostream &o) const
 
 ConditionalExpr::ConditionalExpr(Expr *_condition, Procedure *_on_true, Procedure *_on_false): condition(_condition), on_true(_on_true), on_false(_on_false)
 { }
+
+ConditionalExpr::~ConditionalExpr()
+{
+  delete condition;
+  if (on_true)
+    delete on_true;
+  if (on_false)
+    delete on_false;
+}
 
 void ConditionalExpr::p() const
 {
@@ -425,6 +487,7 @@ void Program::add_expression(Expr *expression) {
     if (emit_as_we_go) {
       emitted_yet = true;
       expression->emit(*emitter_stream);
+      delete expression;
     } else
       this->expressions.push_back(expression);
   }
@@ -435,6 +498,12 @@ Program::Program(): emit_as_we_go(false)
 
 Program::Program(std::ostream &o): emit_as_we_go(true), emitted_yet(false), emitter_stream(&o)
 { }
+
+Program::~Program()
+{
+  for (std::list<Expr *>::iterator it = expressions.begin(); it != expressions.end(); ++it)
+    delete *it;
+}
 
 Expr *Program::operator[](int index) {
   std::list<Expr *>::iterator it = expressions.begin();
