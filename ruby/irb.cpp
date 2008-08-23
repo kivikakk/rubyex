@@ -28,7 +28,7 @@ int irb(int, char **)
 
   line_count = 0;
   while (true) {
-    std::cout << "rxi(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":0> ";
+    std::cout << "rxi(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":" << context_depths << "> ";
 
     std::string input;
     std::getline(std::cin, input);
@@ -64,7 +64,7 @@ int irb_yywrap()
   if (pb->emitted_flag())
     return 1;
 
-  std::cout << "rxi(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":0* ";
+  std::cout << "rxi(main):" << std::setfill('0') << std::setw(3) << ++line_count << ":" << context_depths << "* ";
   std::string input;
   std::getline(std::cin, input);
   if (std::cin.eof()) {
