@@ -44,6 +44,8 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
 RubyValue object_inspect_to_s(linked_ptr<Binding> &, RubyValue);
 RubyValue object_send(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue object_class(linked_ptr<Binding> &, RubyValue);
+RubyValue object_eql(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue object_neql(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
@@ -52,6 +54,9 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect_to_s));
   rb_cObject->add_method("to_s", RubyMethod::Create(object_inspect_to_s));
   rb_cObject->add_method("send", RubyMethod::Create(object_send, ARGS_ARBITRARY));
+
+  rb_cObject->add_method("eql?", RubyMethod::Create(object_eql, ARGS_ARBITRARY));
+  rb_cObject->add_method("!=", RubyMethod::Create(object_neql, 1));
 
   rb_cObject->add_method("class", RubyMethod::Create(object_class));
   rb_cObject->include_module(_e.Kernel);
@@ -95,5 +100,15 @@ RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
 RubyValue object_class(linked_ptr<Binding> &_b, RubyValue _self)
 {
   return RubyValue::from_object(_self.get_class(_b->environment));
+}
+
+RubyValue object_eql(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  return _self.call(_b, "==", _args);
+}
+
+RubyValue object_neql(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  return _b->environment.get_truth(!_self.call(_b, "==", _args).truthy(_b->environment));
 }
 

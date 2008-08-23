@@ -9,6 +9,7 @@ RubyValue array_new_length(linked_ptr<Binding> &, RubyValue, const std::vector<R
 RubyValue array_new_copies(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_new_idx(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue array_index_assign_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_each(linked_ptr<Binding> &, RubyValue, Block &);
 RubyValue array_inspect(linked_ptr<Binding> &, RubyValue);
 RubyValue array_to_s(linked_ptr<Binding> &, RubyValue);
@@ -20,6 +21,7 @@ void RubyArrayEI::init(RubyEnvironment &_e)
   rb_cArray->add_metaclass_method(_e, "[]", RubyMethod::Create(array_new_idx, ARGS_ARBITRARY));
 
   rb_cArray->add_method("[]", RubyMethod::Create(array_index_op, 1));
+  rb_cArray->add_method("[]=", RubyMethod::Create(array_index_assign_op, 2));
   rb_cArray->add_method("each", RubyMethod::Create(array_each));
   rb_cArray->add_method("inspect", RubyMethod::Create(array_inspect));
   rb_cArray->add_method("to_s", RubyMethod::Create(array_to_s));
@@ -70,6 +72,27 @@ RubyValue array_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::ve
     return _b->environment.NIL;
 
   return arr->data[index];
+}
+
+RubyValue array_index_assign_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyArray *arr = _self.get_special<RubyArray>();
+  long index = _args[0].get_fixnum();
+  long my_size = arr->data.size();
+
+  if (index < 0)
+    index += my_size;
+
+  if (index < 0) {
+    std::cerr << "IndexError: index " << _args[0].get_fixnum() << " out of array" << std::endl;
+    throw;
+  }
+
+  while ((unsigned long)index >= arr->data.size())
+    arr->data.push_back(_b->environment.NIL);
+
+  arr->data[index] = _args[1];
+  return _args[1];
 }
 
 RubyValue array_each(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)

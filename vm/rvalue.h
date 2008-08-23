@@ -31,11 +31,8 @@ class RubyValue
     long get_fixnum() const;
     template <typename X> X *get_special() const
     {
-      if (type != RV_OBJECT) {
-	std::cerr << "RubyValue::get_special: not an object" << std::endl;
-	throw; /* XXX */
-      }
-      return dynamic_cast<X *>(object);
+      if (type != RV_OBJECT) return NULL;
+      return dynamic_cast<X *>(object);		/* dynamic_cast returns NULL on failure */
     }
 
     RubyValue call(linked_ptr<Binding> &, const std::string &) const;

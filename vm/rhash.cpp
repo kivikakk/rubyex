@@ -8,6 +8,7 @@ RubyValue hash_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue
 RubyValue hash_new_default(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_new_idx(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue hash_index_assign_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_each(linked_ptr<Binding> &, RubyValue, Block &);
 RubyValue hash_inspect(linked_ptr<Binding> &, RubyValue);
 RubyValue hash_to_s(linked_ptr<Binding> &, RubyValue);
@@ -19,6 +20,7 @@ void RubyHashEI::init(RubyEnvironment &_e)
   rb_cHash->add_metaclass_method(_e, "[]", RubyMethod::Create(hash_new_idx, ARGS_ARBITRARY));
 
   rb_cHash->add_method("[]", RubyMethod::Create(hash_index_op, 1));
+  rb_cHash->add_method("[]=", RubyMethod::Create(hash_index_assign_op, 2));
   rb_cHash->add_method("each", RubyMethod::Create(hash_each));
   rb_cHash->add_method("inspect", RubyMethod::Create(hash_inspect));
   rb_cHash->add_method("to_s", RubyMethod::Create(hash_to_s));
@@ -52,9 +54,14 @@ RubyValue hash_new_idx(linked_ptr<Binding> &_b, RubyValue _self, const std::vect
 RubyValue hash_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyHash *hash = _self.get_special<RubyHash>();
-  RubyValue index = _args[0];
+  return hash->get(_b, _args[0]);
+}
 
-  return hash->get(_b, index);
+RubyValue hash_index_assign_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyHash *hash = _self.get_special<RubyHash>();
+  hash->set(_b, _args[0], _args[1]);
+  return _args[1];
 }
 
 RubyValue hash_each(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
@@ -146,7 +153,7 @@ RubyHash::internal_t::iterator RubyHash::matching_key(linked_ptr<Binding> &_b, R
 {
   // pay close attention to the muso/French/? joke in the signature. (no, there is no context)
   for (internal_t::iterator it = data.begin(); it != data.end(); ++it)
-    if (_compere.call(_b, "eql?", _compere).truthy(_b->environment))
+    if (_compere.call(_b, "eql?", it->first).truthy(_b->environment))
       return it;
   return data.end();
 }

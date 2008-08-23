@@ -7,6 +7,7 @@
 #include "rmethod.h"
 #include "rstring.h"
 
+RubyValue fixnum_negate(linked_ptr<Binding> &, RubyValue);
 RubyValue fixnum_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_multiply(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_subtract(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -27,6 +28,7 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   // TODO: the whole Numeric, Fixnum, Bignum, etc. class hierarchy.
   RubyClass *rb_cFixnum = RubyClass::create_class(_e, "Fixnum");
   // TODO: undefine Fixnum's `new'? or just redefine Numeric#new to throw a method not found error?
+  rb_cFixnum->add_method("-@", RubyMethod::Create(fixnum_negate));
   rb_cFixnum->add_method("+", RubyMethod::Create(fixnum_add, 1));
   rb_cFixnum->add_method("*", RubyMethod::Create(fixnum_multiply, 1));
   rb_cFixnum->add_method("-", RubyMethod::Create(fixnum_subtract, 1));
@@ -51,6 +53,9 @@ void RubyNumericEI::init(RubyEnvironment &_e)
 }
 
 // XXX bignum
+RubyValue fixnum_negate(linked_ptr<Binding> &_b, RubyValue _self)
+{ return RubyValue::from_fixnum(-_self.get_fixnum()); }
+
 RubyValue fixnum_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 { return RubyValue::from_fixnum(_self.get_fixnum() + _operand[0].get_fixnum()); }
 

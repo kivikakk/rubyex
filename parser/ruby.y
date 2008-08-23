@@ -85,7 +85,9 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	SYMBOL					{ $$ = $1; }
 	      | literal					{ $$ = $1; }
 	      | IDENTIFIER '[' exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
+	      | IDENTIFIER '[' exprlist ']' '=' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
+	      | expr '[' exprlist ']' '=' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '.' funccall 			{ $3->target = $1; $$ = $3; }
 	      | expr '.' IDENTIFIER opt_block  		{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
 	      | expr '.' FUNCTION_CALL opt_block	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }

@@ -8,6 +8,7 @@
 #include "rmethod.h"
 
 RubyValue string_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue string_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_reverse(linked_ptr<Binding> &, RubyValue);
 RubyValue string_capitalize(linked_ptr<Binding> &, RubyValue);
@@ -19,6 +20,7 @@ void RubyStringEI::init(RubyEnvironment &_e)
   RubyClass *rb_cString = RubyClass::create_class(_e, "String");
   rb_cString->add_metaclass_method(_e, "new", RubyMethod::Create(string_new, ARGS_ARBITRARY));
 
+  rb_cString->add_method("==", RubyMethod::Create(string_eq, 1));
   rb_cString->add_method("+", RubyMethod::Create(string_add, 1));
   rb_cString->add_method("reverse", RubyMethod::Create(string_reverse));
   rb_cString->add_method("capitalize", RubyMethod::Create(string_capitalize));
@@ -38,6 +40,15 @@ RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
   
   std::cerr << "String::new: hates you" << std::endl;
   throw std::exception();	// TODO: Throw a real exception (ArgumentError)
+}
+
+RubyValue string_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyString *s1 = _self.get_special<RubyString>(),
+	     *s2 = _args[0].get_special<RubyString>();
+  /* TODO: string interning? */
+
+  return _b->environment.get_truth(s2 ? (s1->string_value == s2->string_value) : false);
 }
 
 RubyValue string_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
