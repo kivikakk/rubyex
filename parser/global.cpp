@@ -2,14 +2,6 @@
 #include <iostream>
 
 int context_depths = 0, context_lines = 0;
-bool is_block_mode = false;
-
-std::vector<brace_t> braces_stack;
-
-void set_block(bool _is)
-{
-  is_block_mode = _is;
-}
 
 void enter_context()
 {
@@ -38,39 +30,6 @@ void exit_context_line()
 bool in_context()
 {
   return (context_depths > 0);
-}
-
-void enter_brace(brace_t b)
-{
-  if (b == B_HASH)
-    std::cerr << "entering B_HASH" << std::endl;
-  else
-    std::cerr << "entering B_BLOCK" << std::endl;
-  braces_stack.push_back(b);
-}
-
-bool last_brace_is(brace_t b)
-{
-  if (braces_stack.size() == 0)
-    return false;
-  return *braces_stack.rbegin() == b;
-}
-
-brace_t pop_last_brace()
-{
-  if (braces_stack.size() == 0) {
-    std::cerr << "tried to pop_last_brace(), nothing to pop, assuming hash" << std::endl;
-    return B_HASH;
-  }
-
-  brace_t b = *braces_stack.rbegin();
-  braces_stack.pop_back();
-  if (b == B_HASH)
-    std::cerr << "popping B_HASH" << std::endl;
-  else
-    std::cerr << "popping B_BLOCK" << std::endl;
-
-  return b;
 }
 
 std::string filter_underscores(const std::string &_in)

@@ -40,24 +40,14 @@ typedef union {
 #define YYSTYPE expu
 
 extern int context_depths, context_lines;
-extern bool is_block_mode;
 
 typedef enum {
   B_HASH, B_BLOCK
 } brace_t;
 
-extern std::vector<brace_t> braces_stack;
-
-void set_block(bool);
-
 void enter_context(); void enter_context_line();
 void exit_context(); void exit_context_line();
 bool in_context();
-
-void enter_brace(brace_t);
-bool last_brace_is(brace_t);
-brace_t pop_last_brace();
-
 
 std::string filter_underscores(const std::string &);
 

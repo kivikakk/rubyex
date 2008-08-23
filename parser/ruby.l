@@ -106,7 +106,7 @@ do[\t ]*/\|	{ BEGIN(starting_block_args); std::cerr << "Returning DO with args" 
 do[\t {]?			{
 		  /* no args (if args are given, the args version will match - it's longer, so flex will pick it).
 		   * inject empty arglist into stream, as the parser always sees args coming. */
-		  yyless(2);
+		  yyless(2);	// return everything except `do'
 		  unput('|'); unput('|');
 		  BEGIN(starting_block_args);
 		  std::cerr << "Returning DO without args" << std::endl;
@@ -124,7 +124,7 @@ end			{
 
 <starting_block_args>\|			{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
 <could_be_starting_block_args>\|	{ BEGIN(block_args); std::cerr << "starting" << std::endl; return BLOCK_ARGUMENT_START; }
-<could_be_starting_block_args>[^ \t]	{ BEGIN(INITIAL); std::cerr << "returning on " << yytext << std::endl; yyless(0); }
+<could_be_starting_block_args>[^ \t]	{ BEGIN(INITIAL); yyless(0); }
 <block_args>\|				{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
 
 \{			{ /* see "do" */
@@ -133,19 +133,15 @@ end			{
 		    BEGIN(starting_block_args);
 		  } */
 		  BEGIN(could_be_starting_block_args);
-		  std::cerr << "process: '{'" << std::endl;
 		  return '{';
 		}
 \}			{
-		  std::cerr << "process: '}'" << std::endl;
-		  if (/* last_brace_is(B_BLOCK) && */ in_context() && context_lines == context_depths) {
+		  if (in_context() && context_lines == context_depths) {
 		    IF_DEBUG printf("Going to context_finish (}).");
 		    BEGIN(context_finish);
 		    yyless(0);	// whoops. yyless returns all BUT first `n' chars.
-		    pop_last_brace();
 		    return CONTEXT_FINISH;
 		  }
-		  pop_last_brace();
 		  return '}';
 		}
 
