@@ -8,6 +8,7 @@
 %option yywrap
 
 %x dbstr sstr context_finish starting_block_args arglist_begins
+%s could_be_starting_block_args
 %s block_args
 
 %{
@@ -94,11 +95,14 @@ do[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return DO; }
 \{[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return '{'; }
 
 
-do			{
+
+do[\t {]?			{
 		  /* no args (by precendence). inject empty arglist into stream,
 		   * as the parser always sees the args coming. */
+		  yyless(2);
 		  unput('|'); unput('|');
 		  BEGIN(starting_block_args);
+		  std::cerr << "Returning DO" << std::endl;
 		  return DO;
 		}
 end			{
@@ -111,19 +115,32 @@ end			{
 		  return END;
 		}
 
-\{		{ /* see "do" */ unput('|'); unput('|'); BEGIN(starting_block_args); return '{'; }
+<starting_block_args>\|			{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
+<could_be_starting_block_args>\|	{ BEGIN(block_args); std::cerr << "starting" << std::endl; return BLOCK_ARGUMENT_START; }
+<could_be_starting_block_args>[^ \t]	{ BEGIN(INITIAL); std::cerr << "returning on " << yytext << std::endl; yyless(0); }
+<block_args>\|				{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
+
+\{			{ /* see "do" */
+		  /* if (!is_block_mode) {
+		    unput('|'); unput('|');
+		    BEGIN(starting_block_args);
+		  } */
+		  BEGIN(could_be_starting_block_args);
+		  std::cerr << "process: '{'" << std::endl;
+		  return '{';
+		}
 \}			{
-		  if (in_context() && context_lines == context_depths) {
+		  std::cerr << "process: '}'" << std::endl;
+		  if (/* last_brace_is(B_BLOCK) && */ in_context() && context_lines == context_depths) {
 		    IF_DEBUG printf("Going to context_finish (}).");
 		    BEGIN(context_finish);
 		    yyless(0);	// whoops. yyless returns all BUT first `n' chars.
+		    pop_last_brace();
 		    return CONTEXT_FINISH;
 		  }
+		  pop_last_brace();
 		  return '}';
 		}
-
-<starting_block_args>\|	{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
-<block_args>\|	{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
 
 
 <context_finish>end	{
@@ -170,9 +187,24 @@ end			{
 			  return ARG_BRACKET;
 			}
 
-[a-zA-Z][a-zA-Z0-9_]*	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_]*[!?]?[ \t]*\{	{ 
+			std::string s = yytext;
+			s = s.substr(0, s.length() - 1);
+			while (s[s.length() - 1] == ' ' || s[s.length() - 1] == '\t')
+			  s = s.substr(0, s.length() - 1);
+			yylval.identifier = new IdentifierExpr(s);
+			if (s == "do") {
+			  std::cerr << "Returning DO by backdoor" << std::endl; // XXX XXX
+			  return DO;
+			}
+			unput('{'); unput(')'); unput('(');
+			BEGIN(arglist_begins);
+			return FUNCTION_CALL;
+		      }
 
-:[a-zA-Z][a-zA-Z0-9_]*[!?]?	{ yylval.symbol = new SymbolExpr(std::string(yytext + 1)); return SYMBOL; }
+[a-zA-Z_][a-zA-Z0-9_]*	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
+
+:[a-zA-Z_][a-zA-Z0-9_]*[!?]?	{ yylval.symbol = new SymbolExpr(std::string(yytext + 1)); return SYMBOL; }
 :\"			{
 		  string_buf = "";
 		  doing_symbol = true;

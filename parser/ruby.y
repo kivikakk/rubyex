@@ -30,9 +30,9 @@
 %token <yield> YIELD
 
 %type <expr> line expr compiled_expr
-%type <block> block
+%type <block> block opt_block
 %type <exprlist> exprlist opt_exprlist hashlist
-%type <deflist> deflist block_arguments block_argument_contents funcdef_args
+%type <deflist> deflist block_arguments opt_block_arguments block_argument_contents funcdef_args
 %type <literal> literal
 %type <funccall> funccall
 %type <funcdef> funcdef
@@ -68,45 +68,46 @@ line: 		NL	{ $$ = NULL; }
 	      | expr NL	{ $$ = $1; }
 	      | ';' { $$ = NULL; }
 	      | expr ';' { $$ = $1; }
+	      | CONTEXT_FINISH { $$ = NULL; IF_DEBUG printf("CONTEXT_FINISH\n"); }
 	      | expr CONTEXT_FINISH { $$ = $1; IF_DEBUG printf("CONTEXT_FINISH\n"); }
 	      | expr END_OF_FILE { $$ = $1; }
 ;
 
-expr:	      	YIELD			{ $$ = new YieldExpr(NULL); }
-	      | YIELD exprlist		{ $$ = new YieldExpr($2); }
-	      | YIELD '(' opt_exprlist ')'	{ $$ = new YieldExpr($3); }
-	      |	funccall 		{ $$ = $1; }
-	      | funcdef			{ $$ = $1; }
-	      |	IDENTIFIER		{ $$ = $1; }
-	      |	FUNCTION_CALL 		{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      |	IDENTIFIER block 	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
-	      |	FUNCTION_CALL block 	{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
-	      | IDENTIFIER '=' expr 	{ $$ = new AssignmentExpr($1, $3); }
-	      |	SYMBOL			{ $$ = $1; }
-	      | literal			{ $$ = $1; }
-	      | IDENTIFIER '[' exprlist ']'	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
-	      | expr '[' exprlist ']'	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
-	      | expr '.' funccall 	{ $3->target = $1; $$ = $3; }
-	      | expr '.' IDENTIFIER  	{ $$ = new FuncCallExpr($1, $3, NULL, NULL); }
-	      | expr '.' FUNCTION_CALL  { $$ = new FuncCallExpr($1, $3, NULL, NULL); }
-	      | expr '.' IDENTIFIER block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
-	      | expr '.' FUNCTION_CALL block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
-	      | expr '+' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($3), NULL); }
-	      | expr '-' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ExprList($3), NULL); }
-	      | expr '*' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ExprList($3), NULL); }
-	      | expr '/' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ExprList($3), NULL); }
-	      | '-' expr %prec NEG	{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
-	      | expr '^' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ExprList($3), NULL); }
-	      | expr EQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ExprList($3), NULL); }
-	      | expr NEQ expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ExprList($3), NULL); }
-	      | expr '<' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<"), new ExprList($3), NULL); }
-	      | expr '>' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">"), new ExprList($3), NULL); }
-	      | expr LE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ExprList($3), NULL); }
-	      | expr GE expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
-	      | '(' expr ')'		{ $$ = $2; }
-	      | '[' opt_exprlist ']'	{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
+expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
+	      | YIELD exprlist				{ $$ = new YieldExpr($2); }
+	      | YIELD '(' opt_exprlist ')'		{ $$ = new YieldExpr($3); }
+	      |	funccall 				{ $$ = $1; }
+	      | funcdef					{ $$ = $1; }
+	      |	IDENTIFIER				{ $$ = $1; /* Do not amalgamate this and `IDENTIFIER block' - this needs to be separate for precedence, etc. */ }
+	      |	IDENTIFIER block 			{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
+	      |	FUNCTION_CALL opt_block 		{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
+	      | IDENTIFIER '=' expr 			{ $$ = new AssignmentExpr($1, $3); }
+	      |	SYMBOL					{ $$ = $1; }
+	      | literal					{ $$ = $1; }
+	      | IDENTIFIER '[' exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
+	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
+	      | expr '.' funccall 			{ $3->target = $1; $$ = $3; }
+	      | expr '.' IDENTIFIER opt_block  		{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '.' FUNCTION_CALL opt_block	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '+' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($3), NULL); }
+	      | expr '-' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ExprList($3), NULL); }
+	      | expr '*' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ExprList($3), NULL); }
+	      | expr '/' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ExprList($3), NULL); }
+	      | '-' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
+	      | expr '^' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ExprList($3), NULL); }
+	      | expr EQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ExprList($3), NULL); }
+	      | expr NEQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ExprList($3), NULL); }
+	      | expr '<' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("<"), new ExprList($3), NULL); }
+	      | expr '>' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr(">"), new ExprList($3), NULL); }
+	      | expr LE expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ExprList($3), NULL); }
+	      | expr GE expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
+	      | '(' expr ')'				{ $$ = $2; }
+	      | '[' opt_exprlist ']'			{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
+	      | '{' hashlist CONTEXT_FINISH '}'	{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
 	      | '{' hashlist '}'	{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
-	      | conditional		{ $$ = $1; }
+	      |	'{' CONTEXT_FINISH '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
+	      |	'{' '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
+	      | conditional				{ $$ = $1; }
 ;
 
 compiled_expr:	expr
@@ -116,18 +117,12 @@ compiled_expr:	expr
  * or has some parameters. Any inferred function call (e.g. 'gets')
  * will be treated like an IDENTIFIER in `expr', and we work it out
  * later. */
-funccall:	IDENTIFIER exprlist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
-	      |	IDENTIFIER exprlist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
-	      |	FUNCTION_CALL exprlist				{ $$ = new FuncCallExpr(NULL, $1, $2, NULL); }
-	      |	FUNCTION_CALL exprlist block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
-	      | IDENTIFIER '(' ')'				{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      | IDENTIFIER '(' ')' block			{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | IDENTIFIER '(' exprlist ')'			{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
-	      | IDENTIFIER '(' exprlist ')' block		{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
-	      | FUNCTION_CALL ARG_BRACKET ')'			{ $$ = new FuncCallExpr(NULL, $1, NULL, NULL); }
-	      | FUNCTION_CALL ARG_BRACKET ')' block		{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
-	      | FUNCTION_CALL ARG_BRACKET exprlist ')'		{ $$ = new FuncCallExpr(NULL, $1, $3, NULL); }
-	      | FUNCTION_CALL ARG_BRACKET exprlist ')' block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+funccall: 	IDENTIFIER exprlist opt_block				{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+	      |	FUNCTION_CALL exprlist opt_block			{ $$ = new FuncCallExpr(NULL, $1, $2, $3); }
+	      | IDENTIFIER '(' ')' opt_block				{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
+	      | IDENTIFIER '(' exprlist ')' opt_block			{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
+	      | FUNCTION_CALL ARG_BRACKET ')' opt_block			{ $$ = new FuncCallExpr(NULL, $1, NULL, $4); }
+	      | FUNCTION_CALL ARG_BRACKET exprlist ')' opt_block	{ $$ = new FuncCallExpr(NULL, $1, $3, $5); }
 ;
 
 /* exprlist is one or more, in line with funccall. */
@@ -135,7 +130,7 @@ exprlist:	compiled_expr			{ $$ = new ExprList($1); }
 	      |	exprlist ',' compiled_expr	{ $$ = new ExprList($1, $3); }
 ;
 
-opt_exprlist:	/* empty */			{ $$ = new ExprList(); }
+opt_exprlist:	/* empty */			{ $$ = NULL; }
 	      | exprlist			{ $$ = $1; }
 ;
 
@@ -144,18 +139,26 @@ deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 	      | deflist ',' IDENTIFIER	{ $$ = new DefListExpr($1, $3); }
 ;
 
-hashlist:	/* empty */					{ $$ = new ExprList(); }
-	      | compiled_expr ASSOC compiled_expr		{ $$ = new ExprList($1, $3); }
+hashlist:	compiled_expr ASSOC compiled_expr		{ $$ = new ExprList($1, $3); }
 	      | hashlist ',' compiled_expr ASSOC compiled_expr	{ $$ = new ExprList($1, $3, $5); }
+	      | hashlist ',' NL compiled_expr ASSOC compiled_expr	{ $$ = new ExprList($1, $4, $6); }
 ;
 
-block:		
-	      DO block_arguments sub_content END	{ $$ = new BlockExpr($3); $$->take_deflist($2); }
-	      |	'{' block_arguments sub_content '}'	{ $$ = new BlockExpr($3); $$->take_deflist($2); }
+block:		DO opt_block_arguments sub_content END				{ $$ = new BlockExpr($3); $$->take_deflist($2); }
+	      |	'{' opt_block_arguments sub_content '}'				{ $$ = new BlockExpr($3); $$->take_deflist($2); }
+;
+
+opt_block:	/* empty */	{ $$ = NULL; }
+	      | block		{ $$ = $1; }
 ;
 
 block_arguments:
 	      BLOCK_ARGUMENT_START block_argument_contents BLOCK_ARGUMENT_END	{ $$ = $2; }
+;
+
+opt_block_arguments:
+		/* empty */	{ $$ = NULL; }
+	      |	block_arguments	{ $$ = $1; }
 ;
 
 block_argument_contents:
@@ -188,8 +191,10 @@ sub_content:	{ enter_context(); } sub_line { exit_context(); } { $$ = $2; }
 ;
 
 sub_line:	/* empty */		{ $$ = new Procedure(); }
-	      |	sub_line 	{ enter_context_line(); } 
-		line 		{ exit_context_line(); }
+	      |	sub_line
+				{ enter_context_line(); }
+				line
+				{ exit_context_line(); }
 				{ if ($3) $1->expressions.push_back($3); $$ = $1; }
 ;
 
