@@ -3,10 +3,10 @@
 #include "context.h"
 #include "rmethod.h"
 
-Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target): binding(linked_ptr<Binding>(new Binding(_environment, _context))), def_target(_def_target)
+Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target)))
 { }
 
-Context::Context(linked_ptr<Binding> &_binding, RubyClass *_def_target): binding(_binding), def_target(_def_target)
+Context::Context(linked_ptr<Binding> &_binding): binding(_binding)
 { }
 
 RubyValue Context::entry_to_value(const Stack::StackEntry &_entry)
