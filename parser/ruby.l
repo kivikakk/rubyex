@@ -91,18 +91,18 @@ nil		{ yylval.nil_literal = new NilLiteralExpr(); return NIL_LITERAL; }
 yield		{ return YIELD; }
 yield/\(		{ return YIELD; }
 
-do[\t ]*/\|	{ BEGIN(starting_block_args); return DO; }
+do[\t ]*/\|	{ BEGIN(starting_block_args); std::cerr << "Returning DO with args" << std::endl; return DO; }
 \{[\t ]*/\|	{ BEGIN(starting_block_args); return '{'; }
 
 
 
 do[\t {]?			{
-		  /* no args (by precendence). inject empty arglist into stream,
-		   * as the parser always sees the args coming. */
+		  /* no args (if args are given, the args version will match - it's longer, so flex will pick it).
+		   * inject empty arglist into stream, as the parser always sees args coming. */
 		  yyless(2);
 		  unput('|'); unput('|');
 		  BEGIN(starting_block_args);
-		  std::cerr << "Returning DO" << std::endl;
+		  std::cerr << "Returning DO without args" << std::endl;
 		  return DO;
 		}
 end			{
