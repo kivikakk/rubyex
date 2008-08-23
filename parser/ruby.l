@@ -89,10 +89,10 @@ false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_
 nil		{ yylval.nil_literal = new NilLiteralExpr(); return NIL_LITERAL; }
 
 yield		{ return YIELD; }
-yield\(		{ unput('('); return YIELD; }
+yield/\(		{ return YIELD; }
 
-do[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return DO; }
-\{[\t ]*\|	{ unput('|'); BEGIN(starting_block_args); return '{'; }
+do[\t ]*/\|	{ BEGIN(starting_block_args); return DO; }
+\{[\t ]*/\|	{ BEGIN(starting_block_args); return '{'; }
 
 
 
@@ -154,6 +154,8 @@ end			{
 		  return '}';
 		}
 
+		/* There's gotta be a more succint way to do these. */
+
 -?[0-9][0-9_]*[0-9]\.[0-9][0-9_]*[0-9]	{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; /* Not happy with this. */ }
 -?[0-9]\.[0-9][0-9_]*[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
 -?[0-9][0-9_]*[0-9]\.[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
@@ -173,12 +175,10 @@ end			{
 			  yylval.identifier = new IdentifierExpr(s);
 			  return FUNCTION_CALL;
 			}
-[a-zA-Z][a-zA-Z0-9_]*\(		{
+[a-zA-Z][a-zA-Z0-9_]*/\(		{
 			  std::string s = yytext;
-			  s = s.substr(0, s.length() - 1);
 			  yylval.identifier = new IdentifierExpr(s);
 			  BEGIN(arglist_begins);
-			  unput('(');
 			  return FUNCTION_CALL;
 			}
 
