@@ -13,6 +13,8 @@ RubyValue kernel_print(linked_ptr<Binding> &, RubyValue, const std::vector<RubyV
 RubyValue kernel_puts(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_p(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
+RubyValue kernel_gets(linked_ptr<Binding> &, RubyValue);
+
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
   RubyModule *rb_mKernel = new RubyModule(_e, "Kernel");
@@ -22,6 +24,8 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   rb_mKernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
+
+  rb_mKernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
 
   _e.add_module("Kernel", rb_mKernel);
   _e.Kernel = rb_mKernel;
@@ -100,5 +104,13 @@ RubyValue kernel_p(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<R
   }
 
   return _b->environment.NIL;
+}
+
+RubyValue kernel_gets(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  std::string inp;
+  std::getline(std::cin, inp);
+  inp += '\n';
+  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, inp)));
 }
 
