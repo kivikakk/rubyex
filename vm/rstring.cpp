@@ -11,6 +11,9 @@ RubyValue string_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyVal
 RubyValue string_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_reverse(linked_ptr<Binding> &, RubyValue);
+RubyValue string_length(linked_ptr<Binding> &, RubyValue);
+RubyValue string_strip(linked_ptr<Binding> &, RubyValue);
+RubyValue string_strip_bang(linked_ptr<Binding> &, RubyValue);
 RubyValue string_capitalize(linked_ptr<Binding> &, RubyValue);
 RubyValue string_inspect(linked_ptr<Binding> &, RubyValue);
 RubyValue string_to_s(linked_ptr<Binding> &, RubyValue);
@@ -23,6 +26,9 @@ void RubyStringEI::init(RubyEnvironment &_e)
   rb_cString->add_method("==", RubyMethod::Create(string_eq, 1));
   rb_cString->add_method("+", RubyMethod::Create(string_add, 1));
   rb_cString->add_method("reverse", RubyMethod::Create(string_reverse));
+  rb_cString->add_method("length", RubyMethod::Create(string_length));
+  rb_cString->add_method("strip", RubyMethod::Create(string_strip));
+  rb_cString->add_method("strip!", RubyMethod::Create(string_strip_bang));
   rb_cString->add_method("capitalize", RubyMethod::Create(string_capitalize));
   rb_cString->add_method("inspect", RubyMethod::Create(string_inspect));
   rb_cString->add_method("to_s", RubyMethod::Create(string_to_s));
@@ -34,9 +40,9 @@ void RubyStringEI::init(RubyEnvironment &_e)
 RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   if (_args.size() == 0)
-    return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, "")));
+    return _b->environment.get_string(std::string());
   else if (_args.size() == 1)
-    return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, _args[0].get_special<RubyString>()->string_value)));
+    return _b->environment.get_string(_args[0].get_special<RubyString>()->string_value);
   
   std::cerr << "String::new: hates you" << std::endl;
   throw std::exception();	// TODO: Throw a real exception (ArgumentError)
@@ -55,13 +61,35 @@ RubyValue string_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
 {
   RubyString *s1 = _self.get_special<RubyString>(),
 	     *s2 = _args[0].get_special<RubyString>();
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, s1->string_value + s2->string_value)));
+  return _b->environment.get_string(s1->string_value + s2->string_value);
 }
 
 RubyValue string_reverse(linked_ptr<Binding> &_b, RubyValue _self)
 {
   RubyString *r = _self.get_special<RubyString>();
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, std::string(r->string_value.rbegin(), r->string_value.rend()))));
+  return _b->environment.get_string(std::string(r->string_value.rbegin(), r->string_value.rend()));
+}
+
+RubyValue string_length(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  return RubyValue::from_fixnum(_self.get_special<RubyString>()->string_value.length());
+}
+
+RubyValue string_strip(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  std::string ns = _self.get_special<RubyString>()->string_value;
+  std::string::size_type first = ns.find_first_not_of(" \t\r\n");
+  ns = (first == std::string::npos) ? std::string() : ns.substr(first, ns.find_last_not_of(" \t\r\n") - first + 1);
+  return _b->environment.get_string(ns);
+}
+
+RubyValue string_strip_bang(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  /* `optimized' by not just calling #strip. right. */
+  std::string ns = _self.get_special<RubyString>()->string_value;
+  std::string::size_type first = ns.find_first_not_of(" \t\r\n");
+  _self.get_special<RubyString>()->string_value = (first == std::string::npos) ? std::string() : ns.substr(first, ns.find_last_not_of(" \t\r\n") - first + 1);
+  return _self;
 }
 
 RubyValue string_capitalize(linked_ptr<Binding> &_b, RubyValue _self)
@@ -69,7 +97,7 @@ RubyValue string_capitalize(linked_ptr<Binding> &_b, RubyValue _self)
   RubyString *r = _self.get_special<RubyString>();
   std::string s = r->string_value;
   s[0] = toupper(s[0]);
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, s)));
+  return _b->environment.get_string(s);
 }
 
 RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
@@ -96,7 +124,7 @@ RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
     else
       o << (char)v[i];
   o << '"';
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, o.str())));
+  return _b->environment.get_string(o.str());
 }
 
 RubyValue string_to_s(linked_ptr<Binding> &_b, RubyValue _self)

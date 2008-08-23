@@ -6,6 +6,7 @@
 #include <exception>
 #include "rclass.h"
 #include "rmodule.h"
+#include "rstring.h"
 #include "gc.h"
 
 class RubyEnvironment
@@ -25,6 +26,10 @@ class RubyEnvironment
 
     const std::string &get_name_by_global(RubyObject *) const;
     inline RubyValue get_truth(bool _t) const { return _t ? TRUE : FALSE; }
+    inline RubyValue get_string(const std::string &_s) {
+      /* String interning here. Maybe. Or in RubyString's ctor. */
+      return RubyValue::from_object(gc.track(new RubyString(*this, _s)));
+    }
 
     RubySymbol *get_symbol(const std::string &);
 

@@ -71,6 +71,7 @@ RubyValue fixnum_divide(linked_ptr<Binding> &_b, RubyValue _self, const std::vec
 RubyValue fixnum_neq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 { return _b->environment.get_truth(_self.get_fixnum() != _operand[0].get_fixnum()); }
 
+/* it's probably fine to leave the default Object#== here? */
 RubyValue fixnum_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 { return _b->environment.get_truth(_self.get_fixnum() == _operand[0].get_fixnum()); }
 

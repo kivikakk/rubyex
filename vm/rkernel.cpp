@@ -90,8 +90,12 @@ RubyValue kernel_puts(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
       result->string_value += "\n";
 
     to_print.push_back(result_val);
-    kernel_print(_b, _self, to_print);
+    _self.call(_b, "print", to_print);
   }
+
+  if (_args.size() == 0)
+    _self.call(_b, "print", _b->environment.get_string("\n"));
+
   return _b->environment.NIL;
 }
 
@@ -100,7 +104,7 @@ RubyValue kernel_p(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<R
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     RubyValue r = it->call(_b, "inspect");
     std::vector<RubyValue> rca; rca.push_back(r);
-    kernel_puts(_b, _self, rca);
+    _self.call(_b, "puts", rca);
   }
 
   return _b->environment.NIL;
@@ -110,7 +114,11 @@ RubyValue kernel_gets(linked_ptr<Binding> &_b, RubyValue _self)
 {
   std::string inp;
   std::getline(std::cin, inp);
-  inp += '\n';
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, inp)));
+  if (!std::cin.eof())
+    inp += '\n';
+  else if (inp.size() == 0)
+    return _b->environment.NIL;
+
+  return _b->environment.get_string(inp);
 }
 
