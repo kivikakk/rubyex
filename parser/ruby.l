@@ -16,26 +16,38 @@
   bool doing_symbol = false;
 
   typedef struct {
-    std::string identifier;
+    const char *identifier;
     int literal;
-  } ident_t;
+  } keyword_t;
+
+  /* Only bother with alpha/num here. */
+  const keyword_t keyword_listing[] = {
+    { "do", DO },
+    { "end", END },
+
+    { "def", DEF },
+    { "if", IF },
+    { "else", ELSE },
+    { "elsif", ELSIF },
+    { "unless", UNLESS },
+    { "yield", YIELD },
+
+    { "", 0 }
+  };
+
+  int keyword_search(const char *_s) {
+    const keyword_t *s = keyword_listing;
+    while (s->literal) {
+      if (strcmp(_s, s->identifier) == 0)
+	return s->literal;
+      ++s;
+    }
+    return 0;
+  }
 %}
 
 
 %%
-
-==		{ return EQ; }
-!=		{ return NEQ; }
-\<=		{ return LE; }
->=		{ return GE; }
-
-=>		{ return ASSOC; }
-
-def		{ return DEF; }
-if		{ return IF; }
-else		{ return ELSE; }
-elsif		{ return ELSIF; }
-unless		{ return UNLESS; }
 
 #[^\n]*		{ }
 
@@ -91,14 +103,26 @@ unless		{ return UNLESS; }
 <sstr>\\[^'\\]		string_buf += yytext;
 <sstr>[^\\\n\']+	string_buf += yytext;
 
+==		{ return EQ; }
+!=		{ return NEQ; }
+\<=		{ return LE; }
+>=		{ return GE; }
+
+=>		{ return ASSOC; }
+
+    /* While these would be nice to have as keywords as defined above,
+     * they require some more logic. Note that `yield' is defined above,
+     * but here's `yield('. */
+
 true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }
 false		{ yylval.boolean_literal = new BooleanLiteralExpr(false); return BOOLEAN_LITERAL; }
 nil		{ yylval.nil_literal = new NilLiteralExpr(); return NIL_LITERAL; }
-
-yield		{ return YIELD; }
 yield/\(		{ return YIELD; }
 
-do[\t ]*/\|	{ BEGIN(starting_block_args); std::cerr << "Returning DO with args" << std::endl; return DO; }
+
+    /* Blocks. */
+
+do[\t ]*/\|	{ BEGIN(starting_block_args); return DO; }
 \{[\t ]*/\|	{ BEGIN(starting_block_args); return '{'; }
 
 
@@ -109,7 +133,6 @@ do[\t {]?			{
 		  yyless(2);	// return everything except `do'
 		  unput('|'); unput('|');
 		  BEGIN(starting_block_args);
-		  std::cerr << "Returning DO without args" << std::endl;
 		  return DO;
 		}
 end			{
@@ -123,15 +146,11 @@ end			{
 		}
 
 <starting_block_args>\|			{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
-<could_be_starting_block_args>\|	{ BEGIN(block_args); std::cerr << "starting" << std::endl; return BLOCK_ARGUMENT_START; }
+<could_be_starting_block_args>\|	{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
 <could_be_starting_block_args>[^ \t]	{ BEGIN(INITIAL); yyless(0); }
 <block_args>\|				{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
 
 \{			{ /* see "do" */
-		  /* if (!is_block_mode) {
-		    unput('|'); unput('|');
-		    BEGIN(starting_block_args);
-		  } */
 		  BEGIN(could_be_starting_block_args);
 		  return '{';
 		}
@@ -159,7 +178,7 @@ end			{
 
 		/* There's gotta be a more succint way to do these. */
 
--?[0-9][0-9_]*[0-9]\.[0-9][0-9_]*[0-9]	{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; /* Not happy with this. */ }
+-?[0-9][0-9_]*[0-9]\.[0-9][0-9_]*[0-9]	{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
 -?[0-9]\.[0-9][0-9_]*[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
 -?[0-9][0-9_]*[0-9]\.[0-9]		{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
 -?[0-9]\.[0-9]				{ yylval.floating_literal = new FloatingLiteralExpr(atof(filter_underscores(yytext).c_str())); return FLOATING_LITERAL; }
@@ -167,6 +186,9 @@ end			{
 -?[0-9][0-9_]*[0-9]			{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
 -?[0-9]					{ yylval.integer_literal = new IntegerLiteralExpr(atoi(filter_underscores(yytext).c_str())); return INTEGER_LITERAL; }
 
+
+
+      /* XXX: should we include keyword checks here? */
 
 [a-zA-Z][a-zA-Z0-9_]*[!?]\(?	{
 			  std::string s = yytext;
@@ -195,18 +217,29 @@ end			{
 			s = s.substr(0, s.length() - 1);
 			while (s[s.length() - 1] == ' ' || s[s.length() - 1] == '\t')
 			  s = s.substr(0, s.length() - 1);
-			yylval.identifier = new IdentifierExpr(s);
-			if (s == "do") {
-			  std::cerr << "Returning DO by backdoor" << std::endl; // XXX XXX
+
+			int kwm;
+			if ((kwm = keyword_search(s.c_str())) != 0) {
+			  std::cerr << "Returning " << s << " by backdoor" << std::endl; // XXX XXX
 			  unput('{');
-			  return DO;
+			  return kwm;
 			}
+
+			yylval.identifier = new IdentifierExpr(s);
 			unput('{'); unput(')'); unput('(');
 			BEGIN(arglist_begins);
 			return FUNCTION_CALL;
 		      }
 
-[a-zA-Z_][a-zA-Z0-9_]*	{ yylval.identifier = new IdentifierExpr(std::string(yytext)); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9_]*			{
+		  /* Return the proper token if this is a keyword. */
+		  int kwm;
+		  if ((kwm = keyword_search(yytext)) != 0)
+		    return kwm;
+
+		  yylval.identifier = new IdentifierExpr(std::string(yytext));
+		  return IDENTIFIER;
+		}
 
 :[a-zA-Z_][a-zA-Z0-9_]*[!?]?	{ yylval.symbol = new SymbolExpr(std::string(yytext + 1)); return SYMBOL; }
 :\"			{
