@@ -32,6 +32,8 @@
     { "unless", UNLESS },
     { "yield", YIELD },
 
+    { "while", WHILE },
+
     { "", 0 }
   };
 

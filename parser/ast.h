@@ -192,6 +192,19 @@ class ConditionalExpr : public Expr
     void emit(std::ostream &) const;
 };
 
+class WhileExpr : public Expr
+{
+  public:
+    WhileExpr(Expr *, Procedure *);
+    virtual ~WhileExpr();
+
+    Expr *condition;
+    Procedure *action;
+
+    void p() const;
+    void emit(std::ostream &) const;
+};
+
 class Program : public PrettyPrint, public Emitter
 {
   public:

@@ -153,7 +153,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	break;
       }
       case I_JMP: {
-	uint32 jump_len = r.read_uint32();
+	int32 jump_len = r.read_int32();
 	r.skip_bytes(jump_len);
 	break;
       }
@@ -165,6 +165,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	if (ev.truthy(e))
 	  break;	// Don't skip over true branch.
 	
+	last_value = e.NIL;
 	r.skip_bytes(true_branch_len);
 	break;
       }

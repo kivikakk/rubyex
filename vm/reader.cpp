@@ -77,7 +77,7 @@ std::string Reader::read_bytes(unsigned long _l)
   return s;
 }
 
-void Reader::skip_bytes(unsigned long _l)
+void Reader::skip_bytes(long _l)
 {
   input.seekg(_l, std::ios::cur);
 }

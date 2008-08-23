@@ -21,6 +21,7 @@
 %token <symbol> SYMBOL
 
 %token DEF IF ELSE ELSIF UNLESS
+%token WHILE
 
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
@@ -37,11 +38,14 @@
 %type <funccall> funccall
 %type <funcdef> funcdef
 %type <conditional> conditional
+%type <while_loop> while_loop
 
 %type <procedure> sub_content sub_line otherwise
 
-/* Note this implies EQ/NEQ get applied *after* everything else
+/* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
  * is collapsed - our wanted behaviour. */
+%left '='
+
 %nonassoc EQ NEQ
 %left '<' '>' LE GE
 %left '+' '-'
@@ -49,7 +53,6 @@
 %left NEG
 %right EXP
 
-%left '='
 
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL
 %nonassoc '.' ASSOC
@@ -110,6 +113,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	'{' CONTEXT_FINISH '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      |	'{' '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      | conditional				{ $$ = $1; }
+	      | while_loop				{ $$ = $1; }
 ;
 
 compiled_expr:	expr
@@ -187,6 +191,10 @@ otherwise:	/* empty */				{ $$ = NULL; }
 	      | ELSE sub_content			{ $$ = $2; }
 	      | ELSIF expr ';' sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
 	      | ELSIF expr NL sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
+;
+
+while_loop:	WHILE expr ';' sub_content END		{ $$ = new WhileExpr($2, $4); }
+	      | WHILE expr NL sub_content END		{ $$ = new WhileExpr($2, $4); }
 ;
 
 sub_content:	{ enter_context(); } sub_line { exit_context(); } { $$ = $2; }

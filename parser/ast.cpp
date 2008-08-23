@@ -351,8 +351,9 @@ AssignmentExpr::~AssignmentExpr() {
 }
 
 void AssignmentExpr::p() const {
-  std::cout << this->name << " = ";
+  std::cout << "(" << this->name << " = ";
   this->value->p();
+  std::cout << ")";
 }
 
 void AssignmentExpr::emit(std::ostream &o) const {
@@ -480,16 +481,60 @@ void ConditionalExpr::emit(std::ostream &o) const
   else
     // If there's an `else' section, we need to omit it in the true branch with a jump (I_JMP+len).
     // Don't use sizeof(instruction_t) -- it's 4. (can't change enum underlying type)
-    emit_uint32(o, on_true->length() + 1 + sizeof(uint32));
+    emit_uint32(o, on_true->length() + 1 + sizeof(int32));
 
   on_true->emit(o);
 
   if (on_false) {
     emit_instruction(o, I_JMP);
-    emit_uint32(o, on_false->length());
+    emit_int32(o, on_false->length());
     on_false->emit(o);
   }
 }
+
+// WhileExpr
+
+WhileExpr::WhileExpr(Expr *_condition, Procedure *_action): condition(_condition), action(_action)
+{ }
+
+WhileExpr::~WhileExpr()
+{
+  delete condition; delete action;
+}
+
+void WhileExpr::p() const
+{
+  std::cout << "while (";
+  condition->p();
+  std::cout << ")" << std::endl << "  ";
+  action->p();
+  std::cout << std::endl << "end" << std::endl;
+}
+
+void WhileExpr::emit(std::ostream &o) const
+{
+  long while_begin = (long)o.tellp();
+
+  condition->push(o);
+
+  emit_instruction(o, I_IF);
+  // If the condition's false, we need to jump the action length + the jump back.
+  emit_uint32(o, action->length() + 1 + sizeof(int32));
+
+  action->emit(o);
+
+  // The jump will be considered at the point immediately after the jump length.
+  // We can't calculate it ourself because condition->push could be any length.
+  // We work out where the first command after the jump is (where the jump will
+  // start from), and then go back to while_begin from there.
+
+  // It's here + the I_JMP and arg.
+  long right_after_jmp =
+    (long)o.tellp() + 1 + sizeof(int32);
+  emit_instruction(o, I_JMP);
+  emit_int32(o, while_begin - right_after_jmp);
+}
+
 
 // Program
 

@@ -33,6 +33,7 @@ typedef union {
   FuncCallExpr *funccall;
   FuncDefExpr *funcdef;
   ConditionalExpr *conditional;
+  WhileExpr *while_loop;
 
   Procedure *procedure;
 } expu;

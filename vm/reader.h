@@ -34,7 +34,7 @@ class Reader
     std::string read_string();
     std::string read_bytes(unsigned long);
 
-    void skip_bytes(unsigned long);
+    void skip_bytes(long);
 
   protected:
     std::istream &input;
