@@ -44,7 +44,7 @@
 
 /* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
  * is collapsed - our wanted behaviour. */
-%left '='
+%right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 
 %nonassoc EQ NEQ
 %left '<' '>' LE GE
@@ -85,6 +85,13 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	IDENTIFIER block 			{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      |	FUNCTION_CALL opt_block 		{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      | IDENTIFIER '=' expr 			{ $$ = new AssignmentExpr($1, $3); }
+	      | IDENTIFIER ADD_ASSIGN expr		{ $$ = new AssignmentExpr($1,
+							    new FuncCallExpr(new IdentifierExpr(*$1) /* copy since we kill it */,
+							    new IdentifierExpr("+"), new ExprList($3), NULL));
+							}
+	      | IDENTIFIER SUB_ASSIGN expr		{ $$ = new AssignmentExpr($1, new FuncCallExpr(new IdentifierExpr(*$1), new IdentifierExpr("-"), new ExprList($3), NULL)); }
+	      | IDENTIFIER MUL_ASSIGN expr		{ $$ = new AssignmentExpr($1, new FuncCallExpr(new IdentifierExpr(*$1), new IdentifierExpr("*"), new ExprList($3), NULL)); }
+	      | IDENTIFIER DIV_ASSIGN expr		{ $$ = new AssignmentExpr($1, new FuncCallExpr(new IdentifierExpr(*$1), new IdentifierExpr("/"), new ExprList($3), NULL)); }
 	      |	SYMBOL					{ $$ = $1; }
 	      | literal					{ $$ = $1; }
 	      | IDENTIFIER '[' exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }

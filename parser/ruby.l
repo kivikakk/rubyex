@@ -112,6 +112,11 @@
 
 =>		{ return ASSOC; }
 
+\+=		{ return ADD_ASSIGN; }
+-=		{ return SUB_ASSIGN; }
+\*=		{ return MUL_ASSIGN; }
+\/=		{ return DIV_ASSIGN; }
+
     /* While these would be nice to have as keywords as defined above,
      * they require some more logic. Note that `yield' is defined above,
      * but here's `yield('. */
