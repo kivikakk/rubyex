@@ -7,9 +7,12 @@
 
 %option yywrap
 
-%x dbstr sstr context_finish starting_block_args arglist_begins
+%x context_finish starting_block_args arglist_begins
 %s could_be_starting_block_args
 %s block_args
+
+%x dbstr sstr
+%s dbs_interpolating
 
 %{
   std::string string_buf;
@@ -68,6 +71,29 @@
 		  yylval.string_literal = new StringLiteralExpr(string_buf);
 		  return STRING_LITERAL;
 		}
+<dbstr>#\{		{ /* string interpolation */
+		  std::cerr << "begin string interpolation" << std::endl;
+
+		  unput('('); unput('+');
+		  BEGIN(dbs_interpolating);
+
+		  if (doing_symbol) {
+		    yylval.symbol = new SymbolExpr(string_buf);
+		    return SYMBOL;
+		  }
+
+		  yylval.string_literal = new StringLiteralExpr(string_buf);
+		  return STRING_LITERAL;
+		}
+
+<dbs_interpolating>\}	{
+		  std::cerr << "end string interpolation" << std::endl;
+		  unput('"'); unput('+');
+
+		  unput('s'); unput('_'); unput('o'); unput('t'); unput('.');
+		  return ')';
+		}
+
 <dbstr>\n	string_buf += '\n';
 <dbstr>\\a	string_buf += '\a';
 <dbstr>\\b	string_buf += '\b';
@@ -82,7 +108,12 @@
 
 <dbstr>\\(.|\n)	string_buf += yytext[1];
 
-<dbstr>[^\\\n\"]+	string_buf += yytext;
+  /* we also omit # in this next line so the entirety of `#{' can make it to the
+   * rule above to start string interpolation. we also have a rule just for `#',
+   * but the interpolation rule will be picked due to its being longer. */
+
+<dbstr>[^\\\n\"#]+	string_buf += yytext;
+<dbstr>#		string_buf += yytext[0];
 
 '			{
 		  string_buf = "";

@@ -1,9 +1,11 @@
+#!./ruby
+
 input = :continue
 line_count = 0
 
 while input == :continue
-  line_count = line_count + 1
-  print "rxi(main):" + line_count.to_s + ":0> "
+  line_count += 1
+  print "rxi(main):#{line_count}:0> "
   input = gets
   if input.nil?
     puts
