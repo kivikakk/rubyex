@@ -31,6 +31,7 @@
 %token <yield> YIELD
 
 %type <expr> line expr compiled_expr
+%type <expr> interpolated_string
 %type <block> block opt_block
 %type <exprlist> exprlist opt_exprlist hashlist
 %type <deflist> deflist block_arguments opt_block_arguments block_argument_contents funcdef_args
@@ -41,6 +42,8 @@
 %type <while_loop> while_loop
 
 %type <procedure> sub_content sub_line otherwise
+
+%nonassoc INTERPOLATION_START INTERPOLATION_END
 
 /* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
  * is collapsed - our wanted behaviour. */
@@ -94,6 +97,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | IDENTIFIER DIV_ASSIGN expr		{ $$ = new AssignmentExpr($1, new FuncCallExpr(new IdentifierExpr(*$1), new IdentifierExpr("/"), new ExprList($3), NULL)); }
 	      |	SYMBOL					{ $$ = $1; }
 	      | literal					{ $$ = $1; }
+	      | interpolated_string			{ $$ = $1; }
 	      | IDENTIFIER '[' exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | IDENTIFIER '[' exprlist ']' '=' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
@@ -222,3 +226,7 @@ literal:	STRING_LITERAL		{ $$ = $1; }
 	      | NIL_LITERAL		{ $$ = $1; }
 ;
 
+interpolated_string:
+		STRING_LITERAL INTERPOLATION_START sub_content INTERPOLATION_END STRING_LITERAL
+		{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($5), NULL); std::cerr << "done" << std::endl; }
+;

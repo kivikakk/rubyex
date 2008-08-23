@@ -5,13 +5,13 @@
   #include <string>
 %}
 
-%option yywrap
+%option yywrap stack
 
 %x context_finish starting_block_args arglist_begins
 %s could_be_starting_block_args
 %s block_args
 
-%x dbstr sstr
+%x dbstr sstr dbs_begin
 %s dbs_interpolating
 
 %{
@@ -74,8 +74,8 @@
 <dbstr>#\{		{ /* string interpolation */
 		  std::cerr << "begin string interpolation" << std::endl;
 
-		  unput('('); unput('+');
-		  BEGIN(dbs_interpolating);
+		  unput('!');
+		  BEGIN(dbs_begin);
 
 		  if (doing_symbol) {
 		    yylval.symbol = new SymbolExpr(string_buf);
@@ -86,12 +86,13 @@
 		  return STRING_LITERAL;
 		}
 
+<dbs_begin>!	{ BEGIN(dbs_interpolating); return INTERPOLATION_START; }
+
 <dbs_interpolating>\}	{
 		  std::cerr << "end string interpolation" << std::endl;
-		  unput('"'); unput('+');
-
-		  unput('s'); unput('_'); unput('o'); unput('t'); unput('.');
-		  return ')';
+		  BEGIN(INITIAL);
+		  unput('"');
+		  return INTERPOLATION_END;
 		}
 
 <dbstr>\n	string_buf += '\n';
@@ -160,8 +161,8 @@ yield/\(		{ return YIELD; }
 
     /* Blocks. */
 
-do[\t ]*/\|	{ BEGIN(starting_block_args); return DO; }
-\{[\t ]*/\|	{ BEGIN(starting_block_args); return '{'; }
+do[\t ]*/\|	{ yy_push_state(starting_block_args); return DO; }
+\{[\t ]*/\|	{ yy_push_state(starting_block_args); return '{'; }
 
 
 
@@ -170,32 +171,34 @@ do[\t {]?			{
 		   * inject empty arglist into stream, as the parser always sees args coming. */
 		  yyless(2);	// return everything except `do'
 		  unput('|'); unput('|');
-		  BEGIN(starting_block_args);
+		  yy_push_state(starting_block_args);
 		  return DO;
 		}
 end			{
 		  if (in_context() && context_lines == context_depths) {
 		    IF_DEBUG printf("Going to block_finish (end).");
-		    BEGIN(context_finish);
+		    yy_push_state(context_finish);
 		    yyless(0);
 		    return CONTEXT_FINISH;
 		  }
 		  return END;
 		}
 
+	  /* These first two are deliberately BEGIN: we want to replace the current state, not go down another level. */
+
 <starting_block_args>\|			{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
 <could_be_starting_block_args>\|	{ BEGIN(block_args); return BLOCK_ARGUMENT_START; }
-<could_be_starting_block_args>[^ \t]	{ BEGIN(INITIAL); yyless(0); }
-<block_args>\|				{ BEGIN(INITIAL); return BLOCK_ARGUMENT_END; }
+<could_be_starting_block_args>[^ \t]	{ yy_pop_state(); yyless(0); }
+<block_args>\|				{ yy_pop_state(); return BLOCK_ARGUMENT_END; }
 
 \{			{ /* see "do" */
-		  BEGIN(could_be_starting_block_args);
+		  yy_push_state(could_be_starting_block_args);
 		  return '{';
 		}
 \}			{
 		  if (in_context() && context_lines == context_depths) {
 		    IF_DEBUG printf("Going to context_finish (}).");
-		    BEGIN(context_finish);
+		    yy_push_state(context_finish);
 		    yyless(0);	// whoops. yyless returns all BUT first `n' chars.
 		    return CONTEXT_FINISH;
 		  }
@@ -205,12 +208,12 @@ end			{
 
 <context_finish>end	{
 		  IF_DEBUG printf("Hear `end', returning to initial.\n");
-		  BEGIN(INITIAL);
+		  yy_pop_state();
 		  return END;
 		}
 <context_finish>\}	{
 		  IF_DEBUG printf("Hear }, returning to initial.\n");
-		  BEGIN(INITIAL);
+		  yy_pop_state();
 		  return '}';
 		}
 
@@ -246,7 +249,7 @@ end			{
 			  std::string s = yytext;
 			  if (s[s.length() - 1] == '(') {
 			    s = s.substr(0, s.length() - 1);
-			    BEGIN(arglist_begins);
+			    yy_push_state(arglist_begins);
 			    unput('(');
 			  }
 			  yylval.identifier = new IdentifierExpr(s);
@@ -255,12 +258,12 @@ end			{
 [a-zA-Z][a-zA-Z0-9_]*/\(		{
 			  std::string s = yytext;
 			  yylval.identifier = new IdentifierExpr(s);
-			  BEGIN(arglist_begins);
+			  yy_push_state(arglist_begins);
 			  return FUNCTION_CALL;
 			}
 
 <arglist_begins>\(		{
-			  BEGIN(INITIAL);
+			  yy_pop_state();
 			  return ARG_BRACKET;
 			}
 
@@ -279,7 +282,7 @@ end			{
 
 			yylval.identifier = new IdentifierExpr(s);
 			unput('{'); unput(')'); unput('(');
-			BEGIN(arglist_begins);
+			yy_push_state(arglist_begins);
 			return FUNCTION_CALL;
 		      }
 
