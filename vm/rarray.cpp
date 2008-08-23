@@ -9,6 +9,7 @@ RubyValue array_new_length(linked_ptr<Binding> &, RubyValue, const std::vector<R
 RubyValue array_new_copies(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_new_idx(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue array_each(linked_ptr<Binding> &, RubyValue, Block &);
 RubyValue array_inspect(linked_ptr<Binding> &, RubyValue);
 RubyValue array_to_s(linked_ptr<Binding> &, RubyValue);
 
@@ -19,6 +20,7 @@ void RubyArrayEI::init(RubyEnvironment &_e)
   rb_cArray->add_metaclass_method(_e, "[]", RubyMethod::Create(array_new_idx, ARGS_ARBITRARY));
 
   rb_cArray->add_method("[]", RubyMethod::Create(array_index_op, 1));
+  rb_cArray->add_method("each", RubyMethod::Create(array_each));
   rb_cArray->add_method("inspect", RubyMethod::Create(array_inspect));
   rb_cArray->add_method("to_s", RubyMethod::Create(array_to_s));
 
@@ -68,6 +70,14 @@ RubyValue array_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::ve
     return _b->environment.NIL;
 
   return arr->data[index];
+}
+
+RubyValue array_each(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
+{
+  RubyArray *arr = _self.get_special<RubyArray>();
+  for (std::vector<RubyValue>::iterator it = arr->data.begin(); it != arr->data.end(); ++it)
+    _block.call(_b, *it);
+  return _self;
 }
 
 RubyValue array_inspect(linked_ptr<Binding> &_b, RubyValue _self)
