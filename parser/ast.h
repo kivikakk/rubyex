@@ -205,6 +205,47 @@ class WhileExpr : public Expr
     void emit(std::ostream &) const;
 };
 
+class InterpolateExpr : public Expr
+{
+  public:
+    InterpolateExpr();
+    virtual ~InterpolateExpr();
+
+    void append(StringLiteralExpr *);
+    void append(Procedure *);
+
+    void p() const;
+    void push(std::ostream &) const;
+
+  protected:
+    class _int_base {
+      public:
+	virtual ~_int_base();
+	virtual void p() const = 0;
+	virtual void push(std::ostream &) const = 0;
+    };
+
+    class _int_str : public _int_base {
+      public:
+	_int_str(StringLiteralExpr *);
+	~_int_str();
+	void p() const;
+	void push(std::ostream &) const;
+	StringLiteralExpr *str;
+    };
+
+    class _int_proc : public _int_base {
+      public:
+	_int_proc(Procedure *);
+	~_int_proc();
+	void p() const;
+	void push(std::ostream &) const;
+	Procedure *proc;
+    };
+
+    std::list<_int_base *> data;
+};
+
 class Program : public PrettyPrint, public Emitter
 {
   public:

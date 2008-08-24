@@ -535,6 +535,71 @@ void WhileExpr::emit(std::ostream &o) const
   emit_int32(o, while_begin - right_after_jmp);
 }
 
+// InterpolateExpr
+
+InterpolateExpr::InterpolateExpr()
+{ }
+
+InterpolateExpr::~InterpolateExpr() {
+  for (std::list<InterpolateExpr::_int_base *>::iterator it = data.begin(); it != data.end(); ++it)
+    delete *it;
+}
+
+void InterpolateExpr::append(StringLiteralExpr *_str) {
+  data.push_back(new _int_str(_str));
+}
+
+void InterpolateExpr::append(Procedure *_proc) {
+  data.push_back(new _int_proc(_proc));
+}
+
+void InterpolateExpr::p() const {
+  std::cout << '\"';
+  for (std::list<InterpolateExpr::_int_base *>::const_iterator it = data.begin(); it != data.end(); ++it)
+    (*it)->p();
+  std::cout << '\"';
+}
+
+void InterpolateExpr::push(std::ostream &) const {
+  // XXX
+}
+
+InterpolateExpr::_int_base::~_int_base()
+{ }
+
+InterpolateExpr::_int_str::_int_str(StringLiteralExpr *_str): str(_str)
+{ }
+
+InterpolateExpr::_int_str::~_int_str()
+{
+  delete str;
+}
+
+void InterpolateExpr::_int_str::p() const {
+  std::cout << str->value;
+}
+
+void InterpolateExpr::_int_str::push(std::ostream &o) const {
+  // XXX
+}
+
+InterpolateExpr::_int_proc::_int_proc(Procedure *_proc): proc(_proc)
+{ }
+
+InterpolateExpr::_int_proc::~_int_proc()
+{
+  delete proc;
+}
+
+void InterpolateExpr::_int_proc::p() const {
+  std::cout << "#{";
+  proc->p();
+  std::cout << "}";
+}
+
+void InterpolateExpr::_int_proc::push(std::ostream &o) const {
+  // XXX
+}
 
 // Program
 

@@ -34,6 +34,7 @@ typedef union {
   FuncDefExpr *funcdef;
   ConditionalExpr *conditional;
   WhileExpr *while_loop;
+  InterpolateExpr *interpolated_string;
 
   Procedure *procedure;
 } expu;

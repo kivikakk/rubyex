@@ -31,7 +31,6 @@
 %token <yield> YIELD
 
 %type <expr> line expr compiled_expr
-%type <expr> interpolated_string
 %type <block> block opt_block
 %type <exprlist> exprlist opt_exprlist hashlist
 %type <deflist> deflist block_arguments opt_block_arguments block_argument_contents funcdef_args
@@ -40,6 +39,7 @@
 %type <funcdef> funcdef
 %type <conditional> conditional
 %type <while_loop> while_loop
+%type <interpolated_string> interpolated_string
 
 %type <procedure> sub_content sub_line otherwise
 
@@ -228,5 +228,11 @@ literal:	STRING_LITERAL		{ $$ = $1; }
 
 interpolated_string:
 		STRING_LITERAL INTERPOLATION_START sub_content INTERPOLATION_END STRING_LITERAL
-		{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($5), NULL); std::cerr << "done" << std::endl; }
+		{
+		  $$ = new InterpolateExpr();
+		  $$->append($1);
+		  $$->append($3);
+		  $$->append($5);
+		  std::cerr << "done" << std::endl;
+		}
 ;

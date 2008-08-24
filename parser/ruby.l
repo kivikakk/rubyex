@@ -11,7 +11,7 @@
 %s could_be_starting_block_args
 %s block_args
 
-%x dbstr sstr dbs_begin
+%x dbstr sstr dbs_begin dbs_finishing
 %s dbs_interpolating
 
 %{
@@ -59,10 +59,10 @@
 \"			{
 		  string_buf = "";
 		  doing_symbol = false;
-		  BEGIN(dbstr);
+		  yy_push_state(dbstr);
 		}
 <dbstr>\"		{ /* all done */
-		  BEGIN(INITIAL);
+		  yy_pop_state();
 		  if (doing_symbol) {
 		    yylval.symbol = new SymbolExpr(string_buf);
 		    return SYMBOL;
@@ -90,8 +90,13 @@
 
 <dbs_interpolating>\}	{
 		  std::cerr << "end string interpolation" << std::endl;
-		  BEGIN(INITIAL);
+		  BEGIN(dbs_finishing);
 		  unput('"');
+		  return CONTEXT_FINISH;
+		}
+<dbs_finishing>\"	{
+		  yyless(0);
+		  yy_pop_state();
 		  return INTERPOLATION_END;
 		}
 
