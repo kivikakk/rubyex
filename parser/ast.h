@@ -215,6 +215,7 @@ class InterpolateExpr : public Expr
     void append(Procedure *);
 
     void p() const;
+    void emit(std::ostream &) const;
     void push(std::ostream &) const;
 
   protected:

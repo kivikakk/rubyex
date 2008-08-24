@@ -28,6 +28,7 @@ typedef enum
   I_TARGET_DEF		= 0x21,
   I_DEF			= 0x22,
   I_YIELD		= 0x23,
+  I_INTERPOL		= 0x24,		// I love those guys.
 
   I_END			= 0x30,
   I_POP			= 0x31,

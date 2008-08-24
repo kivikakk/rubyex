@@ -560,8 +560,16 @@ void InterpolateExpr::p() const {
   std::cout << '\"';
 }
 
-void InterpolateExpr::push(std::ostream &) const {
-  // XXX
+void InterpolateExpr::emit(std::ostream &o) const {
+  for (std::list<InterpolateExpr::_int_base *>::const_iterator it = data.begin(); it != data.end(); ++it)
+    (*it)->push(o);
+  emit_instruction(o, I_INTERPOL);
+  emit_uint32(o, data.size());
+}
+
+void InterpolateExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
 }
 
 InterpolateExpr::_int_base::~_int_base()
@@ -580,7 +588,7 @@ void InterpolateExpr::_int_str::p() const {
 }
 
 void InterpolateExpr::_int_str::push(std::ostream &o) const {
-  // XXX
+  str->push(o);
 }
 
 InterpolateExpr::_int_proc::_int_proc(Procedure *_proc): proc(_proc)
@@ -598,7 +606,8 @@ void InterpolateExpr::_int_proc::p() const {
 }
 
 void InterpolateExpr::_int_proc::push(std::ostream &o) const {
-  // XXX
+  proc->emit(o);
+  emit_instruction(o, I_PUSH_LAST);
 }
 
 // Program

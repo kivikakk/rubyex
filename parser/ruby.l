@@ -124,11 +124,11 @@
 '			{
 		  string_buf = "";
 		  doing_symbol = false;
-		  BEGIN(sstr);
+		  yy_push_state(sstr);
 		}
 
 <sstr>'			{
-		  BEGIN(INITIAL);
+		  yy_pop_state();
 		  if (doing_symbol) {
 		    yylval.symbol = new SymbolExpr(string_buf);
 		    return SYMBOL;
@@ -305,12 +305,12 @@ end			{
 :\"			{
 		  string_buf = "";
 		  doing_symbol = true;
-		  BEGIN(dbstr);
+		  yy_push_state(dbstr);
 		}
 :'			{
 		  string_buf = "";
 		  doing_symbol = true;
-		  BEGIN(sstr);
+		  yy_push_state(sstr);
 		}
 
 [\t ]+		{ }
