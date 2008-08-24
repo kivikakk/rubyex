@@ -43,7 +43,7 @@
 %type <conditional> conditional
 %type <while_loop> while_loop
 %type <begin_section> begin_section
-%type <rescue_mission> opt_rescue_mission
+%type <rescue> opt_rescue
 %type <identifier> opt_rescue_target
 %type <interpolated_string> interpolated_string
 
@@ -250,12 +250,12 @@ interpolated_string:
 		{ $$ = $1; $$->append($3); $$->append($6); }
 ;
 
-begin_section:	BEGIN_SECTION sub_content opt_rescue_mission opt_rescue_else opt_rescue_ensure END 	{ $$ = new BeginSectionExpr($2, $3, $4, $5); }
+begin_section:	BEGIN_SECTION sub_content opt_rescue opt_rescue_else opt_rescue_ensure END 	{ $$ = new BeginSectionExpr(new BlockExpr($2), $3, $4, $5); }
 ;
 
-opt_rescue_mission:
+opt_rescue:
 		/* empty */					{ $$ = NULL; }
-	      |	RESCUE opt_idlist opt_rescue_target sub_content	{ $$ = new RescueExpr($2, $3, new BlockExpr($4)); }
+	      |	RESCUE opt_idlist opt_rescue_target sub_content	{ $$ = new Rescue($2, $3, new BlockExpr($4)); }
 ;
 
 opt_rescue_else:

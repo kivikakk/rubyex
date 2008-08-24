@@ -215,16 +215,16 @@ class WhileExpr : public Expr
     void emit(std::ostream &) const;
 };
 
-class RescueExpr;
+class Rescue;
 
 class BeginSectionExpr : public Expr
 {
   public:
-    BeginSectionExpr(Procedure *, RescueExpr *, BlockExpr *, BlockExpr *);
+    BeginSectionExpr(BlockExpr *, Rescue *, BlockExpr *, BlockExpr *);
     virtual ~BeginSectionExpr();
 
-    Procedure *main_clause;
-    RescueExpr *rescue;
+    BlockExpr *main_clause;
+    Rescue *rescue;
     BlockExpr *else_clause;
     BlockExpr *ensure_clause;
 
@@ -233,19 +233,16 @@ class BeginSectionExpr : public Expr
     void push(std::ostream &) const;
 };
 
-class RescueExpr : public Expr
+class Rescue : public PrettyPrint
 {
   public:
-    RescueExpr(IdListExpr *, IdentifierExpr *, BlockExpr *);
-    virtual ~RescueExpr();
+    Rescue(IdListExpr *, IdentifierExpr *, BlockExpr *);
+    virtual ~Rescue();
 
     std::list<IdentifierExpr *> exceptions;
-    IdentifierExpr *save_to;
     BlockExpr *clause;
 
     void p() const;
-    void emit(std::ostream &) const;
-    void push(std::ostream &) const;
 };
 
 class InterpolateExpr : public Expr

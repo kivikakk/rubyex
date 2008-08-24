@@ -547,7 +547,7 @@ void WhileExpr::emit(std::ostream &o) const
 
 // BeginSectionExpr
 
-BeginSectionExpr::BeginSectionExpr(Procedure *_main_clause, RescueExpr *_rescue, BlockExpr *_else_clause, BlockExpr *_ensure_clause): main_clause(_main_clause), rescue(_rescue), else_clause(_else_clause), ensure_clause(_ensure_clause)
+BeginSectionExpr::BeginSectionExpr(BlockExpr *_main_clause, Rescue *_rescue, BlockExpr *_else_clause, BlockExpr *_ensure_clause): main_clause(_main_clause), rescue(_rescue), else_clause(_else_clause), ensure_clause(_ensure_clause)
 { }
 
 BeginSectionExpr::~BeginSectionExpr() {
@@ -580,13 +580,28 @@ void BeginSectionExpr::p() const {
 }
 
 void BeginSectionExpr::emit(std::ostream &o) const {
-  long begin_begin = (long)o.tellp();	// Here's where it all starts.
-  
   // if we have a rescue or ensure part, we add it to the VM stack.
-  if (rescue || ensure_clause);
-    
-  main_clause->emit(o);
-  // XXX
+  if (!rescue && !ensure_clause) {
+    // Nothing special. The return value is the last thing in `main', or `else' if there is one.
+    main_clause->proc->emit(o);
+    if (else_clause)
+      else_clause->proc->emit(o);
+  } else {
+    // needs to be blocked.
+    if (ensure_clause)
+      ensure_clause->push(o);
+    if (rescue)
+      rescue->clause->push(o);
+
+    emit_instruction(o, I_PUSH_EXCEPTION);
+    emit_uint8(o, (rescue ? E_RESCUE : 0) | (ensure_clause ? E_ENSURE : 0));
+
+    // XXX do something with main clause and jumpy bits here.
+
+    emit_instruction(o, I_POP_EXCEPTION);
+    if (else_clause)
+      else_clause->proc->emit(o);
+  }
 }
 
 void BeginSectionExpr::push(std::ostream &o) const {
@@ -594,21 +609,25 @@ void BeginSectionExpr::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH_LAST);
 }
 
-// RescueExpr
+// Rescue
 
-RescueExpr::RescueExpr(IdListExpr *_exceptions, IdentifierExpr *_save_to, BlockExpr *_clause): save_to(_save_to), clause(_clause) {
+Rescue::Rescue(IdListExpr *_exceptions, IdentifierExpr *_save_to, BlockExpr *_clause): clause(_clause) {
   if (_exceptions) {
     exceptions = _exceptions->args;
     delete _exceptions;
   }
+
+  if (_save_to)
+    clause->args.push_back(_save_to);
 }
 
-RescueExpr::~RescueExpr() {
-  delete save_to;
+Rescue::~Rescue() {
+  for (std::list<IdentifierExpr *>::iterator it = exceptions.begin(); it != exceptions.end(); ++it)
+    delete *it;
   delete clause;
 }
 
-void RescueExpr::p() const {
+void Rescue::p() const {
   std::cout << "rescue";
 
   if (exceptions.size() > 0) {
@@ -618,26 +637,16 @@ void RescueExpr::p() const {
       (*it)->p();
     }
   }
-  if (save_to) {
+  if (clause->args.size() == 1) {
     std::cout << " => ";
-    save_to->p();
+    (*clause->args.begin())->p();
   }
 
   std::cout << std::endl << "  ";
-  clause->p();
+  clause->proc->p();
 
   std::cout << std::endl;
 }
-
-void RescueExpr::emit(std::ostream &o) const {
-  // XXX
-}
-
-void RescueExpr::push(std::ostream &o) const {
-  emit(o);
-  emit_instruction(o, I_PUSH_LAST);
-}
-
 
 // InterpolateExpr
 

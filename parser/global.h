@@ -36,7 +36,7 @@ typedef union {
   ConditionalExpr *conditional;
   WhileExpr *while_loop;
   BeginSectionExpr *begin_section;
-  RescueExpr *rescue_mission;
+  Rescue *rescue;
   InterpolateExpr *interpolated_string;
 
   Procedure *procedure;

@@ -14,6 +14,13 @@ typedef enum
   T_BLOCK		= 0xf0
 } type_t;
 
+// below is used for bitfield.
+typedef enum
+{
+  E_RESCUE		= 0x01,
+  E_ENSURE		= 0x02,
+} exception_information_t;
+
 typedef enum
 {
   I_ASSIGNMENT		= 0x01,
@@ -39,6 +46,7 @@ typedef enum
   I_IF			= 0x40,
 
   I_PUSH_EXCEPTION	= 0x50,
+  I_POP_EXCEPTION	= 0x51,
 } instruction_t;
 
 #endif
