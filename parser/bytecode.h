@@ -37,6 +37,8 @@ typedef enum
   I_JMP			= 0x34,
 
   I_IF			= 0x40,
+
+  I_PUSH_EXCEPTION	= 0x50,
 } instruction_t;
 
 #endif

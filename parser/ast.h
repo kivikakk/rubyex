@@ -220,13 +220,13 @@ class RescueExpr;
 class BeginSectionExpr : public Expr
 {
   public:
-    BeginSectionExpr(Procedure *, RescueExpr *, Procedure *, Procedure *);
+    BeginSectionExpr(Procedure *, RescueExpr *, BlockExpr *, BlockExpr *);
     virtual ~BeginSectionExpr();
 
     Procedure *main_clause;
     RescueExpr *rescue;
-    Procedure *else_clause;
-    Procedure *ensure_clause;
+    BlockExpr *else_clause;
+    BlockExpr *ensure_clause;
 
     void p() const;
     void emit(std::ostream &) const;
@@ -236,12 +236,12 @@ class BeginSectionExpr : public Expr
 class RescueExpr : public Expr
 {
   public:
-    RescueExpr(IdListExpr *, IdentifierExpr *, Procedure *);
+    RescueExpr(IdListExpr *, IdentifierExpr *, BlockExpr *);
     virtual ~RescueExpr();
 
     std::list<IdentifierExpr *> exceptions;
     IdentifierExpr *save_to;
-    Procedure *clause;
+    BlockExpr *clause;
 
     void p() const;
     void emit(std::ostream &) const;

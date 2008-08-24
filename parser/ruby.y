@@ -47,7 +47,8 @@
 %type <identifier> opt_rescue_target
 %type <interpolated_string> interpolated_string
 
-%type <procedure> sub_content sub_line otherwise opt_rescue_else opt_rescue_ensure
+%type <procedure> sub_content sub_line otherwise
+%type <block> opt_rescue_else opt_rescue_ensure
 
 %nonassoc INTERPOLATION_START
 
@@ -249,22 +250,22 @@ interpolated_string:
 		{ $$ = $1; $$->append($3); $$->append($6); }
 ;
 
-begin_section:	BEGIN_SECTION sub_content opt_rescue_mission opt_rescue_else opt_rescue_ensure END 				{ $$ = new BeginSectionExpr($2, $3, $4, $5); }
+begin_section:	BEGIN_SECTION sub_content opt_rescue_mission opt_rescue_else opt_rescue_ensure END 	{ $$ = new BeginSectionExpr($2, $3, $4, $5); }
 ;
 
 opt_rescue_mission:
 		/* empty */					{ $$ = NULL; }
-	      |	RESCUE opt_idlist opt_rescue_target sub_content	{ $$ = new RescueExpr($2, $3, $4); }
+	      |	RESCUE opt_idlist opt_rescue_target sub_content	{ $$ = new RescueExpr($2, $3, new BlockExpr($4)); }
 ;
 
 opt_rescue_else:
 		/* empty */					{ $$ = NULL; }
-	      | ELSE sub_content				{ $$ = $2; }
+	      | ELSE sub_content				{ $$ = new BlockExpr($2); }
 ;
 
 opt_rescue_ensure:
 		/* empty */					{ $$ = NULL; }
-	      | ENSURE sub_content				{ $$ = $2; }
+	      | ENSURE sub_content				{ $$ = new BlockExpr($2); }
 ;
 
 opt_rescue_target:

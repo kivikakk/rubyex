@@ -243,12 +243,9 @@ void BlockExpr::push(std::ostream &o) const
 {
   emit_instruction(o, I_CONSTRUCT_BLOCK);
   
-  if (args.size() > 0) {
-    emit_uint32(o, args.size());
-    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it)
-      emit_string(o, (*it)->id);
-  } else
-    emit_uint32(o, 0);
+  emit_uint32(o, args.size());
+  for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it)
+    emit_string(o, (*it)->id);
 
   emit_uint32(o, proc->length());
   proc->emit(o);
@@ -550,7 +547,7 @@ void WhileExpr::emit(std::ostream &o) const
 
 // BeginSectionExpr
 
-BeginSectionExpr::BeginSectionExpr(Procedure *_main_clause, RescueExpr *_rescue, Procedure *_else_clause, Procedure *_ensure_clause): main_clause(_main_clause), rescue(_rescue), else_clause(_else_clause), ensure_clause(_ensure_clause)
+BeginSectionExpr::BeginSectionExpr(Procedure *_main_clause, RescueExpr *_rescue, BlockExpr *_else_clause, BlockExpr *_ensure_clause): main_clause(_main_clause), rescue(_rescue), else_clause(_else_clause), ensure_clause(_ensure_clause)
 { }
 
 BeginSectionExpr::~BeginSectionExpr() {
@@ -583,6 +580,11 @@ void BeginSectionExpr::p() const {
 }
 
 void BeginSectionExpr::emit(std::ostream &o) const {
+  long begin_begin = (long)o.tellp();	// Here's where it all starts.
+  
+  // if we have a rescue or ensure part, we add it to the VM stack.
+  if (rescue || ensure_clause);
+    
   main_clause->emit(o);
   // XXX
 }
@@ -594,7 +596,7 @@ void BeginSectionExpr::push(std::ostream &o) const {
 
 // RescueExpr
 
-RescueExpr::RescueExpr(IdListExpr *_exceptions, IdentifierExpr *_save_to, Procedure *_clause): save_to(_save_to), clause(_clause) {
+RescueExpr::RescueExpr(IdListExpr *_exceptions, IdentifierExpr *_save_to, BlockExpr *_clause): save_to(_save_to), clause(_clause) {
   if (_exceptions) {
     exceptions = _exceptions->args;
     delete _exceptions;
