@@ -97,7 +97,6 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	context->binding->def_target->def_method(name, method);
 	break;
       }
-
       case I_YIELD: {
 	if (!yield_block) {
 	  std::cerr << "I_YIELD: LocalJumpError: no block given" << std::endl;	// XXX LocalJumpError
@@ -118,6 +117,20 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	// end
 	last_value = yield_block->call(context->binding, arguments);
 
+	break;
+      }
+      case I_INTERPOL: {
+	uint32 arg_count = r.read_uint32();
+	
+	std::vector<RubyValue> components;
+	while (arg_count--)
+	  components.push_back(s.pop_value(context));
+	
+	std::string r;
+	for (std::vector<RubyValue>::iterator it = components.begin(); it != components.end(); ++it)
+	  r += it->call(context->binding, "to_s").get_special<RubyString>()->string_value;
+
+	last_value = e.get_string(r);
 	break;
       }
 

@@ -561,7 +561,8 @@ void InterpolateExpr::p() const {
 }
 
 void InterpolateExpr::emit(std::ostream &o) const {
-  for (std::list<InterpolateExpr::_int_base *>::const_iterator it = data.begin(); it != data.end(); ++it)
+  // push them on reverse.
+  for (std::list<InterpolateExpr::_int_base *>::const_reverse_iterator it = data.rbegin(); it != data.rend(); ++it)
     (*it)->push(o);
   emit_instruction(o, I_INTERPOL);
   emit_uint32(o, data.size());
