@@ -227,12 +227,11 @@ literal:	STRING_LITERAL		{ $$ = $1; }
 ;
 
 interpolated_string:
-		STRING_LITERAL INTERPOLATION_START sub_content INTERPOLATION_END STRING_LITERAL
+		STRING_LITERAL INTERPOLATION_START sub_content '}' {restart_string_literal();} STRING_LITERAL
 		{
 		  $$ = new InterpolateExpr();
 		  $$->append($1);
 		  $$->append($3);
-		  $$->append($5);
-		  std::cerr << "done" << std::endl;
+		  $$->append($6);
 		}
 ;

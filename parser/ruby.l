@@ -54,6 +54,11 @@
 
 %%
 
+    if (string_lit_rs) {
+      string_lit_rs = false;
+      string_buf = ""; doing_symbol = false; BEGIN(dbstr);
+    }
+
 #[^\n]*		{ }
 
 \"			{
@@ -72,8 +77,6 @@
 		  return STRING_LITERAL;
 		}
 <dbstr>#\{		{ /* string interpolation */
-		  std::cerr << "begin string interpolation" << std::endl;
-
 		  unput('!');
 		  BEGIN(dbs_begin);
 
@@ -88,12 +91,6 @@
 
 <dbs_begin>!	{ BEGIN(dbs_interpolating); return INTERPOLATION_START; }
 
-<dbs_interpolating>\}	{
-		  std::cerr << "end string interpolation" << std::endl;
-		  BEGIN(dbs_finishing);
-		  unput('"');
-		  return CONTEXT_FINISH;
-		}
 <dbs_finishing>\"	{
 		  yyless(0);
 		  yy_pop_state();

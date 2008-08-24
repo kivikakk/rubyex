@@ -42,11 +42,9 @@ typedef union {
 #define YYSTYPE expu
 
 extern int context_depths, context_lines;
+extern bool string_lit_rs;
 
-typedef enum {
-  B_HASH, B_BLOCK
-} brace_t;
-
+void restart_string_literal();
 void enter_context(); void enter_context_line();
 void exit_context(); void exit_context_line();
 bool in_context();
