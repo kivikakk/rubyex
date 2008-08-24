@@ -16,7 +16,7 @@ class RubyHash : public RubyObject
   public:
     RubyHash(RubyEnvironment &);
     RubyHash(RubyEnvironment &, RubyValue);
-    RubyHash(RubyEnvironment &, const std::vector<RubyValue> &);
+    RubyHash(linked_ptr<Binding> &, const std::vector<RubyValue> &);	// Needs the binding to call set().
 
     void set(linked_ptr<Binding> &, RubyValue, RubyValue);
     RubyValue get(linked_ptr<Binding> &, RubyValue);

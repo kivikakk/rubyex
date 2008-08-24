@@ -48,7 +48,7 @@ RubyValue hash_new_default(linked_ptr<Binding> &_b, RubyValue _self, const std::
 
 RubyValue hash_new_idx(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  return RubyValue::from_object(_b->environment.gc.track(new RubyHash(_b->environment, _args)));
+  return RubyValue::from_object(_b->environment.gc.track(new RubyHash(_b, _args)));
 }
 
 RubyValue hash_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -116,15 +116,15 @@ RubyHash::RubyHash(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "Hash
 RubyHash::RubyHash(RubyEnvironment &_e, RubyValue _default_value): RubyObject(new NamedLazyClass(_e, "Hash")), default_value(_default_value)
 { }
 
-RubyHash::RubyHash(RubyEnvironment &_e, const std::vector<RubyValue> &_values): RubyObject(new NamedLazyClass(_e, "Hash")), default_value(_e.NIL)
+RubyHash::RubyHash(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_values): RubyObject(new NamedLazyClass(_b->environment, "Hash")), default_value(_b->environment.NIL)
 {
   if (_values.size() % 2 == 1) {
     std::cerr << "odd number of arguments for Hash" << std::endl;
     throw;
   }
 
-//  for (unsigned int idx = 0; idx < _values.size(); idx += 2)
-//    set(_values[idx + 0], _values[idx + 1]);
+  for (unsigned int idx = 0; idx < _values.size(); idx += 2)
+    set(_b, _values[idx + 0], _values[idx + 1]);
 }
 
 void RubyHash::set(linked_ptr<Binding> &_b, RubyValue _key, RubyValue _value)

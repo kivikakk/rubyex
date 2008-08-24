@@ -9,9 +9,11 @@ while input == :continue
   input = gets
   if input.nil?
     puts
-  elsif input.length > 0
+  else
     input.strip!
-    puts "=> " + eval(input).inspect
+    if input.length > 0
+      puts "=> " + eval(input).inspect
+    end
     input = :continue
   end
 end
