@@ -49,7 +49,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	uint32 arg_count = r.read_uint32();
 
 	RubyValue target;
-	Block block(NULL, NULL);	// purposefully temporary.
+	Block block(NULL, NULL, NULL);	// purposefully temporary.
 
 	if (is_target) target = s.pop_value(context);
 	if (is_block) block = s.pop_block();
@@ -68,7 +68,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
 
       case I_CONSTRUCT_BLOCK: {
-	Block block(context->binding->def_target, yield_block);	// takes def_target of surroundings.
+	Block block(context->binding->def_target, context, yield_block);	// takes def_target of surroundings.
 
 	uint32 arg_count = r.read_uint32();
 	while (arg_count--)

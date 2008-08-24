@@ -5,7 +5,7 @@
 #include "context.h"
 #include "process.h"
 
-Block::Block(RubyClass *_def_target, Block *_caller_block): def_target(_def_target), caller_block(_caller_block)
+Block::Block(RubyClass *_def_target, Context *_caller_context, Block *_caller_block): def_target(_def_target), caller_context(_caller_context), caller_block(_caller_block)
 { }
 
 RubyValue Block::call(linked_ptr<Binding> &_b)
@@ -27,7 +27,7 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
   // N.B. new Context's `self' is the same as the one from outside.
   // Hence `self' in a block still refers to the `self' from outside,
   // which makes sense.
-  Context *c = new Context(_b->environment, _b->context, def_target);
+  Context *c = new Context(_b->environment, _b->context, def_target, caller_context);
   // XXX!! This context should have a binding which somehow keeps
   // the variables from outer scope in, while new variables
   // created within this scope die afterward.
@@ -56,7 +56,7 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
   std::istringstream iss(this->code);
   Reader r = Reader(iss);
 
-  Context *c = new Context(_b->environment, _b->context, def_target);
+  Context *c = new Context(_b->environment, _b->context, def_target, caller_context);
 
   unsigned int given_args_to_add = std::min(this->args.size(), _args.size());
   for (unsigned int i = 0; i < given_args_to_add; ++i)

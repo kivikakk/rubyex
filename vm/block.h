@@ -6,10 +6,12 @@
 #include "rvalue.h"
 #include "binding.h"
 
+class Context;
+
 class Block
 {
   public:
-    Block(RubyClass *, Block *);
+    Block(RubyClass *, Context *, Block *);
 
     RubyValue call(linked_ptr<Binding> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue);
@@ -19,6 +21,7 @@ class Block
     std::string code;
     std::vector<std::string> args;
     RubyClass *def_target;
+    Context *caller_context;
     Block *caller_block;
 };
 

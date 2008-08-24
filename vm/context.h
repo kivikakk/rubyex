@@ -8,6 +8,7 @@
 
 #include <string>
 #include <memory>
+#include <exception>
 #include "linked_ptr.h"
 #include "stack.h"
 #include "rvalue.h"
@@ -17,19 +18,24 @@
 class Context
 {
   public:
-    Context(RubyEnvironment &, RubyValue, RubyClass *);
+    Context(RubyEnvironment &, RubyValue, RubyClass *, Context *);
     Context(linked_ptr<Binding> &);
 
     RubyMethod *get_method(const std::string &) const;
 
     RubyValue entry_to_value(const Stack::StackEntry &);
+    RubyValue resolve_local(const std::string &);
     RubyValue resolve_identifier(const std::string &);
     // these two not const - could result in method call.
 
     void assign(const std::string &, RubyValue);
 
     linked_ptr<Binding> binding;
+    Context *outer_context;
 };
+
+class CannotFindLocalError : public std::exception
+{ };
 
 #endif
 

@@ -3,7 +3,7 @@
 #include "context.h"
 #include "rmethod.h"
 
-Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target)))
+Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target, Context *_outer_context): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target))), outer_context(_outer_context)
 { }
 
 Context::Context(linked_ptr<Binding> &_binding): binding(_binding)
@@ -35,14 +35,24 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry)
   throw;
 }
 
+RubyValue Context::resolve_local(const std::string &_identifier)
+{
+  std::map<std::string, RubyValue>::const_iterator iter = binding->locals.find(_identifier);
+  if (iter != binding->locals.end())
+    return iter->second;
+
+  if (outer_context)
+    return outer_context->resolve_local(_identifier);
+
+  throw CannotFindLocalError();
+}
+
 RubyValue Context::resolve_identifier(const std::string &_identifier)
 {
-  // first look at locals.
-  {
-    std::map<std::string, RubyValue>::const_iterator iter = binding->locals.find(_identifier);
-    if (iter != binding->locals.end())
-      return iter->second;
-  }
+  try {
+    return resolve_local(_identifier);
+  } catch (CannotFindLocalError)
+  { }
 
   // how about environment globals? (<< XXX seems conceptually incorrect - should they be exposed any other way, logically?)
   try {
