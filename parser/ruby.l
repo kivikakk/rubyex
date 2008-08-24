@@ -26,6 +26,9 @@
   /* Only bother with alpha/num here. */
   const keyword_t keyword_listing[] = {
     { "do", DO },
+    { "begin", BEGIN_SECTION }, { "ensure", ENSURE },
+    { "raise", RAISE }, { "rescue", RESCUE },
+    { "catch", CATCH }, { "throw", THROW },
     { "end", END },
 
     { "def", DEF },
@@ -36,6 +39,7 @@
     { "yield", YIELD },
 
     { "while", WHILE },
+
 
     { "", 0 }
   };

@@ -106,6 +106,16 @@ class DefListExpr
     std::list<IdentifierExpr *> args;
 };
 
+class IdListExpr
+{
+  public:
+    IdListExpr(IdentifierExpr *);
+    IdListExpr(IdListExpr *, IdentifierExpr *);
+    virtual ~IdListExpr();
+
+    std::list<IdentifierExpr *> args;
+};
+
 class BlockExpr : public Expr
 {
   public:
@@ -203,6 +213,39 @@ class WhileExpr : public Expr
 
     void p() const;
     void emit(std::ostream &) const;
+};
+
+class RescueExpr;
+
+class BeginSectionExpr : public Expr
+{
+  public:
+    BeginSectionExpr(Procedure *, RescueExpr *, Procedure *, Procedure *);
+    virtual ~BeginSectionExpr();
+
+    Procedure *main_clause;
+    RescueExpr *rescue;
+    Procedure *else_clause;
+    Procedure *ensure_clause;
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+};
+
+class RescueExpr : public Expr
+{
+  public:
+    RescueExpr(IdListExpr *, IdentifierExpr *, Procedure *);
+    virtual ~RescueExpr();
+
+    std::list<IdentifierExpr *> exceptions;
+    IdentifierExpr *save_to;
+    Procedure *clause;
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
 };
 
 class InterpolateExpr : public Expr

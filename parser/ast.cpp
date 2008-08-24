@@ -190,6 +190,21 @@ DefListExpr::~DefListExpr() {
   // See ~ExprList() for an explanation.
 }
 
+IdListExpr::IdListExpr(IdentifierExpr *first) {
+  this->args.push_back(first);
+}
+
+IdListExpr::IdListExpr(IdListExpr *combine, IdentifierExpr *also) {
+  this->args = combine->args;
+  this->args.push_back(also);
+
+  delete combine;
+}
+
+IdListExpr::~IdListExpr() {
+  // See ~ExprList() for an explanation.
+}
+
 BlockExpr::BlockExpr(): proc(NULL)
 { }
 
@@ -434,10 +449,8 @@ ConditionalExpr::ConditionalExpr(Expr *_condition, Procedure *_on_true, Procedur
 ConditionalExpr::~ConditionalExpr()
 {
   delete condition;
-  if (on_true)
-    delete on_true;
-  if (on_false)
-    delete on_false;
+  delete on_true;
+  delete on_false;
 }
 
 void ConditionalExpr::p() const
@@ -534,6 +547,95 @@ void WhileExpr::emit(std::ostream &o) const
   emit_instruction(o, I_JMP);
   emit_int32(o, while_begin - right_after_jmp);
 }
+
+// BeginSectionExpr
+
+BeginSectionExpr::BeginSectionExpr(Procedure *_main_clause, RescueExpr *_rescue, Procedure *_else_clause, Procedure *_ensure_clause): main_clause(_main_clause), rescue(_rescue), else_clause(_else_clause), ensure_clause(_ensure_clause)
+{ }
+
+BeginSectionExpr::~BeginSectionExpr() {
+  delete main_clause;
+  delete rescue;
+  delete else_clause;
+  delete ensure_clause;
+}
+
+void BeginSectionExpr::p() const {
+  std::cout << "begin" << std::endl << "  ";
+  main_clause->p();
+  std::cout << std::endl;
+
+  if (rescue) rescue->p();
+
+  if (else_clause) {
+    std::cout << "else" << std::endl << "  ";
+    else_clause->p();
+    std::cout << std::endl;
+  }
+
+  if (ensure_clause) {
+    std::cout << "ensure" << std::endl << "  ";
+    ensure_clause->p();
+    std::cout << std::endl;
+  }
+
+  std::cout << "end";
+}
+
+void BeginSectionExpr::emit(std::ostream &o) const {
+  main_clause->emit(o);
+  // XXX
+}
+
+void BeginSectionExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
+// RescueExpr
+
+RescueExpr::RescueExpr(IdListExpr *_exceptions, IdentifierExpr *_save_to, Procedure *_clause): save_to(_save_to), clause(_clause) {
+  if (_exceptions) {
+    exceptions = _exceptions->args;
+    delete _exceptions;
+  }
+}
+
+RescueExpr::~RescueExpr() {
+  delete save_to;
+  delete clause;
+}
+
+void RescueExpr::p() const {
+  std::cout << "rescue";
+
+  if (exceptions.size() > 0) {
+    std::cout << " ";
+    for (std::list<IdentifierExpr *>::const_iterator it = exceptions.begin(); it != exceptions.end(); ++it) {
+      if (it != exceptions.begin()) std::cout << ", ";
+      (*it)->p();
+    }
+  }
+  if (save_to) {
+    std::cout << " => ";
+    save_to->p();
+  }
+
+  std::cout << std::endl << "  ";
+  clause->p();
+
+  std::cout << std::endl;
+}
+
+void RescueExpr::emit(std::ostream &o) const {
+  // XXX
+}
+
+void RescueExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
 
 // InterpolateExpr
 

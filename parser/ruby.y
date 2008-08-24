@@ -21,6 +21,8 @@
 %token <symbol> SYMBOL
 
 %token DEF IF ELSE ELSIF UNLESS
+%token BEGIN_SECTION
+%token RAISE RESCUE THROW CATCH ENSURE
 %token WHILE
 
 %token <string_literal> STRING_LITERAL 
@@ -33,15 +35,19 @@
 %type <expr> line expr compiled_expr
 %type <block> block opt_block
 %type <exprlist> exprlist opt_exprlist hashlist
+%type <idlist> idlist opt_idlist
 %type <deflist> deflist block_arguments opt_block_arguments block_argument_contents funcdef_args
 %type <literal> literal
 %type <funccall> funccall
 %type <funcdef> funcdef
 %type <conditional> conditional
 %type <while_loop> while_loop
+%type <begin_section> begin_section
+%type <rescue_mission> opt_rescue_mission
+%type <identifier> opt_rescue_target
 %type <interpolated_string> interpolated_string
 
-%type <procedure> sub_content sub_line otherwise
+%type <procedure> sub_content sub_line otherwise opt_rescue_else opt_rescue_ensure
 
 %nonassoc INTERPOLATION_START
 
@@ -124,6 +130,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	'{' CONTEXT_FINISH '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      |	'{' '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      | conditional				{ $$ = $1; }
+	      | begin_section				{ $$ = $1; }
 	      | while_loop				{ $$ = $1; }
 ;
 
@@ -154,6 +161,14 @@ opt_exprlist:	/* empty */			{ $$ = NULL; }
 /* deflist is for function/block argument definitions. one or more. */
 deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 	      | deflist ',' IDENTIFIER	{ $$ = new DefListExpr($1, $3); }
+;
+
+idlist:		IDENTIFIER		{ $$ = new IdListExpr($1); }
+	      |	idlist ',' IDENTIFIER	{ $$ = new IdListExpr($1, $3); }
+;
+
+opt_idlist:	/* empty */		{ $$ = NULL; }
+	      | idlist			{ $$ = $1; }
 ;
 
 hashlist:	compiled_expr ASSOC compiled_expr		{ $$ = new ExprList($1, $3); }
@@ -233,3 +248,27 @@ interpolated_string:
 	      |	interpolated_string INTERPOLATION_START sub_content '}' {restart_string_literal();} STRING_LITERAL
 		{ $$ = $1; $$->append($3); $$->append($6); }
 ;
+
+begin_section:	BEGIN_SECTION sub_content opt_rescue_mission opt_rescue_else opt_rescue_ensure END 				{ $$ = new BeginSectionExpr($2, $3, $4, $5); }
+;
+
+opt_rescue_mission:
+		/* empty */					{ $$ = NULL; }
+	      |	RESCUE opt_idlist opt_rescue_target sub_content	{ $$ = new RescueExpr($2, $3, $4); }
+;
+
+opt_rescue_else:
+		/* empty */					{ $$ = NULL; }
+	      | ELSE sub_content				{ $$ = $2; }
+;
+
+opt_rescue_ensure:
+		/* empty */					{ $$ = NULL; }
+	      | ENSURE sub_content				{ $$ = $2; }
+;
+
+opt_rescue_target:
+		/* empty */		{ $$ = NULL; }
+	      |	ASSOC IDENTIFIER	{ $$ = $2; }
+;
+

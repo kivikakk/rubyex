@@ -19,6 +19,7 @@ typedef union {
   Expr *expr;
   ExprList *exprlist;
   DefListExpr *deflist;
+  IdListExpr *idlist;
   BlockExpr *block;
 
   StringLiteralExpr *string_literal;
@@ -34,6 +35,8 @@ typedef union {
   FuncDefExpr *funcdef;
   ConditionalExpr *conditional;
   WhileExpr *while_loop;
+  BeginSectionExpr *begin_section;
+  RescueExpr *rescue_mission;
   InterpolateExpr *interpolated_string;
 
   Procedure *procedure;
