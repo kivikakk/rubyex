@@ -11,7 +11,7 @@
 %s could_be_starting_block_args
 %s block_args
 
-%x dbstr sstr dbs_begin dbs_finishing
+%x dbstr sstr dbs_begin
 %s dbs_interpolating
 
 %{
@@ -90,12 +90,6 @@
 		}
 
 <dbs_begin>!	{ BEGIN(dbs_interpolating); return INTERPOLATION_START; }
-
-<dbs_finishing>\"	{
-		  yyless(0);
-		  yy_pop_state();
-		  return INTERPOLATION_END;
-		}
 
 <dbstr>\n	string_buf += '\n';
 <dbstr>\\a	string_buf += '\a';

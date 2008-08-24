@@ -43,7 +43,7 @@
 
 %type <procedure> sub_content sub_line otherwise
 
-%nonassoc INTERPOLATION_START INTERPOLATION_END
+%nonassoc INTERPOLATION_START
 
 /* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
  * is collapsed - our wanted behaviour. */
@@ -228,10 +228,5 @@ literal:	STRING_LITERAL		{ $$ = $1; }
 
 interpolated_string:
 		STRING_LITERAL INTERPOLATION_START sub_content '}' {restart_string_literal();} STRING_LITERAL
-		{
-		  $$ = new InterpolateExpr();
-		  $$->append($1);
-		  $$->append($3);
-		  $$->append($6);
-		}
+		{ $$ = new InterpolateExpr(); $$->append($1); $$->append($3); $$->append($6); }
 ;
