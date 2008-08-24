@@ -6,7 +6,7 @@
 Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target, Context *_outer_context): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target))), outer_context(_outer_context)
 { }
 
-Context::Context(linked_ptr<Binding> &_binding): binding(_binding)
+Context::Context(linked_ptr<Binding> &_binding): binding(_binding), outer_context(NULL)
 { }
 
 RubyValue Context::entry_to_value(const Stack::StackEntry &_entry)
@@ -77,12 +77,28 @@ RubyMethod *Context::get_method(const std::string &_name) const
 
 void Context::assign(const std::string &_name, RubyValue _value)
 {
+  if (assign_if_exists(_name, _value))
+    return;
+
   if (binding->locals.find(_name) != binding->locals.end()) {
     // XXX We're going to overwrite something.
     // XXX GC concerns?
-    ;
   }
 
   binding->locals[_name] = _value;
+}
+
+bool Context::assign_if_exists(const std::string &_name, RubyValue _value)
+{
+  if (binding->locals.find(_name) != binding->locals.end()) {
+    // overwriting.
+    binding->locals[_name] = _value;
+    return true;
+  }
+
+  if (outer_context)
+    return outer_context->assign_if_exists(_name, _value);
+
+  return false;
 }
 

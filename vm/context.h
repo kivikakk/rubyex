@@ -29,6 +29,7 @@ class Context
     // these two not const - could result in method call.
 
     void assign(const std::string &, RubyValue);
+    bool assign_if_exists(const std::string &, RubyValue);
 
     linked_ptr<Binding> binding;
     Context *outer_context;
