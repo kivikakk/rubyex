@@ -15,7 +15,7 @@ class WorldException : public std::exception
 {
   public:
     WorldException(linked_ptr<Binding> &, RubyObject *);
-    WorldException(linked_ptr<Binding> &, RubyClass *, const std::string &);
+    WorldException(linked_ptr<Binding> &, RubyObject *, const std::string &);
 
     RubyObject *exception;
 

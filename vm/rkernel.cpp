@@ -5,14 +5,15 @@
 #include "rstring.h"
 #include "eval_hook.h"
 #include "rbinding.h"
+#include "rexception.h"
 
 RubyValue kernel_binding(linked_ptr<Binding> &, RubyValue);
 RubyValue kernel_eval(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_raise(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 RubyValue kernel_print(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_puts(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_p(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-
 RubyValue kernel_gets(linked_ptr<Binding> &, RubyValue);
 
 void RubyKernelEI::init(RubyEnvironment &_e)
@@ -20,11 +21,11 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   RubyModule *rb_mKernel = new RubyModule(_e, "Kernel");
   rb_mKernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
   rb_mKernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
+  rb_mKernel->add_module_method(_e, "raise", RubyMethod::Create(kernel_raise, ARGS_ARBITRARY));
 
   rb_mKernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
-
   rb_mKernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
 
   _e.add_module("Kernel", rb_mKernel);
@@ -57,6 +58,21 @@ RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
   }
 
   return eval_hook(_b->environment, use_binding, _self, first.get_special<RubyString>()->string_value);
+}
+
+RubyValue kernel_raise(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  if (_args.size() == 0)
+    throw WorldException(_b, _b->environment.NotImplementedError, "Kernel::raise: reraise, or raise RuntimeError");
+  else if (_args.size() == 1) {
+    RubyString *s = _args[0].get_special<RubyString>();
+    if (s)
+      throw WorldException(_b, _b->environment.RuntimeError, s->string_value);
+    throw WorldException(_b, _args[0].get_special<RubyObject>());
+  } else if (_args.size() == 2)
+    throw WorldException(_b, _args[0].get_special<RubyObject>(), _args[1].get_special<RubyString>()->string_value);
+  else
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments");
 }
 
 RubyValue kernel_print(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

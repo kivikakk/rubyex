@@ -2,6 +2,7 @@
 #include <exception>
 #include "context.h"
 #include "rmethod.h"
+#include "rexception.h"
 
 Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target, Context *_outer_context): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target))), outer_context(_outer_context)
 { }
@@ -66,13 +67,12 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
   } catch (std::exception)	// XXX: better defined exception.
   { }
 
-  std::cerr << "Context::entry_to_value: failing" << std::endl;
-  throw;
+  throw WorldException(binding, binding->environment.NameError, std::string("undefined local variable or method `") + _identifier + '\'');
 }
 
-RubyMethod *Context::get_method(const std::string &_name) const
+RubyMethod *Context::get_method(const std::string &_name)
 {
-  return binding->context.get_method(_name, binding->environment);
+  return binding->context.get_method(binding, _name);
 }
 
 void Context::assign(const std::string &_name, RubyValue _value)

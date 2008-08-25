@@ -39,8 +39,7 @@ RubyMethod *RubyClass::find_method(const std::string &_name) const
       sagasu = NULL;
   }
 
-  std::cerr << "RubyClass::find_method: cannot find " << get_name() << "#" << _name << std::endl;
-  throw;
+  throw ClassHasNoSuchMethodException();
 }
 
 bool RubyClass::has_ancestor(RubyClass *_check) const {
@@ -50,7 +49,7 @@ bool RubyClass::has_ancestor(RubyClass *_check) const {
     if (ptr == _check)
       return true;
     else
-      ptr = ptr->superklass->resolve();
+      ptr = ptr->superklass ? ptr->superklass->resolve() : NULL;
 
   return false;
 }
@@ -100,6 +99,13 @@ RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<
 {
   RubyClass *s = _self.get_special<RubyClass>();
   RubyObject *i = s->new_instance(_b->environment);
-  return RubyValue::from_object(i);
+  RubyValue v = RubyValue::from_object(i);
+  try {
+    s->find_method("initialize");
+    v.call(_b, "initialize", _args);
+  } catch (ClassHasNoSuchMethodException)
+  { }
+
+  return v;
 }
 

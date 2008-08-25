@@ -2,6 +2,7 @@
 #include "rvalue.h"
 #include "renvironment.h"
 #include "rmethod.h"
+#include "rexception.h"
 
 RubyValue::RubyValue(): type(RV_NOTHING)
 { }
@@ -33,7 +34,7 @@ RubyClass *RubyValue::get_class(RubyEnvironment &_e) const
 }
 
 // the inclusion of `environment' here as a parameter seems a cop-out
-RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e) const
+RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_name) const
 {
   // We need to find a method by this name in our context. We go through the class's ::ancestors.
   // Tradition has it:
@@ -44,8 +45,8 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
   // 		...]
 
   switch (type) {
-    case RubyValue::RV_FIXNUM: return _e.Fixnum->find_method(_name);
-    case RubyValue::RV_SYMBOL: return _e.Symbol->find_method(_name);
+    case RubyValue::RV_FIXNUM: return _b->environment.Fixnum->find_method(_name);
+    case RubyValue::RV_SYMBOL: return _b->environment.Symbol->find_method(_name);
     case RubyValue::RV_OBJECT: {
       // MyMetaClass
       RubyClass *c = object->get_metaclass_read();
@@ -54,7 +55,14 @@ RubyMethod *RubyValue::get_method(const std::string &_name, RubyEnvironment &_e)
       
       // MyClass, MyClassIncludedModules, SuperClass, SuperClassIncludedModules, SuperSuperClass,
       // SuperSuperClassIncludedModules, ..., ...
-      return object->get_class()->find_method(_name);
+      try {
+	return object->get_class()->find_method(_name);
+      } catch (ClassHasNoSuchMethodException) {
+	throw WorldException(_b, _b->environment.NoMethodError,
+	  std::string("undefined method `") + _name + "' for " + 
+	  this->call(_b, "inspect").get_special<RubyString>()->string_value + ":" +
+	  this->get_class(_b->environment)->get_name());
+      }
       break;
     }
     default: std::cerr << "RubyValue::get_method: what in the world? my type is not recognisable" << std::endl; throw;
@@ -90,20 +98,20 @@ long RubyValue::get_fixnum() const
   return fixnum;
 }
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name) const
-{ return get_method(_name, _b->environment)->call(_b, *this); }
+{ return get_method(_b, _name)->call(_b, *this); }
 
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0) const
 {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
-  return get_method(_name, _b->environment)->call(_b, *this, args);
+  return get_method(_b, _name)->call(_b, *this, args);
 }
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1) const
 {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
   args.push_back(_arg1);
-  return get_method(_name, _b->environment)->call(_b, *this, args);
+  return get_method(_b, _name)->call(_b, *this, args);
 }
 
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1, RubyValue _arg2) const
@@ -112,12 +120,12 @@ RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, Rub
   args.push_back(_arg0);
   args.push_back(_arg1);
   args.push_back(_arg2);
-  return get_method(_name, _b->environment)->call(_b, *this, args);
+  return get_method(_b, _name)->call(_b, *this, args);
 }
 
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, const std::vector<RubyValue> &_args) const
 {
-  return get_method(_name, _b->environment)->call(_b, *this, _args);
+  return get_method(_b, _name)->call(_b, *this, _args);
 }
 
 

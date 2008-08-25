@@ -29,6 +29,18 @@ RubyClass *RubyObject::get_metaclass_read() const
   return metaklass;
 }
 
+RubyValue RubyObject::get_instance(RubyEnvironment &_e, const std::string &_name) const
+{
+  if (instance_variables.find(_name) == instance_variables.end())
+    return _e.NIL;
+  return instance_variables.find(_name)->second;
+}
+
+void RubyObject::set_instance(RubyEnvironment &_e, const std::string &_name, RubyValue _value)
+{
+  instance_variables[_name] = _value;
+}
+
 RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
 {
   if (metaklass == NULL) {

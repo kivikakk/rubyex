@@ -1,6 +1,7 @@
 #ifndef RCLASS_H
 #define RCLASS_H
 
+#include <exception>
 #include "rmodule.h"
 #include "lazyclass.h"
 #include "rei.h"
@@ -25,6 +26,9 @@ class RubyClass : public RubyModule, public LazyClass
   protected:
     explicit RubyClass(RubyEnvironment &, LazyClass *, const std::string &);
 };
+
+class ClassHasNoSuchMethodException : public std::exception
+{ };
 
 class RubyClassEI : public RubyEnvironmentInitializer
 {

@@ -24,8 +24,8 @@ class RubyValue
     static RubyValue from_symbol(RubySymbol *);
     static RubyValue from_object(RubyObject *);
 
-    RubyClass *get_class(RubyEnvironment &_e) const;
-    RubyMethod *get_method(const std::string &, RubyEnvironment &) const;
+    RubyClass *get_class(RubyEnvironment &) const;
+    RubyMethod *get_method(linked_ptr<Binding> &, const std::string &) const;
 
     bool truthy(RubyEnvironment &) const;
     long get_fixnum() const;

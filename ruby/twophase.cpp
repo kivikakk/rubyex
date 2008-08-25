@@ -5,6 +5,7 @@
 #include "yywrap.h"
 #include "vm/renvironment.h"
 #include "vm/process.h"
+#include "vm/rexception.h"
 #include "parser/ast.h"
 #include "parser/main.h"
 #include "parser/global.h"
@@ -37,7 +38,16 @@ int twophase(int argc, char **argv)
   Reader reader(iss);
   Context *c = new Context(e, RubyValue::from_object(e.main), e.Object, NULL);
 
-  process(e, reader, c, NULL);
+  try {
+    process(e, reader, c, NULL);
+  } catch (WorldException &w) {
+    RubyString *msg = w.exception->get_instance(e, "message").get_special<RubyString>();
+    std::string cname = w.exception->get_class()->get_name();
+    if (msg)
+      std::cerr << msg->string_value << " (" << cname << ")" << std::endl;
+    else
+      std::cerr << cname << std::endl;
+  }
 
   return 0;
 }

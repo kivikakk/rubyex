@@ -36,7 +36,17 @@ class RubyEnvironment
     RubyClass *Object, *Module, *Class;
     RubyClass *Binding, *Symbol, *Fixnum, *String;
     RubyClass *Array, *Hash;
-    RubyClass *Exception, *StandardError, *TypeError;
+
+    RubyClass *Exception;
+      RubyClass *ScriptError;
+	RubyClass *NotImplementedError;
+      RubyClass *StandardError;
+	RubyClass *ArgumentError;
+	RubyClass *NameError;
+	  RubyClass *NoMethodError;
+	RubyClass *RuntimeError;
+	RubyClass *TypeError;
+
     RubyModule *Kernel;
 
     RubyObject *main;

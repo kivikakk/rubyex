@@ -5,6 +5,8 @@
 #include "block.h"
 #include <vector>
 #include "rvalue.h"
+#include "binding.h"
+#include "linked_ptr.h"
 
 class RubyObject;
 class Context;

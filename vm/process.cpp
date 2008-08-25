@@ -60,7 +60,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  arguments.push_back(s.pop_value(context));
 
 	// if we have a target, we need to be more direct
-	RubyMethod *method = is_target ? target.get_method(name, e) : context->get_method(name);
+	RubyMethod *method = is_target ? target.get_method(context->binding, name) : context->get_method(name);
 
 	last_value = is_block ? 
 	  method->call(context->binding, is_target ? target : context->binding->context, arguments, block) :
