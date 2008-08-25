@@ -590,13 +590,20 @@ void BeginSectionExpr::emit(std::ostream &o) const {
     // needs to be blocked.
     if (ensure_clause)
       ensure_clause->push(o);
-    if (rescue)
+    if (rescue) {
+      for (std::list<IdentifierExpr *>::const_reverse_iterator it = rescue->exceptions.rbegin();
+	it != rescue->exceptions.rend(); ++it)
+	(*it)->push(o);
       rescue->clause->push(o);
+    }
 
     emit_instruction(o, I_PUSH_EXCEPTION);
     emit_uint8(o, (rescue ? E_RESCUE : 0) | (ensure_clause ? E_ENSURE : 0));
+    emit_uint8(o, rescue ? rescue->exceptions.size() : 0);
 
-    // XXX do something with main clause and jumpy bits here.
+    // TODO RESUME: do we just throw the main block in here?
+    // Or should we push it first of all up the top?
+    // Depends on how we handle this in the VM. Good night!
 
     emit_instruction(o, I_POP_EXCEPTION);
     if (else_clause)
