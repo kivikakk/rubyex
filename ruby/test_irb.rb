@@ -4,7 +4,6 @@ input = :continue
 line_count = 0
 
 while input == :continue
-  begin
   line_count += 1
   print "rxi(main):#{line_count}:0> "
   input = gets

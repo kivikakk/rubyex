@@ -43,6 +43,9 @@ RubyMethod *RubyClass::find_method(const std::string &_name) const
 }
 
 bool RubyClass::has_ancestor(RubyClass *_check) const {
+  if (this == _check)
+    return true;
+
   RubyClass *ptr = superklass->resolve();
 
   while (ptr)
