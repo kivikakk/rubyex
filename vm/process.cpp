@@ -183,9 +183,33 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	break;
       }
 
+      case I_EXCEPTION_BLOCK: {
+	uint8 flags = r.read_uint8();
+	uint8 no_of_catches = r.read_uint8();
+	std::vector<RubyValue> catches;
+
+	Block main_clause = s.pop_block(), rescue(NULL, NULL, NULL), ensure(NULL, NULL, NULL);
+
+	if (flags & E_RESCUE) {
+	  rescue = s.pop_block();
+	  while (no_of_catches--)
+	    catches.push_back(s.pop_value(context));
+	}
+
+	if (flags & E_ENSURE)
+	  ensure = s.pop_block();
+  
+	std::cerr << "I_EXCEPTION_BLOCK ";
+	if (flags & E_RESCUE) std::cerr << "E_RESCUE ";
+	if (flags & E_ENSURE) std::cerr << "E_ENSURE ";
+
+	break;
+      }
+
       default:
 	std::cerr << "unknown(" << in << ")" << std::endl; throw;
     }
+
   }
 
   return last_value;

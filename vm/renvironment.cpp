@@ -9,6 +9,7 @@
 #include "rtri.h"
 #include "rarray.h"
 #include "rhash.h"
+#include "rexception.h"
 #include "stlext.h"
 
 RubyEnvironment::RubyEnvironment()
@@ -28,6 +29,8 @@ RubyEnvironment::RubyEnvironment()
   RubyStringEI().init(*this);
   RubyArrayEI().init(*this);
   RubyHashEI().init(*this);
+
+  RubyExceptionEI().init(*this);
 
   main = new RubyObject(new NamedLazyClass(*this, "Object"));
 }
