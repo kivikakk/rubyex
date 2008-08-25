@@ -18,7 +18,8 @@ typedef enum
 typedef enum
 {
   E_RESCUE		= 0x01,
-  E_ENSURE		= 0x02,
+  E_ELSE		= 0x02,
+  E_ENSURE		= 0x04,
 } exception_information_t;
 
 typedef enum

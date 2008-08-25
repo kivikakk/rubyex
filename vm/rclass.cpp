@@ -43,6 +43,18 @@ RubyMethod *RubyClass::find_method(const std::string &_name) const
   throw;
 }
 
+bool RubyClass::has_ancestor(RubyClass *_check) const {
+  RubyClass *ptr = superklass->resolve();
+
+  while (ptr)
+    if (ptr == _check)
+      return true;
+    else
+      ptr = ptr->superklass->resolve();
+
+  return false;
+}
+
 RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
 {
   // XXX TODO: refactor me later.

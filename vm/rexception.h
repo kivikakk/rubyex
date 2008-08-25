@@ -14,9 +14,13 @@ class RubyExceptionEI : public RubyEnvironmentInitializer
 class WorldException : public std::exception
 {
   public:
-    WorldException(RubyObject *);
+    WorldException(linked_ptr<Binding> &, RubyObject *);
+    WorldException(linked_ptr<Binding> &, RubyClass *, const std::string &);
 
     RubyObject *exception;
+
+  protected:
+    void check_exception_object(linked_ptr<Binding> &) const;
 };
 
 #endif

@@ -590,6 +590,8 @@ void BeginSectionExpr::emit(std::ostream &o) const {
     // needs to be blocked.
     if (ensure_clause)
       ensure_clause->push(o);
+    if (else_clause)
+      else_clause->push(o);
     if (rescue) {
       for (std::list<IdentifierExpr *>::const_reverse_iterator it = rescue->exceptions.rbegin();
 	it != rescue->exceptions.rend(); ++it)
@@ -600,11 +602,8 @@ void BeginSectionExpr::emit(std::ostream &o) const {
     main_clause->push(o);
 
     emit_instruction(o, I_EXCEPTION_BLOCK);
-    emit_uint8(o, (rescue ? E_RESCUE : 0) | (ensure_clause ? E_ENSURE : 0));
+    emit_uint8(o, (rescue ? E_RESCUE : 0) | (ensure_clause ? E_ENSURE : 0) | (else_clause ? E_ELSE : 0));
     emit_uint8(o, rescue ? rescue->exceptions.size() : 0);
-
-    if (else_clause)
-      else_clause->proc->emit(o);
   }
 }
 

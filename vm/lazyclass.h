@@ -12,9 +12,10 @@ class LazyClass
     virtual ~LazyClass();
 
     RubyClass *resolve();
+    RubyClass *resolve() const;
   
   protected:
-    virtual RubyClass *internal_resolve();
+    virtual RubyClass *internal_resolve() const;
 
     RubyClass *cache;
 };
@@ -25,7 +26,7 @@ class NamedLazyClass : public LazyClass
     NamedLazyClass(RubyEnvironment &, const std::string &);
 
   protected:
-    RubyClass *internal_resolve();
+    RubyClass *internal_resolve() const;
   
     RubyEnvironment *e;
     std::string name;

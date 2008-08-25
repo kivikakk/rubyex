@@ -16,12 +16,13 @@ class RubyClass : public RubyModule, public LazyClass
     static RubyClass *create_class_with_super(RubyEnvironment &, const std::string &, LazyClass *);
 
     RubyMethod *find_method(const std::string &) const;
+    bool has_ancestor(RubyClass *) const;
 
     RubyObject *new_instance(RubyEnvironment &);
 
-  protected:
     LazyClass *superklass;
 
+  protected:
     explicit RubyClass(RubyEnvironment &, LazyClass *, const std::string &);
 };
 

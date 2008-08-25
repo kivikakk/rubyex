@@ -4,6 +4,7 @@
 #include "rstring.h"
 #include "rnumeric.h"
 #include "rmethod.h"
+#include "rexception.h"
 
 RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_block)
 {
@@ -186,22 +187,56 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       case I_EXCEPTION_BLOCK: {
 	uint8 flags = r.read_uint8();
 	uint8 no_of_catches = r.read_uint8();
-	std::vector<RubyValue> catches;
+	std::vector<RubyClass *> catches;
+	// I've heard the catches could even be Modules, but how?
 
-	Block main_clause = s.pop_block(), rescue(NULL, NULL, NULL), ensure(NULL, NULL, NULL);
+	Block main_clause = s.pop_block(), rescue_clause(NULL, NULL, NULL), else_clause(NULL, NULL, NULL), ensure_clause(NULL, NULL, NULL);
 
 	if (flags & E_RESCUE) {
-	  rescue = s.pop_block();
-	  while (no_of_catches--)
-	    catches.push_back(s.pop_value(context));
+	  rescue_clause = s.pop_block();
+	  while (no_of_catches--) {
+	    RubyValue v = s.pop_value(context);
+	    RubyClass *c = v.get_special<RubyClass>();
+	    if (!c)
+	      throw WorldException(context->binding, e.TypeError, "class or module required for rescue clause");
+	    catches.push_back(c);
+	  }
+	  if (catches.size() == 0)
+	    catches.push_back(e.StandardError);
 	}
 
+	if (flags & E_ELSE)
+	  else_clause = s.pop_block();
+
 	if (flags & E_ENSURE)
-	  ensure = s.pop_block();
-  
-	std::cerr << "I_EXCEPTION_BLOCK ";
-	if (flags & E_RESCUE) std::cerr << "E_RESCUE ";
-	if (flags & E_ENSURE) std::cerr << "E_ENSURE ";
+	  ensure_clause = s.pop_block();
+
+	bool handled = false;
+	try {
+	  main_clause.call(context->binding);
+	} catch (WorldException &w) {
+	  for (std::vector<RubyClass *>::iterator it = catches.begin(); it != catches.end(); ++it)
+	    if (w.exception->get_class()->has_ancestor(*it)) {
+	      // The rescue block handles this.
+	      // If we had no rescue block, we'd never get here since there'd be no catches.
+	      rescue_clause.call(context->binding, RubyValue::from_object(w.exception));
+	      handled = true;
+	      break;
+	    }
+
+	  if (!handled) {
+	    // Rescue block failed or didn't exist.
+	    if (flags & E_ENSURE)
+	      ensure_clause.call(context->binding);
+	    // Escalate.
+	    throw;
+	  }
+	}
+
+	if (!handled)
+	  // No rescue block was called.
+	  if (flags & E_ELSE)
+	    else_clause.call(context->binding);
 
 	break;
       }
