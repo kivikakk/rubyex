@@ -45,8 +45,7 @@ typedef enum
 
   I_IF			= 0x40,
 
-  I_PUSH_EXCEPTION	= 0x50,
-  I_POP_EXCEPTION	= 0x51,
+  I_EXCEPTION_BLOCK	= 0x50,
 } instruction_t;
 
 #endif

@@ -597,15 +597,12 @@ void BeginSectionExpr::emit(std::ostream &o) const {
       rescue->clause->push(o);
     }
 
-    emit_instruction(o, I_PUSH_EXCEPTION);
+    main_clause->push(o);
+
+    emit_instruction(o, I_EXCEPTION_BLOCK);
     emit_uint8(o, (rescue ? E_RESCUE : 0) | (ensure_clause ? E_ENSURE : 0));
     emit_uint8(o, rescue ? rescue->exceptions.size() : 0);
 
-    // TODO RESUME: do we just throw the main block in here?
-    // Or should we push it first of all up the top?
-    // Depends on how we handle this in the VM. Good night!
-
-    emit_instruction(o, I_POP_EXCEPTION);
     if (else_clause)
       else_clause->proc->emit(o);
   }
