@@ -4,7 +4,7 @@
 #include "rmethod.h"
 #include "rexception.h"
 
-Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyClass *_def_target, Context *_outer_context): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target))), outer_context(_outer_context)
+Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyModule *_def_target, Context *_outer_context): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target))), outer_context(_outer_context)
 { }
 
 Context::Context(linked_ptr<Binding> &_binding): binding(_binding), outer_context(NULL)

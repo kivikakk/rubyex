@@ -161,6 +161,28 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	break;
       }
+      case I_MODULE: {
+	std::string name = s.pop_identifier();
+	Block code = s.pop_block();
+
+	bool already_exists = e.module_exists(name);
+	RubyModule *m = already_exists ? e.get_module_by_name(name) : new RubyModule(e, name);
+
+	// Specify a new context, with a new def_target, etc.
+	Context *module_def_ctx = new Context(e, RubyValue::from_object(m), m, context);
+
+	try {
+	  code.call(module_def_ctx);
+	} catch(WorldException &) {
+	  delete m; delete module_def_ctx; throw;
+	}
+
+	delete module_def_ctx;
+	if (!already_exists)
+	  e.add_module(name, m);		// XXX what modules of modules/classes, etc.?
+
+	break;
+      }
 
       case I_PUSH: {
 	type_t t = r.read_type();

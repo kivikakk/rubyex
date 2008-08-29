@@ -11,14 +11,14 @@ class Block;
 class Binding
 {
   public:
-    Binding(RubyEnvironment &, RubyValue, RubyClass *);
+    Binding(RubyEnvironment &, RubyValue, RubyModule *);
     ~Binding();
 
     std::map<std::string, RubyValue> locals;
 
     RubyEnvironment &environment;
     RubyValue context;
-    RubyClass *def_target;		// where `def' points to.
+    RubyModule *def_target;		// where `def' points to.
 };
 
 #endif
