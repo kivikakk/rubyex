@@ -240,17 +240,13 @@ void _assignment()
 
 void _method_call()
 {
-  // This fails for now, but should work (`def' shouldn't be interpreted as a func def)
-  /* Commented out temporarily, even though it's a failing test that should be brought to
-   * our attention, but we'll see it in here later, I hope. But honestly, naming a method
-   * def? What are you thinking?! */
-  /* BEGIN(p_regular, "abc.def", 1);
+  BEGIN(p_regular, "abc.def", 1);
   $(FuncCallExpr, regular, p_regular[0]);
   $(IdentifierExpr, lval, regular->target);
   ASSERT(lval->id == "abc");
   ASSERT(regular->name == "def");
   ASSERT(regular->args.size() == 0);
-  ASSERT(regular->block == NULL); */
+  ASSERT(regular->block == NULL);
 
   BEGIN(p_left_exp, "(norman.expose).friedlich", 1);
   $(FuncCallExpr, left_exp, p_left_exp[0]);
@@ -362,7 +358,6 @@ void _operator_precedence()
   $(LiteralTypedExpr<int>, p2_n5, *p2e->args.begin());
   ASSERT(p2_n5->value == -5);
 
-  /* TODO: support this test.
   BEGIN(p3, "a-5", 1);
   $(FuncCallExpr, p3e, p3[0]);
   $(IdentifierExpr, p3_a, p3e->target);
@@ -371,7 +366,6 @@ void _operator_precedence()
   ASSERT(p3e->args.size() == 1);
   $(LiteralTypedExpr<int>, p3_5, *p3e->args.begin());
   ASSERT(p3_5->value == 5);
-  */
 }
 
 void _block()
