@@ -34,7 +34,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  case T_BOOLEAN_LITERAL: last_value = r.read_bool() ? e.TRUE : e.FALSE; break;
 	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  case T_NIL_LITERAL: last_value = e.NIL; break;
-	  default: std::cerr << "I_EXECUTE: unknown_type(" << t << ")" << std::endl; throw;
+	  default: throw WorldException(context->binding, e.RuntimeError, "process(): unknown type");
 	}
 	break;
       }
@@ -99,10 +99,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	break;
       }
       case I_YIELD: {
-	if (!yield_block) {
-	  std::cerr << "I_YIELD: LocalJumpError: no block given" << std::endl;	// XXX LocalJumpError
-	  throw;
-	}
+	if (!yield_block)
+	  throw WorldException(context->binding, e.LocalJumpError, "no block given");
 
 	uint32 arg_count = r.read_uint32();
 
@@ -151,8 +149,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE.object : e.FALSE.object); break;
 	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
 	  case T_NIL_LITERAL: s.push_object(e.NIL.object); break;
-	  case T_BLOCK: /* XXX complain */ std::cerr << "I_PUSH: push a block?" << std::endl; throw;
-	  default: std::cerr << "I_PUSH: don't know what we're pushing (" << t << ")" << std::endl; throw;
+	  case T_BLOCK: throw WorldException(context->binding, e.RuntimeError, "process(): trying to push a block");
+	  default: throw WorldException(context->binding, e.RuntimeError, "process(): trying to push something we're not sure of");
 	}
 	break;
       }
@@ -161,8 +159,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  case RubyValue::RV_FIXNUM: s.push_integer(last_value.fixnum); break;
 	  case RubyValue::RV_SYMBOL: s.push_symbol(last_value.symbol->value); break;
 	  case RubyValue::RV_OBJECT: s.push_object(/* XXX gc track? */ last_value.object); break;
-	  case RubyValue::RV_NOTHING: /* XXX what? */ std::cerr << "I_PUSH_LAST: given a RV_NOTHING RubyValue (uninitialised RubyValue?)" << std::endl; throw;
-	  default: std::cerr << "I_PUSH_LAST, but unknown RubyValue " << "(" << last_value.type << ")" << std::endl; throw;
+	  case RubyValue::RV_NOTHING: throw WorldException(context->binding, e.RuntimeError, "process(): given RV_NOTHING to I_PUSH_LAST");
+	  default: throw WorldException(context->binding, e.RuntimeError, "process(): given something unknown to I_PUSH_LAST");
 	}
 	break;
       }
@@ -228,8 +226,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	    // Rescue block failed or didn't exist.
 	    if (flags & E_ENSURE)
 	      ensure_clause.call(context->binding);
-	    // Escalate.
-	    throw;
+	    throw; // Escalate.
 	  }
 	}
 
@@ -242,7 +239,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
 
       default:
-	std::cerr << "unknown(" << in << ")" << std::endl; throw;
+	throw WorldException(context->binding, e.RuntimeError, "read unknown VM instruction");
     }
 
   }

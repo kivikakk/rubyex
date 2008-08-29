@@ -40,19 +40,17 @@ RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
 RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyValue first = _args[0];
-  if (first.object->get_class() != _b->environment.String) {
-    std::cerr << "Kernel::eval: tried to eval non-String" << std::endl;
-    throw; // XXX Exception
-  }
+  if (first.object->get_class() != _b->environment.String)
+    throw WorldException(_b, _b->environment.TypeError, "tried to eval non-String");
 
   linked_ptr<Binding> use_binding = _b;
 
   if (_args.size() == 2) {
+    // Add Proc support for 2nd argument.
+
     RubyValue second = _args[1];
-    if (second.object->get_class() != _b->environment.Binding) {
-      std::cerr << "Kernel::eval: second arg not a Binding?" << std::endl;
-      throw; // XXX exception
-    }
+    if (second.object->get_class() != _b->environment.Binding)
+      throw WorldException(_b, _b->environment.TypeError, "wrong argument type XXX (expected Binding [in future, Proc])");
 
     use_binding = second.get_special<RubyBinding>()->binding;
   }

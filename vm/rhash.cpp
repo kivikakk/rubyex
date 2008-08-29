@@ -3,6 +3,7 @@
 #include "block.h"
 #include "rmethod.h"
 #include "rstring.h"
+#include "rexception.h"
 
 RubyValue hash_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_new_default(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -37,8 +38,8 @@ RubyValue hash_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<R
     case 1:
       return hash_new_default(_b, _self, _args);
   }
-  std::cerr << "Hash::new: no matching arg count?" << std::endl;
-  throw;
+
+  throw WorldException(_b, _b->environment.ArgumentError, "hash_new not with 0..1 arguments - big problem");
 }
 
 RubyValue hash_new_default(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -118,10 +119,8 @@ RubyHash::RubyHash(RubyEnvironment &_e, RubyValue _default_value): RubyObject(ne
 
 RubyHash::RubyHash(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_values): RubyObject(new NamedLazyClass(_b->environment, "Hash")), default_value(_b->environment.NIL)
 {
-  if (_values.size() % 2 == 1) {
-    std::cerr << "odd number of arguments for Hash" << std::endl;
-    throw;
-  }
+  if (_values.size() % 2 == 1)
+    throw WorldException(_b, _b->environment.ArgumentError, "odd number of arguments for Hash");
 
   for (unsigned int idx = 0; idx < _values.size(); idx += 2)
     set(_b, _values[idx + 0], _values[idx + 1]);

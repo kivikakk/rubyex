@@ -29,7 +29,7 @@ RubyClass *RubyValue::get_class(RubyEnvironment &_e) const
     case RubyValue::RV_FIXNUM: return _e.Fixnum;
     case RubyValue::RV_SYMBOL: return _e.Symbol;
     case RubyValue::RV_OBJECT: return object->get_class();
-    default: std::cerr << "RubyValue::get_class: don't know my own type" << std::endl; throw;
+    default: throw SevereInternalError("RubyValue::get_class doesn't know its own type");
   }
 }
 
@@ -65,7 +65,7 @@ RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_n
       }
       break;
     }
-    default: std::cerr << "RubyValue::get_method: what in the world? my type is not recognisable" << std::endl; throw;
+    default: throw SevereInternalError("RubyValue::get_method doesn't know its own type");
   }
 }
 
@@ -83,17 +83,14 @@ bool RubyValue::truthy(RubyEnvironment &_e) const
       // Every other object is truthy.
       return true;
     }
-    default: std::cerr << "RubyValue::truthy: my type is unknown" << std::endl; throw;
+    default: throw SevereInternalError("RubyValue::truthy doesn't know its own type");
   }
 }
 
 long RubyValue::get_fixnum() const
 {
-  if (type != RubyValue::RV_FIXNUM) {
-    std::cerr << "RubyValue::get_fixnum: not a Fixnum!" << std::endl;
-    // XXX throw an exception here.
-    throw;
-  }
+  if (type != RubyValue::RV_FIXNUM)
+    throw SevereInternalError("RubyValue::get_fixnum is called on not a fixnum");
 
   return fixnum;
 }

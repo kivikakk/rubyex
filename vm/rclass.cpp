@@ -75,10 +75,6 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return _e.gc.track(new RubyHash(_e));
   else
     return new RubyObject(this);
-
-  std::cerr << "RubyClass::new_instance(): OH DEAR." << std::endl;
-  // XXX InternalError?
-  throw;
 }
 
 RubyClass::RubyClass(RubyEnvironment &_e, LazyClass *_superklass, const std::string &_name): RubyModule(new NamedLazyClass(_e, "Class"), _name), superklass(_superklass)

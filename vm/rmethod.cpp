@@ -1,4 +1,5 @@
 #include "rmethod.h"
+#include "rexception.h"
 #include <iostream>
 
 RubyMethod::~RubyMethod()
@@ -39,13 +40,14 @@ RubyValue RubyMethodBlockNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, 
 
 RubyValue RubyMethodBlockNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &)
 {
-  std::cerr << "RubyMethodBlockNoArgs::call: no block given." << std::endl;
-  throw; // XXX - ArgumentError
+  throw WorldException(_b, _b->environment.ArgumentError, "no block given");
 }
 
-RubyValue RubyMethodBlockNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &, Block &_block)
+RubyValue RubyMethodBlockNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
 {
-  // arguments discarded.
+  if (_args.size() > 0)
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for 0)");
+
   return function(_b, _self, _block);
 }
 
@@ -59,15 +61,19 @@ RubyValue RubyMethodNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self)
   return function(_b, _self);
 }
 
-RubyValue RubyMethodNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &)
+RubyValue RubyMethodNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  // arguments discarded.
+  if (_args.size() > 0)
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for 0)");
+    
   return function(_b, _self);
 }
 
-RubyValue RubyMethodNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &, Block &)
+RubyValue RubyMethodNoArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &)
 {
-  // arguments discarded.
+  if (_args.size() > 0)
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for 0)");
+
   return function(_b, _self);
 }
 
@@ -78,12 +84,14 @@ RubyMethodBlockArgs::RubyMethodBlockArgs(RCMethodBlockArgs _function, int _args)
 
 RubyValue RubyMethodBlockArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  std::cerr << "RubyMethodBlockArgs::call: no block given." << std::endl;
-  throw; // XXX - ArgumentError
+  throw WorldException(_b, _b->environment.ArgumentError, "no block given");
 }
 
 RubyValue RubyMethodBlockArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
 {
+  if ((int)_args.size() != args)
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
+
   return function(_b, _self, _args, _block);
 }
 
@@ -94,11 +102,17 @@ RubyMethodArgs::RubyMethodArgs(RCMethodArgs _function, int _args): function(_fun
 
 RubyValue RubyMethodArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
+  if ((int)_args.size() != args)
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
+
   return function(_b, _self, _args);
 }
 
 RubyValue RubyMethodArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &)
 {
+  if ((int)_args.size() != args)
+    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
+
   // block discarded.
   return function(_b, _self, _args);
 }

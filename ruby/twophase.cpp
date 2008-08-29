@@ -41,12 +41,16 @@ int twophase(int argc, char **argv)
   try {
     process(e, reader, c, NULL);
   } catch (WorldException &w) {
+    std::cerr << "Dying on exception: ";
+
     RubyString *msg = w.exception->get_instance(e, "message").get_special<RubyString>();
     std::string cname = w.exception->get_class()->get_name();
     if (msg)
       std::cerr << msg->string_value << " (" << cname << ")" << std::endl;
     else
       std::cerr << cname << std::endl;
+  } catch (SevereInternalError &s) {
+    std::cerr << "Severe internal error: " << s.message << std::endl;
   }
 
   return 0;

@@ -3,6 +3,7 @@
 #include "rclass.h"
 #include "renvironment.h"
 #include "rmethod.h"
+#include "rexception.h"
 
 RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(new NamedLazyClass(_e, "Module")), name(_name)
 { }
@@ -23,10 +24,8 @@ const std::string &RubyModule::get_name() const
 
 void RubyModule::add_method(const std::string &_name, RubyMethod *_method)
 {
-  if (has_method(_name)) {
-    std::cerr << "ERROR: added a method where one exists already." << std::endl;
-    throw; // XXX
-  }
+  if (has_method(_name))
+    throw SevereInternalError("tried to add method `" + _name + "' yet one exists already");
 
   methods[_name] = _method;
 }
@@ -40,10 +39,8 @@ void RubyModule::def_method(const std::string &_name, RubyMethod *_method)
 
 void RubyModule::remove_method(const std::string &_name)
 {
-  if (!has_method(_name)) {
-    std::cerr << "ERROR: tried to remove a method where one doesn't exist already." << std::endl;
-    throw;		// XXX
-  }
+  if (!has_method(_name))
+    throw SevereInternalError("tried to remove method `" + _name + "' yet one doesn't exist already");
   
   methods.erase(_name);
 }
@@ -58,8 +55,7 @@ void RubyModule::include_module(RubyModule *_module)
 {
   for (std::list<RubyModule *>::const_iterator it = includes.begin(); it != includes.end(); ++it)
     if (*it == _module) {
-      std::cerr << "WARNING: " << name << " already included " << _module->get_name() << "?" << std::endl;
-      // is this even an error condition?
+      std::cerr << "XXX: yet to implement re-including of the same module" << std::endl;
       return;
     }
 
@@ -75,10 +71,8 @@ bool RubyModule::has_method(const std::string &_name) const
 RubyMethod *RubyModule::get_method(const std::string &_name) const
 {
   std::map<std::string, RubyMethod *>::const_iterator it = methods.find(_name);
-  if (it == methods.end()) {
-    std::cerr << "ERROR: module " << this->name << " does not have method '" << _name << "'. I have " << methods.size() << " method(s)." << std::endl;
-    throw std::exception();
-  }
+  if (it == methods.end())
+    throw SevereInternalError(this->name + " missing requested method `" + _name + "'");
 
   return it->second;
 }

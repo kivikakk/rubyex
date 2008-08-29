@@ -6,6 +6,7 @@
 #include "rclass.h"
 #include "renvironment.h"
 #include "rmethod.h"
+#include "rexception.h"
 
 RubyValue string_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -17,6 +18,7 @@ RubyValue string_strip_bang(linked_ptr<Binding> &, RubyValue);
 RubyValue string_capitalize(linked_ptr<Binding> &, RubyValue);
 RubyValue string_inspect(linked_ptr<Binding> &, RubyValue);
 RubyValue string_to_s(linked_ptr<Binding> &, RubyValue);
+RubyValue string_to_sym(linked_ptr<Binding> &, RubyValue);
 
 void RubyStringEI::init(RubyEnvironment &_e)
 {
@@ -32,6 +34,7 @@ void RubyStringEI::init(RubyEnvironment &_e)
   rb_cString->add_method("capitalize", RubyMethod::Create(string_capitalize));
   rb_cString->add_method("inspect", RubyMethod::Create(string_inspect));
   rb_cString->add_method("to_s", RubyMethod::Create(string_to_s));
+  rb_cString->add_method("to_sym", RubyMethod::Create(string_to_sym));
 
   _e.add_class("String", rb_cString);
   _e.String = rb_cString;
@@ -44,8 +47,7 @@ RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
   else if (_args.size() == 1)
     return _b->environment.get_string(_args[0].get_special<RubyString>()->string_value);
   
-  std::cerr << "String::new: hates you" << std::endl;
-  throw std::exception();	// TODO: Throw a real exception (ArgumentError)
+  throw WorldException(_b, _b->environment.RuntimeError, "string_new: given invalid number of args -- big problem");
 }
 
 RubyValue string_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -130,6 +132,11 @@ RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
 RubyValue string_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   return _self;
+}
+
+RubyValue string_to_sym(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  return RubyValue::from_symbol(_b->environment.get_symbol(_self.get_special<RubyString>()->string_value));
 }
 
 RubyString::RubyString(RubyEnvironment &_e, const std::string &_string_value): RubyObject(new NamedLazyClass(_e, "String")), string_value(_string_value)

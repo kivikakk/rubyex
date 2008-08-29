@@ -42,6 +42,8 @@ class RubyEnvironment
 	RubyClass *NotImplementedError;
       RubyClass *StandardError;
 	RubyClass *ArgumentError;
+	RubyClass *IndexError;
+	RubyClass *LocalJumpError;
 	RubyClass *NameError;
 	  RubyClass *NoMethodError;
 	RubyClass *RuntimeError;

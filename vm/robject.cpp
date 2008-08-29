@@ -104,12 +104,9 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyValue a = _args[0];
-  if (!(a.type == RubyValue::RV_SYMBOL) && !(a.type == RubyValue::RV_OBJECT && (a.object->get_class() == _b->environment.String))) {
-    std::cerr << "Object#send: not given a Symbol or String" << std::endl;
-    throw;	// boom. XXX TypeError
-  }
+  a = a.call(_b, "to_sym");
 
-  std::string function_name = _args[0].get_special<RubyString>()->string_value;
+  std::string function_name = a.symbol->value;
   std::vector<RubyValue> rest = std::vector<RubyValue>(_args.begin() + 1, _args.end());
   return _self.call(_b, function_name, rest);
 }

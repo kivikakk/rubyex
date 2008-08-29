@@ -30,6 +30,8 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
   // StandardError
   DEF_EXCEPTION(StandardError, Exception)
     DEF_EXCEPTION(ArgumentError, StandardError)
+    DEF_EXCEPTION(IndexError, StandardError)
+    DEF_EXCEPTION(LocalJumpError, StandardError)
     DEF_EXCEPTION(NameError, StandardError)
       DEF_EXCEPTION(NoMethodError, NameError)
     DEF_EXCEPTION(RuntimeError, StandardError)
@@ -76,4 +78,10 @@ void WorldException::check_exception_object(linked_ptr<Binding> &_b) const {
   if (!exception->get_class()->has_ancestor(_b->environment.Exception)) 
     throw WorldException(_b, _b->environment.TypeError, "exception class/object expected");
 }
+
+SevereInternalError::SevereInternalError(const std::string &_message): message(_message)
+{ }
+
+SevereInternalError::~SevereInternalError() throw ()
+{ }
 

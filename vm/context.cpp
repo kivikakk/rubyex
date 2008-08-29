@@ -30,10 +30,8 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry)
     case Stack::SE_INTEGER: return RubyValue::from_fixnum(_entry.integer);
     case Stack::SE_OBJECT: return RubyValue::from_object(_entry.object);
     default:
-      std::cerr << "Context: trying to convert non-id/sym/int to RValue" << std::endl;
-      throw;
+      throw WorldException(binding, binding->environment.RuntimeError, "Context: trying to convert non-id/sym/int to RValue");
   }
-  throw;
 }
 
 RubyValue Context::resolve_local(const std::string &_identifier)

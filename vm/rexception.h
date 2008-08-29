@@ -23,5 +23,14 @@ class WorldException : public std::exception
     void check_exception_object(linked_ptr<Binding> &) const;
 };
 
+class SevereInternalError : public std::exception
+{
+  public:
+    SevereInternalError(const std::string &);
+    ~SevereInternalError() throw ();
+
+    std::string message;
+};
+
 #endif
 

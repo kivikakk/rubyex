@@ -3,6 +3,7 @@
 #include "rclass.h"
 #include "rmethod.h"
 #include "rstring.h"
+#include "rexception.h"
 
 RubyValue array_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_new_length(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -40,8 +41,8 @@ RubyValue array_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<
     case 2:
       return array_new_copies(_b, _self, _args);
   }
-  std::cerr << "Array::new: no matching arg count?" << std::endl;
-  throw;	// XXX -- we need a better way of handling arg counts in general, right?
+
+  throw WorldException(_b, _b->environment.RuntimeError, "array_new with not 0..2 args - big problem");
 }
 
 RubyValue array_new_length(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -83,10 +84,8 @@ RubyValue array_index_assign_op(linked_ptr<Binding> &_b, RubyValue _self, const 
   if (index < 0)
     index += my_size;
 
-  if (index < 0) {
-    std::cerr << "IndexError: index " << _args[0].get_fixnum() << " out of array" << std::endl;
-    throw;
-  }
+  if (index < 0)
+    throw WorldException(_b, _b->environment.IndexError, "index XXX out of array");
 
   while ((unsigned long)index >= arr->data.size())
     arr->data.push_back(_b->environment.NIL);
