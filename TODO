@@ -6,9 +6,10 @@ Game plan:
  * attr_*
  * *_eval
  * regexps -- oniguruma
+ * classes/modules nested
 
-Minor things:
+Not as important right now:
  * our float range sucks (double). Fix.
  * investigate strange issue with Array.new(int)
- * classes/modules nested
  * better solution for new_instance() in rclass
+ * methods ending in `=' should always return the RHS

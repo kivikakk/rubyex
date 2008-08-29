@@ -82,13 +82,15 @@ input:  	/* empty */
 	      | input line { if ($2) program->add_expression($2); }
 ;
 
-line: 		NL	{ $$ = NULL; }
-	      | expr NL	{ $$ = $1; }
-	      | ';' { $$ = NULL; }
-	      | expr ';' { $$ = $1; }
-	      | CONTEXT_FINISH { $$ = NULL; IF_DEBUG printf("CONTEXT_FINISH\n"); }
-	      | expr CONTEXT_FINISH { $$ = $1; IF_DEBUG printf("CONTEXT_FINISH\n"); }
-	      | expr END_OF_FILE { $$ = $1; }
+line_separator:	NL
+	      |	';'
+;
+
+line: 		line_separator		{ $$ = NULL; }
+	      | expr line_separator	{ $$ = $1; }
+	      | CONTEXT_FINISH 		{ $$ = NULL; IF_DEBUG printf("CONTEXT_FINISH\n"); }
+	      | expr CONTEXT_FINISH	{ $$ = $1; IF_DEBUG printf("CONTEXT_FINISH\n"); }
+	      | expr END_OF_FILE 	{ $$ = $1; }
 ;
 
 expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
@@ -186,8 +188,8 @@ opt_idlist:	/* empty */		{ $$ = NULL; }
 	      | idlist			{ $$ = $1; }
 ;
 
-hashlist:	compiled_expr ASSOC compiled_expr		{ $$ = new ExprList($1, $3); }
-	      | hashlist ',' compiled_expr ASSOC compiled_expr	{ $$ = new ExprList($1, $3, $5); }
+hashlist:	compiled_expr ASSOC compiled_expr			{ $$ = new ExprList($1, $3); }
+	      | hashlist ',' compiled_expr ASSOC compiled_expr		{ $$ = new ExprList($1, $3, $5); }
 	      | hashlist ',' NL compiled_expr ASSOC compiled_expr	{ $$ = new ExprList($1, $4, $6); }
 ;
 
@@ -213,9 +215,9 @@ block_argument_contents:
 	      | deflist		{ $$ = $1; }
 ;
 
-funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END 	{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
-	      |	DEF IDENTIFIER funcdef_args ';' sub_content END { $$ = new FuncDefExpr(NULL, $2, $3, $5); }
-	      |	DEF IDENTIFIER funcdef_args NL sub_content END 	{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
+funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END				{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
+	      |	DEF function_name funcdef_args line_separator sub_content END 		{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
+	      |	DEF function_name '=' funcdef_args line_separator sub_content END 	{ $2->id += '='; $$ = new FuncDefExpr(NULL, $2, $4, $6); }
 ;
 
 funcdef_args:	/* empty */		{ $$ = NULL; }
@@ -224,26 +226,22 @@ funcdef_args:	/* empty */		{ $$ = NULL; }
 	      | deflist			{ $$ = $1; }
 ;
 
-conditional:	IF expr ';' sub_content otherwise END 	{ $$ = new ConditionalExpr($2, $4, $5); }
-	      |	IF expr NL sub_content otherwise END	{ $$ = new ConditionalExpr($2, $4, $5); }
+conditional:	IF expr line_separator sub_content otherwise END 	{ $$ = new ConditionalExpr($2, $4, $5); }
 ;
 
-otherwise:	/* empty */				{ $$ = NULL; }
-	      | ELSE sub_content			{ $$ = $2; }
-	      | ELSIF expr ';' sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
-	      | ELSIF expr NL sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
+otherwise:	/* empty */					{ $$ = NULL; }
+	      | ELSE sub_content				{ $$ = $2; }
+	      | ELSIF expr line_separator sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
 ;
 
-while_loop:	WHILE expr ';' sub_content END		{ $$ = new WhileExpr($2, $4); }
-	      | WHILE expr NL sub_content END		{ $$ = new WhileExpr($2, $4); }
+while_loop:	WHILE expr line_separator sub_content END		{ $$ = new WhileExpr($2, $4); }
 ;
 
 sub_content:	{ enter_context(); } sub_line { exit_context(); } { $$ = $2; }
 ;
 
-sub_line:	/* empty */		{ $$ = new Procedure(); }
-	      |	sub_line
-				{ enter_context_line(); }
+sub_line:	/* empty */	{ $$ = new Procedure(); }
+	      |	sub_line	{ enter_context_line(); }
 				line
 				{ exit_context_line(); }
 				{ if ($3) $1->expressions.push_back($3); $$ = $1; }
