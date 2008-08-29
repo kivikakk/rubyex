@@ -37,6 +37,9 @@ typedef enum
   I_DEF			= 0x22,
   I_YIELD		= 0x23,
   I_INTERPOL		= 0x24,		// I love those guys.
+  I_CLASS		= 0x25,
+  I_CLASS_INHERIT	= 0x26,
+  I_MODULE		= 0x27,
 
   I_END			= 0x30,
   I_POP			= 0x31,

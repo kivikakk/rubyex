@@ -31,6 +31,8 @@ typedef union {
   IdentifierExpr *identifier;
   SymbolExpr *symbol;
   LiteralExpr *literal;
+  ClassDefExpr *classdef;
+  ModuleDefExpr *moduledef;
   FuncCallExpr *funccall;
   FuncDefExpr *funcdef;
   ConditionalExpr *conditional;

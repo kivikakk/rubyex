@@ -1,5 +1,7 @@
 #include "ast.h"
 
+// Procedure
+
 void Procedure::p() const {
   for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it) {
     if (it != expressions.begin()) std::cout << "; ";
@@ -22,6 +24,8 @@ unsigned long Procedure::length() const {
   return bytes;
 }
 
+// IdentifierExpr
+
 void IdentifierExpr::p() const {
   std::cout << this->id;
 }
@@ -37,6 +41,8 @@ void IdentifierExpr::push(std::ostream &o) const {
   emit_type(o, T_IDENTIFIER);
   emit_string(o, id);
 }
+
+// SymbolExpr
 
 void SymbolExpr::p() const {
   std::cout << ":" << this->symbol;
@@ -54,6 +60,8 @@ void SymbolExpr::push(std::ostream &o) const {
   emit_string(o, symbol);
 }
 
+// IntegerLiteralExpr
+
 void IntegerLiteralExpr::p() const {
   std::cout << value;
 }
@@ -69,6 +77,8 @@ void IntegerLiteralExpr::push(std::ostream &o) const {
   emit_type(o, T_INTEGER_LITERAL);
   emit_int32(o, value);
 }
+
+// FloatingLiteralExpr
 
 void FloatingLiteralExpr::p() const {
   std::cout << value;
@@ -86,6 +96,8 @@ void FloatingLiteralExpr::push(std::ostream &o) const {
   emit_float(o, value);
 }
 
+// BooleanLiteralExpr
+
 void BooleanLiteralExpr::p() const {
   std::cout << (value ? "true" : "false");
 }
@@ -101,6 +113,8 @@ void BooleanLiteralExpr::push(std::ostream &o) const {
   emit_type(o, T_BOOLEAN_LITERAL);
   emit_bool(o, value);
 }
+
+// StringLiteralExpr
 
 void StringLiteralExpr::p() const {
   std::cout << "\"";
@@ -125,6 +139,8 @@ void StringLiteralExpr::push(std::ostream &o) const {
   emit_text(o, value);
 }
 
+// NilLiteralExpr
+
 void NilLiteralExpr::p() const {
   std::cout << "nil";
 }
@@ -138,6 +154,8 @@ void NilLiteralExpr::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH);
   emit_type(o, T_NIL_LITERAL);
 }
+
+// ExprList
 
 ExprList::ExprList()
 { }
@@ -175,6 +193,8 @@ ExprList::~ExprList() {
   // see ExprList(ExprList*, Expr*) above.
 }
 
+// DefListExpr
+
 DefListExpr::DefListExpr(IdentifierExpr *first) {
   this->args.push_back(first);
 }
@@ -190,6 +210,8 @@ DefListExpr::~DefListExpr() {
   // See ~ExprList() for an explanation.
 }
 
+// IdListExpr
+
 IdListExpr::IdListExpr(IdentifierExpr *first) {
   this->args.push_back(first);
 }
@@ -204,6 +226,8 @@ IdListExpr::IdListExpr(IdListExpr *combine, IdentifierExpr *also) {
 IdListExpr::~IdListExpr() {
   // See ~ExprList() for an explanation.
 }
+
+// BlockExpr
 
 BlockExpr::BlockExpr(): proc(NULL)
 { }
@@ -251,6 +275,8 @@ void BlockExpr::push(std::ostream &o) const
   proc->emit(o);
 }
 
+// YieldExpr
+
 YieldExpr::YieldExpr(ExprList *_args)
 {
   if (_args) {
@@ -286,6 +312,63 @@ void YieldExpr::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH_LAST);
 }
 
+// ClassDefExpr
+
+ClassDefExpr::ClassDefExpr(IdentifierExpr *_name, IdentifierExpr *_super, BlockExpr *_proc): name(_name), super(_super), proc(_proc)
+{ }
+
+void ClassDefExpr::p() const {
+  std::cout << "class ";
+  name->p();
+  if (super) {
+    std::cout << "< ";
+    super->p();
+  }
+  std::cout << std::endl << "  ";
+  proc->p();
+  std::cout << std::endl << "end";
+}
+
+void ClassDefExpr::emit(std::ostream &o) const {
+  proc->push(o);
+  if (super)
+    super->push(o);
+  name->push(o);
+
+  emit_instruction(o, super ? I_CLASS_INHERIT : I_CLASS);
+}
+
+void ClassDefExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
+// ModuleExpr
+
+ModuleDefExpr::ModuleDefExpr(IdentifierExpr *_name, BlockExpr *_proc): name(_name), proc(_proc)
+{ }
+
+void ModuleDefExpr::p() const {
+  std::cout << "module ";
+  name->p();
+  std::cout << std::endl << "  ";
+  proc->p();
+  std::cout << std::endl << "end";
+}
+
+void ModuleDefExpr::emit(std::ostream &o) const {
+  proc->push(o);
+  name->push(o);
+
+  emit_instruction(o, I_MODULE);
+}
+
+void ModuleDefExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
+// FuncCallExpr
 
 FuncCallExpr::FuncCallExpr(Expr *_target, IdentifierExpr *_name, ExprList *_args, BlockExpr *_block): target(_target), block(_block)
 {
@@ -305,7 +388,6 @@ FuncCallExpr::~FuncCallExpr()
     delete *it;
   delete block;
 }
-  
 
 void FuncCallExpr::p() const
 {
@@ -351,6 +433,8 @@ void FuncCallExpr::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH_LAST);
 }
 
+// AssignmentExpr
+
 AssignmentExpr::AssignmentExpr(IdentifierExpr *_name, Expr *_value) {
   this->name = _name->id;
   this->value = _value;
@@ -379,6 +463,8 @@ void AssignmentExpr::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH_LAST);
 }
 
+// FuncDefExpr
+
 FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, DefListExpr *_args, Procedure *_proc): target(_target), name(_name), proc(_proc)
 {
   if (_args) {
@@ -396,7 +482,6 @@ FuncDefExpr::~FuncDefExpr()
   delete proc;
 }
   
-
 void FuncDefExpr::p() const
 {
   std::cout << "def ";

@@ -22,8 +22,9 @@
 
 %token DEF IF ELSE ELSIF UNLESS
 %token BEGIN_SECTION
-%token RAISE RESCUE THROW CATCH ENSURE
+%token RESCUE ENSURE
 %token WHILE
+%token CLASS MODULE
 
 %token <string_literal> STRING_LITERAL 
 %token <integer_literal> INTEGER_LITERAL
@@ -38,6 +39,8 @@
 %type <idlist> idlist opt_idlist
 %type <deflist> deflist block_arguments opt_block_arguments block_argument_contents funcdef_args
 %type <literal> literal
+%type <classdef> classdef
+%type <moduledef> moduledef
 %type <funccall> funccall
 %type <funcdef> funcdef
 %type <conditional> conditional
@@ -89,6 +92,8 @@ line: 		NL	{ $$ = NULL; }
 expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | YIELD exprlist				{ $$ = new YieldExpr($2); }
 	      | YIELD '(' opt_exprlist ')'		{ $$ = new YieldExpr($3); }
+	      | classdef				{ $$ = $1; }
+	      | moduledef				{ $$ = $1; }
 	      |	funccall 				{ $$ = $1; }
 	      | funcdef					{ $$ = $1; }
 	      |	IDENTIFIER				{ $$ = $1; /* Do not amalgamate this and `IDENTIFIER block' - this needs to be separate for precedence, etc. */ }
@@ -271,5 +276,12 @@ opt_rescue_ensure:
 opt_rescue_target:
 		/* empty */		{ $$ = NULL; }
 	      |	ASSOC IDENTIFIER	{ $$ = $2; }
+;
+
+classdef:	CLASS IDENTIFIER sub_content END		{ $$ = new ClassDefExpr($2, NULL, new BlockExpr($3)); }
+	      |	CLASS IDENTIFIER '<' IDENTIFIER sub_content END	{ $$ = new ClassDefExpr($2, $4, new BlockExpr($5)); }
+;
+
+moduledef:	MODULE IDENTIFIER sub_content END		{ $$ = new ModuleDefExpr($2, new BlockExpr($3)); }
 ;
 

@@ -27,8 +27,7 @@
   const keyword_t keyword_listing[] = {
     { "do", DO },
     { "begin", BEGIN_SECTION }, { "ensure", ENSURE },
-    /* { "raise", RAISE }, */ { "rescue", RESCUE },
-    /* { "catch", CATCH }, { "throw", THROW }, */
+    { "rescue", RESCUE },
     { "end", END },
 
     { "def", DEF },
@@ -40,6 +39,7 @@
 
     { "while", WHILE },
 
+    { "class", CLASS }, { "module", MODULE },
 
     { "", 0 }
   };

@@ -144,6 +144,33 @@ class YieldExpr : public Expr
     std::list<Expr *> args;
 };
 
+class ClassDefExpr : public Expr
+{
+  public:
+    ClassDefExpr(IdentifierExpr *, IdentifierExpr *, BlockExpr *);
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+
+    IdentifierExpr *name;
+    IdentifierExpr *super;
+    BlockExpr *proc;
+};
+
+class ModuleDefExpr : public Expr
+{
+  public:
+    ModuleDefExpr(IdentifierExpr *, BlockExpr *);
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+
+    IdentifierExpr *name;
+    BlockExpr *proc;
+};
+
 class FuncCallExpr : public Expr
 {
   public:
