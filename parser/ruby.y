@@ -50,6 +50,8 @@
 %type <identifier> opt_rescue_target
 %type <interpolated_string> interpolated_string
 
+%type <identifier> function_name
+
 %type <procedure> sub_content sub_line otherwise
 %type <block> opt_rescue_else opt_rescue_ensure
 
@@ -96,7 +98,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | moduledef				{ $$ = $1; }
 	      |	funccall 				{ $$ = $1; }
 	      | funcdef					{ $$ = $1; }
-	      |	IDENTIFIER				{ $$ = $1; /* Do not amalgamate this and `IDENTIFIER block' - this needs to be separate for precedence, etc. */ }
+	      |	IDENTIFIER				{ $$ = $1; /* Do not amalgamate this and `IDENTIFIER block' with opt_block - need to be separate for precedence, etc. */ }
 	      |	IDENTIFIER block 			{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      |	FUNCTION_CALL opt_block 		{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      | IDENTIFIER '=' expr 			{ $$ = new AssignmentExpr($1, $3); }
@@ -115,14 +117,8 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | expr '[' exprlist ']' '=' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '.' funccall 			{ $3->target = $1; $$ = $3; }
-
-	      /* All types of method calls from here. */
-	      | expr '.' IDENTIFIER opt_block  		{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
-	      | expr '.' CLASS opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("class"), NULL, $4); }
-	      | expr '.' MODULE opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("module"), NULL, $4); }
-	      | expr '.' DEF opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("def"), NULL, $4); }
-	      /* Until here. */
-
+	      | expr '.' function_name opt_block  	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '.' function_name '=' expr	  	{ $3->id += '='; $$ = new FuncCallExpr($1, $3, new ExprList($5), NULL); }
 	      | expr '.' FUNCTION_CALL opt_block	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
 	      | expr '+' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($3), NULL); }
 	      | expr '-' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ExprList($3), NULL); }
@@ -145,6 +141,12 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | conditional				{ $$ = $1; }
 	      | begin_section				{ $$ = $1; }
 	      | while_loop				{ $$ = $1; }
+;
+
+function_name:	IDENTIFIER	{ $$ = $1; }
+	      |	CLASS		{ $$ = new IdentifierExpr("class"); }
+	      | MODULE		{ $$ = new IdentifierExpr("module"); }
+	      | DEF		{ $$ = new IdentifierExpr("def"); }
 ;
 
 compiled_expr:	expr
