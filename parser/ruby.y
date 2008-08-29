@@ -120,6 +120,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr '.' IDENTIFIER opt_block  		{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
 	      | expr '.' CLASS opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("class"), NULL, $4); }
 	      | expr '.' MODULE opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("module"), NULL, $4); }
+	      | expr '.' DEF opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("def"), NULL, $4); }
 	      /* Until here. */
 
 	      | expr '.' FUNCTION_CALL opt_block	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
