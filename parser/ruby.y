@@ -115,7 +115,13 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | expr '[' exprlist ']' '=' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '.' funccall 			{ $3->target = $1; $$ = $3; }
+
+	      /* All types of method calls from here. */
 	      | expr '.' IDENTIFIER opt_block  		{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
+	      | expr '.' CLASS opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("class"), NULL, $4); }
+	      | expr '.' MODULE opt_block  		{ $$ = new FuncCallExpr($1, new IdentifierExpr("module"), NULL, $4); }
+	      /* Until here. */
+
 	      | expr '.' FUNCTION_CALL opt_block	{ $$ = new FuncCallExpr($1, $3, NULL, $4); }
 	      | expr '+' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("+"), new ExprList($3), NULL); }
 	      | expr '-' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ExprList($3), NULL); }
