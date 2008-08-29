@@ -16,6 +16,7 @@ RubyValue string_length(linked_ptr<Binding> &, RubyValue);
 RubyValue string_strip(linked_ptr<Binding> &, RubyValue);
 RubyValue string_strip_bang(linked_ptr<Binding> &, RubyValue);
 RubyValue string_capitalize(linked_ptr<Binding> &, RubyValue);
+RubyValue string_index(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_inspect(linked_ptr<Binding> &, RubyValue);
 RubyValue string_to_s(linked_ptr<Binding> &, RubyValue);
 RubyValue string_to_sym(linked_ptr<Binding> &, RubyValue);
@@ -32,6 +33,7 @@ void RubyStringEI::init(RubyEnvironment &_e)
   rb_cString->add_method("strip", RubyMethod::Create(string_strip));
   rb_cString->add_method("strip!", RubyMethod::Create(string_strip_bang));
   rb_cString->add_method("capitalize", RubyMethod::Create(string_capitalize));
+  rb_cString->add_method("index", RubyMethod::Create(string_index, 1));
   rb_cString->add_method("inspect", RubyMethod::Create(string_inspect));
   rb_cString->add_method("to_s", RubyMethod::Create(string_to_s));
   rb_cString->add_method("to_sym", RubyMethod::Create(string_to_sym));
@@ -100,6 +102,14 @@ RubyValue string_capitalize(linked_ptr<Binding> &_b, RubyValue _self)
   std::string s = r->string_value;
   s[0] = toupper(s[0]);
   return _b->environment.get_string(s);
+}
+
+RubyValue string_index(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  unsigned int i = _self.get_special<RubyString>()->string_value.find(_args[0].get_special<RubyString>()->string_value);
+  if (i == std::string::npos)
+    return _b->environment.NIL;
+  return RubyValue::from_fixnum(i);
 }
 
 RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)

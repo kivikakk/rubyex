@@ -44,8 +44,10 @@ int irb(int, char **)
     bytecode.str("");
     p.reset_emitted_flag();
     int r = yyparse(pb);
-    if (r != 0)
-      return r;
+    if (r != 0) {
+      std::cerr << "Syntax error: " << syntax_error << std::endl;
+      continue;
+    }
     
     std::istringstream iss(bytecode.str());
     Reader reader(iss);

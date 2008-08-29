@@ -143,7 +143,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	if (!super)
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
 	
-	RubyClass *c = e.class_exists(name) ? e.get_class_by_name(name) : RubyClass::create_class_with_super(e, name, super);
+	bool already_exists = e.class_exists(name);
+	RubyClass *c = already_exists ? e.get_class_by_name(name) : RubyClass::create_class_with_super(e, name, super);
 
 	// Specify a new context, with a new def_target, etc.
 	Context *class_def_ctx = new Context(e, RubyValue::from_object(c), c, context);
@@ -155,7 +156,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	}
 
 	delete class_def_ctx;
-	e.add_class(name, c);		// XXX what about subclasses, classes of modules, etc.?
+	if (!already_exists)
+	  e.add_class(name, c);		// XXX what about subclasses, classes of modules, etc.?
 
 	break;
       }

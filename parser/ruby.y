@@ -17,7 +17,7 @@
 %token BLOCK_ARGUMENT_START BLOCK_ARGUMENT_END
 %token ARG_BRACKET
 %token NL DO END CONTEXT_FINISH
-%token END_OF_FILE 0 "end of file"
+%token END_OF_FILE 0 "$end"
 %token <symbol> SYMBOL
 
 %token DEF IF ELSE ELSIF UNLESS

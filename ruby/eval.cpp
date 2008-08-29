@@ -17,8 +17,12 @@ RubyValue eval_hook(linked_ptr<Binding> &_b, RubyValue _self, const std::string 
 
   yy_scan_string(_code.c_str());
   int r = yyparse(&p);
-  if (r != 0)
-    throw WorldException(_b, _b->environment.SyntaxError, "compile error (" + syntax_error + ")");
+  if (r != 0) {
+    RubyValue rv = RubyValue::from_object(_b->environment.SyntaxError).call(_b, "new");
+    rv.get_special<RubyObject>()->set_instance(_b->environment, "message", _b->environment.get_string(std::string("compile error (") + syntax_error + ")"));
+    rv.get_special<RubyObject>()->set_instance(_b->environment, "underlying", _b->environment.get_string(syntax_error));
+    throw WorldException(_b, rv.object);
+  }
   
   std::istringstream iss(bytecode.str());
   Reader reader(iss);

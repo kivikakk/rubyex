@@ -30,8 +30,10 @@ int twophase(int argc, char **argv)
   std::ostringstream oss;
   Program p(oss);
   int r = yyparse(&p);
-  if (r != 0)
+  if (r != 0) {
+    std::cerr << "Syntax error: " << syntax_error << std::endl;
     return r;
+  }
 
   std::istringstream iss(oss.str());
   RubyEnvironment e;

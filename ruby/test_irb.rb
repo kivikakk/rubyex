@@ -17,15 +17,19 @@ while input == :continue
     input.strip!
     if input.length > 0
       begin
-	puts "=> " + eval(chaining + input).inspect
+	puts "=> " + eval(chaining + input + "\n").inspect
 	chaining = ""
       rescue Exception => e
 	if e.class == SyntaxError
-	  # This is so not robust.
-	  chaining_mode = true
-	  chaining += "#{input}\n"
+	  if e.message.index "unexpected $end"
+	    # This is so not robust.
+	    chaining_mode = true
+	    chaining += "#{input}\n"
+	  else
+	    chaining = ""; puts "#{e.class}: #{e.message}"
+	  end
 	else
-	  puts "#{e.class}: #{e.message}"
+	  chaining = ""; puts "#{e.class}: #{e.message}"
 	end
       end
     end
