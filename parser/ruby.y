@@ -138,9 +138,9 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr GE expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
 	      | '(' expr ')'				{ $$ = $2; }
 	      | '[' opt_exprlist ']'			{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
-	      | '{' hashlist CONTEXT_FINISH '}'	{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
-	      | '{' hashlist '}'	{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
-	      |	'{' CONTEXT_FINISH '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
+	      | '{' hashlist CONTEXT_FINISH '}'		{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
+	      | '{' hashlist '}'			{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
+	      |	'{' CONTEXT_FINISH '}'			{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      |	'{' '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      | conditional				{ $$ = $1; }
 	      | begin_section				{ $$ = $1; }
