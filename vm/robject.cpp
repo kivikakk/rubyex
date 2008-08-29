@@ -18,6 +18,11 @@ void RubyObject::add_metaclass_method(RubyEnvironment &_e, const std::string &_n
   get_metaclass(_e)->add_method(_name, _method);
 }
 
+void RubyObject::set_class(LazyClass *_klass)
+{
+  klass = _klass;
+}
+
 RubyClass *RubyObject::get_class() const
 {
   return klass->resolve();

@@ -12,6 +12,8 @@ RubyValue io_flush(linked_ptr<Binding> &, RubyValue);
 RubyValue io_sync(linked_ptr<Binding> &, RubyValue);
 RubyValue io_sync_set(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
+RubyValue file_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+
 void RubyIOEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cIO = RubyClass::create_class(_e, "IO");
@@ -25,38 +27,26 @@ void RubyIOEI::init(RubyEnvironment &_e)
 
   _e.add_class("IO", rb_cIO);
   _e.IO = rb_cIO;
+
+  RubyClass *rb_cFile = RubyClass::create_class_with_super(_e, "File", rb_cIO);
+  rb_cFile->add_method("initialize", RubyMethod::Create(file_initialize, ARGS_MINIMAL(1)));
+
+  _e.add_class("File", rb_cFile);
+  _e.File = rb_cFile;
 }
 
 RubyValue io_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyIO *self = _self.get_special<RubyIO>();
   int fd = _args[0].get_fixnum();
-  char mode[10]; mode[0] = 0;
+  std::string mode = "r";
 
-  if (_args.size() == 1)
-    strcpy(mode, "r");
-  else if (_args.size() == 2) {
-    RubyValue a1 = _args[1];
-    if (a1.type == RubyValue::RV_OBJECT) {
-      RubyString *a1s = a1.get_special<RubyString>();
-      if (a1s) {
-	strncpy(mode, a1s->string_value.c_str(), 9);
-	mode[a1s->string_value.length()] = 0;
-      } else
-	throw WorldException(_b, _b->environment.TypeError, "io_initialize doesn't know what to do for second argument");
-    } else if (a1.type == RubyValue::RV_FIXNUM) {
-      if (a1.fixnum & 2)
-	strcpy(mode, "r+");
-      else if (a1.fixnum & 1)
-	strcpy(mode, "w");		// fdopen doesn't truncate w/ `w' or `w+'. see fopen(3).
-      else
-	strcpy(mode, "r");
-    } else
-      throw WorldException(_b, _b->environment.TypeError, "io_initialize can't recognise second argument");
-  } else
+  if (_args.size() == 2) {
+    mode = RubyIO::rv_to_mode(_b, _args[1]);
+  } else if (_args.size() != 1)
     throw WorldException(_b, _b->environment.ArgumentError, "incorrect number of arguments (expected 1 or 2)");
 
-  self->init(fd, mode);
+  self->init(fd, mode.c_str());
   return _b->environment.NIL;
 }
 
@@ -106,6 +96,20 @@ RubyValue io_sync_set(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
   return _b->environment.get_truth(_self.get_special<RubyIO>()->sync = _args[0].truthy(_b->environment));
 }
 
+RubyValue file_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  RubyIO *self = _self.get_special<RubyIO>();
+  std::string mode = "r";
+
+  if (_args.size() == 2)
+    mode = RubyIO::rv_to_mode(_b, _args[1]);
+  else if (_args.size() != 1)
+    throw WorldException(_b, _b->environment.ArgumentError, "incorrect number of arguments (expected 1 or 2)");
+
+  self->file = fopen(_args[0].get_special<RubyString>()->string_value.c_str(), mode.c_str());
+  return _b->environment.NIL;
+}
+
 RubyIO::RubyIO(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "IO")), sync(false), file(NULL)
 { }
 
@@ -122,6 +126,38 @@ void RubyIO::init(int _fd, const char *_mode)
 RubyIO::~RubyIO()
 {
   fclose(this->file);
+}
+
+std::string RubyIO::rv_to_mode(linked_ptr<Binding> &_b, RubyValue _val)
+{
+  char mode[10]; mode[0] = 0;
+
+  if (_val.type == RubyValue::RV_OBJECT) {
+    RubyString *a1s = _val.get_special<RubyString>();
+    if (a1s) {
+      strncpy(mode, a1s->string_value.c_str(), 9);
+      mode[a1s->string_value.length()] = 0;
+    } else if (_val.object == _b->environment.NIL.object)
+      strcpy(mode, "r");
+    else
+      throw WorldException(_b, _b->environment.TypeError, "io_initialize doesn't know what to do for second argument");
+  } else if (_val.type == RubyValue::RV_FIXNUM) {
+    if (_val.fixnum & 2) {
+      if (_val.fixnum & 1024)
+	strcpy(mode, "a+");
+      else
+	strcpy(mode, "r+");
+    } else if (_val.fixnum & 1) {
+      if (_val.fixnum & 1024)
+	strcpy(mode, "a");
+      else
+	strcpy(mode, "w");	// fdopen doesn't truncate w/ `w' or `w+'. see fopen(3).
+    } else
+      strcpy(mode, "r");
+  } else
+      throw WorldException(_b, _b->environment.TypeError, "io_initialize can't recognise second argument");
+
+  return mode;
 }
 
 std::string RubyIO::read()

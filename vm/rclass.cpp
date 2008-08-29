@@ -63,18 +63,17 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
   // XXX TODO: refactor me later.
   // XXX: this whole thing is so fishy.
   //
-  if (this == _e.Module)
-    return new RubyModule(_e, "" /* XXX */);
-  else if (this == _e.Class)
+  if (has_ancestor(_e.Class))
     return RubyClass::create_class(_e, "" /* XXX */);
-    // case _e.Binding: return new 
-  else if (this == _e.String)
+  else if (has_ancestor(_e.Module))
+    return new RubyModule(_e, "" /* XXX */);
+  else if (has_ancestor(_e.String))
     return _e.gc.track(new RubyString(_e, "" /* XXX */));
-  else if (this == _e.Array)
+  else if (has_ancestor(_e.Array))
     return _e.gc.track(new RubyArray(_e));
-  else if (this == _e.Hash)
+  else if (has_ancestor(_e.Hash))
     return _e.gc.track(new RubyHash(_e));
-  else if (this == _e.IO)
+  else if (has_ancestor(_e.IO))
     return _e.gc.track(new RubyIO(_e));
   else
     return new RubyObject(this);
@@ -101,6 +100,8 @@ RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<
 {
   RubyClass *s = _self.get_special<RubyClass>();
   RubyObject *i = s->new_instance(_b->environment);
+  i->set_class(s);	// Explicitly, in the case of derived classes - their root ones would assign themselves as the class in the ctor init'r.
+
   RubyValue v = RubyValue::from_object(i);
   try {
     s->find_method("initialize");

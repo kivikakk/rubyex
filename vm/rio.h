@@ -19,6 +19,8 @@ class RubyIO : public RubyObject
     RubyIO(RubyEnvironment &, int, const char *);
     ~RubyIO();
 
+    static std::string rv_to_mode(linked_ptr<Binding> &, RubyValue);
+
     void init(int, const char *);
     std::string read();
     std::string read(int);
