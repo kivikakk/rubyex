@@ -132,13 +132,20 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	last_value = e.get_string(r);
 	break;
       }
+      case I_CLASS:
+      case I_CLASS_INHERIT: {
+	bool inherits = in == I_CLASS_INHERIT;
 
-      case I_END:
-	std::cerr << "END unimplemented." << std::endl;
+	std::string name = s.pop_identifier();
+	RubyClass *super = inherits ? s.pop_value(context).get_special<RubyClass>() : e.Object;
+	Block b = s.pop_block();
+
+	if (!super)
+	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
+	
 	break;
-      case I_POP:
-	std::cerr << "POP unimplemented." << std::endl;
-	break;
+      }
+
       case I_PUSH: {
 	type_t t = r.read_type();
 	switch (t) {
