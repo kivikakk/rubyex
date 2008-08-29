@@ -17,7 +17,7 @@ RubyValue Block::call(linked_ptr<Binding> &_b, RubyValue _arg1)
   args.push_back(_arg1);
 
   return call(_b, args);
-  }
+}
 
 RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_args)
 {
@@ -28,10 +28,6 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
   // Hence `self' in a block still refers to the `self' from outside,
   // which makes sense.
   Context *c = new Context(_b->environment, _b->context, def_target, caller_context);
-  // XXX!! This context should have a binding which somehow keeps
-  // the variables from outer scope in, while new variables
-  // created within this scope die afterward.
-
 
   // We now create the block variable arguments in this context.
   // In true MRI fashion, we ignore extra arguments that aren't being used
@@ -49,6 +45,14 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
   delete c;
 
   return ret_val;
+}
+
+// Runs the call in a given context. Useful if it's technically not a block. (great, I know.)
+RubyValue Block::call(Context *_c, linked_ptr<Binding> &_b)
+{
+  std::istringstream iss(this->code);
+  Reader r = Reader(iss);
+  return process(_b->environment, r, _c, caller_block);
 }
 
 RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_args, Block &_block)
