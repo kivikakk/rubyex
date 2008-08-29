@@ -5,3 +5,4 @@ Game plan:
 
 Minor things:
  * our float range sucks (double). Fix.
+ * investigate strange issue with Array.new(int)

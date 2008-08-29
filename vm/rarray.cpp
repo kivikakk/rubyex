@@ -47,6 +47,7 @@ RubyValue array_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<
 
 RubyValue array_new_length(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
+  // XXX doesn't work?
   return RubyValue::from_object(_b->environment.gc.track(new RubyArray(_b->environment, _args[0].get_fixnum())));
 }
 

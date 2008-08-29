@@ -17,6 +17,12 @@ RubyMethod *RubyMethod::Create(RCMethodBlockArgs _function, int _args)
 RubyMethod *RubyMethod::Create(RCMethodArgs _function, int _args)
 { return new RubyMethodArgs(_function, _args); }
 
+bool RubyMethod::verify_args(int _base, int _their)
+{
+  if (_base >= 0)
+    return (_base == _their);
+  return (_their >= (-_base - 1));
+}
 
 RubyValue RubyMethod::call(linked_ptr<Binding> &_b, RubyValue _self)
 {
@@ -102,7 +108,7 @@ RubyMethodArgs::RubyMethodArgs(RCMethodArgs _function, int _args): function(_fun
 
 RubyValue RubyMethodArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  if ((int)_args.size() != args)
+  if (!verify_args(args, (int)_args.size()))
     throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
 
   return function(_b, _self, _args);
@@ -110,7 +116,7 @@ RubyValue RubyMethodArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const s
 
 RubyValue RubyMethodArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &)
 {
-  if ((int)_args.size() != args)
+  if (!verify_args(args, (int)_args.size()))
     throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
 
   // block discarded.

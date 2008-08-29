@@ -22,6 +22,8 @@ class RubyMethod
     static RubyMethod *Create(RCMethodBlockArgs, int);
     static RubyMethod *Create(RCMethodArgs, int);
 
+    static bool verify_args(int, int);
+
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue);			// adds blank arglist.
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue, Block &);		// adds blank arglist.
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &) = 0;
