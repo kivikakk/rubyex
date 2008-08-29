@@ -16,7 +16,9 @@ class Block
     RubyValue call(linked_ptr<Binding> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue);
     RubyValue call(Context *);
+    RubyValue call(Context *, const std::vector<RubyValue> &);
     RubyValue call(Context *, linked_ptr<Binding> &);
+    RubyValue call(Context *, linked_ptr<Binding> &, const std::vector<RubyValue> &);
     RubyValue call(linked_ptr<Binding> &, const std::vector<RubyValue> &);
     RubyValue call(linked_ptr<Binding> &, const std::vector<RubyValue> &, Block &);
 

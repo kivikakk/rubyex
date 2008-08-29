@@ -50,13 +50,32 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
 // Runs the call in a given context. Useful if it's technically not a block. (great, I know.)
 RubyValue Block::call(Context *_c)
 {
-  return call(_c, _c->binding);
+  return call(_c, _c->binding, std::vector<RubyValue>());
+}
+
+RubyValue Block::call(Context *_c, const std::vector<RubyValue> &_args)
+{
+  return call(_c, _c->binding, _args);
 }
 
 RubyValue Block::call(Context *_c, linked_ptr<Binding> &_b)
 {
+  return call(_c, _b, std::vector<RubyValue>());
+}
+
+RubyValue Block::call(Context *_c, linked_ptr<Binding> &_b, const std::vector<RubyValue> &_args)
+{
   std::istringstream iss(this->code);
   Reader r = Reader(iss);
+
+  unsigned int given_args_to_add = std::min(this->args.size(), _args.size());
+  for (unsigned int i = 0; i < given_args_to_add; ++i)
+    _c->assign(this->args[i], _args[i]);
+  
+  for (unsigned int i = given_args_to_add; i < this->args.size(); ++i)
+    _c->assign(this->args[i], _b->environment.NIL);
+
+  // we use caller_block for the Block, if one's been given.
   return process(_b->environment, r, _c, caller_block);
 }
 

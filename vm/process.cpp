@@ -234,13 +234,16 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	bool handled = false;
 	try {
-	  last_value = main_clause.call(context, context->binding);
+	  last_value = main_clause.call(context);
 	} catch (WorldException &w) {
 	  for (std::vector<RubyClass *>::iterator it = catches.begin(); it != catches.end(); ++it)
 	    if (w.exception->get_class()->has_ancestor(*it)) {
 	      // The rescue block handles this.
 	      // If we had no rescue block, we'd never get here since there'd be no catches.
-	      last_value = rescue_clause.call(context->binding, RubyValue::from_object(w.exception));
+	      std::vector<RubyValue> args;
+	      args.push_back(RubyValue::from_object(w.exception));
+
+	      last_value = rescue_clause.call(context, args);
 	      handled = true;
 	      break;
 	    }
@@ -248,7 +251,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  if (!handled) {
 	    // Rescue block failed or didn't exist.
 	    if (flags & E_ENSURE)
-	      ensure_clause.call(context->binding);
+	      ensure_clause.call(context);
 	    throw; // Escalate.
 	  }
 	}
@@ -256,7 +259,10 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	if (!handled)
 	  // No rescue block was called.
 	  if (flags & E_ELSE)
-	    last_value = else_clause.call(context->binding);
+	    last_value = else_clause.call(context);
+
+	if (flags & E_ENSURE)
+	  ensure_clause.call(context);
 
 	break;
       }
