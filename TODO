@@ -1,6 +1,7 @@
 Game plan:
  * class/module definitions
  * requires
+ * catch/throw (not keywords)
 
 Minor things:
  * our float range sucks (double). Fix.
