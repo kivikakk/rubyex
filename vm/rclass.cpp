@@ -5,6 +5,7 @@
 #include "rstring.h"
 #include "rarray.h"
 #include "rhash.h"
+#include "rio.h"
 
 RubyClass *RubyClass::create_class(RubyEnvironment &_e, const std::string &_name)
 {
@@ -73,6 +74,8 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return _e.gc.track(new RubyArray(_e));
   else if (this == _e.Hash)
     return _e.gc.track(new RubyHash(_e));
+  else if (this == _e.IO)
+    return _e.gc.track(new RubyIO(_e));
   else
     return new RubyObject(this);
 }

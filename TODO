@@ -11,3 +11,4 @@ Minor things:
  * our float range sucks (double). Fix.
  * investigate strange issue with Array.new(int)
  * classes/modules nested
+ * better solution for new_instance() in rclass

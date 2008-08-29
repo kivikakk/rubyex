@@ -35,7 +35,7 @@ class RubyEnvironment
 
     RubyClass *Object, *Module, *Class;
     RubyClass *Binding, *Symbol, *Fixnum, *String;
-    RubyClass *Array, *Hash;
+    RubyClass *Array, *Hash, *IO;
 
     RubyClass *Exception;
       RubyClass *ScriptError;
