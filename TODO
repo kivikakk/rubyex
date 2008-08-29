@@ -1,9 +1,10 @@
 Game plan:
- * requires
+ * IO
+ * require
  * catch/throw (not keywords)
  * attr_*
  * *_eval
- * regexps
+ * regexps -- oniguruma
 
 Minor things:
  * our float range sucks (double). Fix.
