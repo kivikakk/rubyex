@@ -1,6 +1,6 @@
 Game plan:
- * exceptions
- * irb
+ * class/module definitions
+ * requires
 
 Minor things:
  * our float range sucks (double). Fix.
