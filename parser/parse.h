@@ -3,6 +3,7 @@
 
 #include "ast.h"
 #include <exception>
+#include <string>
 
 Program parse_code(const char *);
 Program parse_code(const char *, int, int);
@@ -19,5 +20,7 @@ class ParseFailureException : public std::exception
   protected:
     std::string code;
 };
+
+extern std::string syntax_error;
 
 #endif

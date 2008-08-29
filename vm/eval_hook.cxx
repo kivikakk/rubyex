@@ -1,8 +1,8 @@
 #include "eval_hook.h"
+#include "rexception.h"
 #include <iostream>
 
-RubyValue eval_hook(RubyEnvironment &_e, linked_ptr<Binding> _binding, RubyValue _self, const std::string &_code)
+RubyValue eval_hook(linked_ptr<Binding> &_b, RubyValue, const std::string &)
 {
-  std::cerr << "error: no eval() in VM" << std::endl;
-  return _e.NIL;
+  throw WorldException(_b, _b->environment.RuntimeError, "no eval() in VM");
 }

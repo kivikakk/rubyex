@@ -3,6 +3,8 @@
 #include "global.h"
 #include "tests.h"
 
+std::string syntax_error;
+
 Program parse_code(const char *code)
 {
   return parse_code(code, 0, -1);
@@ -25,8 +27,7 @@ Program parse_code(const char *code, int line, int length)
 
 void yyerror(Program *p, char const *s)
 {
-  if (!omit_errors)
-    std::cerr << s << std::endl;
+  syntax_error = s;
 }
 
 ParseFailureException::ParseFailureException() { }

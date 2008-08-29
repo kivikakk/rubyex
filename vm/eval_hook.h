@@ -6,7 +6,7 @@
 #include "linked_ptr.h"
 #include "binding.h"
 
-RubyValue eval_hook(RubyEnvironment &, linked_ptr<Binding>, RubyValue, const std::string &);
+RubyValue eval_hook(linked_ptr<Binding> &, RubyValue, const std::string &);
 
 #endif
 

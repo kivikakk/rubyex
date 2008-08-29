@@ -55,7 +55,7 @@ RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
     use_binding = second.get_special<RubyBinding>()->binding;
   }
 
-  return eval_hook(_b->environment, use_binding, _self, first.get_special<RubyString>()->string_value);
+  return eval_hook(use_binding, _self, first.get_special<RubyString>()->string_value);
 }
 
 RubyValue kernel_raise(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
