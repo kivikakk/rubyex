@@ -1,4 +1,5 @@
 Game plan:
+ * optional arguments
  * IO
  * require
  * catch/throw (not keywords)
