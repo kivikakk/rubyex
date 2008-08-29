@@ -1,8 +1,11 @@
 Game plan:
- * class/module definitions
  * requires
  * catch/throw (not keywords)
+ * attr_*
+ * *_eval
+ * regexps
 
 Minor things:
  * our float range sucks (double). Fix.
  * investigate strange issue with Array.new(int)
+ * classes/modules nested
