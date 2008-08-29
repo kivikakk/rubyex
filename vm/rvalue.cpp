@@ -50,8 +50,10 @@ RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_n
     case RubyValue::RV_OBJECT: {
       // MyMetaClass
       RubyClass *c = object->get_metaclass_read();
-      if (c && c->has_method(_name))
-	return c->get_method(_name);
+      if (c)
+	try {
+	  return c->find_method(_name);
+	} catch (ClassHasNoSuchMethodException) { }
       
       // MyClass, MyClassIncludedModules, SuperClass, SuperClassIncludedModules, SuperSuperClass,
       // SuperSuperClassIncludedModules, ..., ...

@@ -31,6 +31,11 @@ RubyClass *RubyObject::get_class() const
 RubyClass *RubyObject::get_metaclass_read() const
 {
   // Caller had best be careful about NULL.
+  if (!metaklass) {
+    const RubyClass *this_class = dynamic_cast<const RubyClass *>(this);
+    if (this_class && this_class->superklass)
+      return this_class->superklass->resolve()->get_metaclass_read();
+  }
   return metaklass;
 }
 
@@ -52,7 +57,11 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
     // XXX at the moment metaclasses will be created as inheriting from Object.
     // this is not good. TODO: research the proper method for determining the superclass.
     // Metaclass land is scary.
-    metaklass = RubyClass::create_class(_e, "<some metaclass>");
+    RubyClass *this_class = dynamic_cast<RubyClass *>(this);
+    if (this_class && this_class->superklass)
+      metaklass = RubyClass::create_class_with_super(_e, "<some inheriting metaclass>", this_class->superklass->resolve()->get_metaclass(_e));
+    else
+      metaklass = RubyClass::create_class(_e, "<some metaclass>");
   }
 
   return metaklass;

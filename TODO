@@ -1,5 +1,5 @@
 Game plan:
- * optional arguments
+ * optional arguments; (builtin) functions which could take a block or not? (IO::open)
  * IO
  * require
  * catch/throw (not keywords)

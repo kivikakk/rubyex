@@ -23,3 +23,7 @@ out/%.o: %.cxx
 
 clean:
 	-rm out/*.o vm vm.a
+
+rebuild:
+	@make clean
+	@make

@@ -25,7 +25,7 @@ class RubyObject
     RubyValue get_instance(RubyEnvironment &, const std::string &) const;
     void set_instance(RubyEnvironment &, const std::string &, RubyValue);
 
-    RubyClass *get_metaclass(RubyEnvironment &_e);
+    RubyClass *get_metaclass(RubyEnvironment &);
 
   protected:
     LazyClass *klass;

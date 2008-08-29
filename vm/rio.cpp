@@ -4,11 +4,13 @@
 #include "rmethod.h"
 #include "rexception.h"
 
-RubyValue io_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue io_open(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
+RubyValue io_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue io_write(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue io_read(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue io_flush(linked_ptr<Binding> &, RubyValue);
+RubyValue io_close(linked_ptr<Binding> &, RubyValue);
 RubyValue io_sync(linked_ptr<Binding> &, RubyValue);
 RubyValue io_sync_set(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
@@ -17,11 +19,13 @@ RubyValue file_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<Ru
 void RubyIOEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cIO = RubyClass::create_class(_e, "IO");
-  rb_cIO->add_method("initialize", RubyMethod::Create(io_initialize, ARGS_MINIMAL(1)));
+  rb_cIO->add_metaclass_method(_e, "open", RubyMethod::Create(io_open, ARGS_MINIMAL(1)));
 
+  rb_cIO->add_method("initialize", RubyMethod::Create(io_initialize, ARGS_MINIMAL(1)));
   rb_cIO->add_method("write", RubyMethod::Create(io_write, 1));
   rb_cIO->add_method("read", RubyMethod::Create(io_read, ARGS_ARBITRARY));
   rb_cIO->add_method("flush", RubyMethod::Create(io_flush));
+  rb_cIO->add_method("close", RubyMethod::Create(io_close));
   rb_cIO->add_method("sync", RubyMethod::Create(io_sync));
   rb_cIO->add_method("sync=", RubyMethod::Create(io_sync_set, 1));
 
@@ -33,6 +37,22 @@ void RubyIOEI::init(RubyEnvironment &_e)
 
   _e.add_class("File", rb_cFile);
   _e.File = rb_cFile;
+}
+
+RubyValue io_open(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
+{
+  RubyValue inst = _self.call(_b, "new", _args);
+
+  RubyValue rv;
+  try {
+    rv = _block.call(_b, inst);
+  } catch (WorldException) {
+    inst.get_special<RubyIO>()->close();
+    throw;
+  }
+
+  inst.get_special<RubyIO>()->close();
+  return rv;
 }
 
 RubyValue io_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -84,6 +104,12 @@ RubyValue io_flush(linked_ptr<Binding> &_b, RubyValue _self)
 {
   _self.get_special<RubyIO>()->flush();
   return _self;
+}
+
+RubyValue io_close(linked_ptr<Binding> &_b, RubyValue _self)
+{
+  _self.get_special<RubyIO>()->close();
+  return _b->environment.NIL;
 }
 
 RubyValue io_sync(linked_ptr<Binding> &_b, RubyValue _self)
@@ -196,5 +222,13 @@ int RubyIO::write(const std::string &_data)
 void RubyIO::flush()
 {
   fflush(this->file);
+}
+
+void RubyIO::close()
+{
+  if (this->file) {
+    fclose(this->file);
+    this->file = NULL;
+  }
 }
 

@@ -95,7 +95,7 @@ RubyValue RubyMethodBlockArgs::call(linked_ptr<Binding> &_b, RubyValue _self, co
 
 RubyValue RubyMethodBlockArgs::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
 {
-  if ((int)_args.size() != args)
+  if (!verify_args(args, (int)_args.size()))
     throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
 
   return function(_b, _self, _args, _block);

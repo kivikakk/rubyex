@@ -26,6 +26,7 @@ class RubyIO : public RubyObject
     std::string read(int);
     int write(const std::string &);
     void flush();
+    void close();
 
     bool sync;
     FILE *file;
