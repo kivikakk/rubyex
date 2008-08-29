@@ -138,11 +138,25 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	std::string name = s.pop_identifier();
 	RubyClass *super = inherits ? s.pop_value(context).get_special<RubyClass>() : e.Object;
-	Block b = s.pop_block();
+	Block code = s.pop_block();
 
 	if (!super)
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
 	
+	RubyClass *c = e.class_exists(name) ? e.get_class_by_name(name) : RubyClass::create_class_with_super(e, name, super);
+
+	// Specify a new context, with a new def_target, etc.
+	Context *class_def_ctx = new Context(e, RubyValue::from_object(c), c, context);
+
+	try {
+	  code.call(class_def_ctx);
+	} catch(WorldException &) {
+	  delete c; delete class_def_ctx; throw;
+	}
+
+	delete class_def_ctx;
+	e.add_class(name, c);		// XXX what about subclasses, classes of modules, etc.?
+
 	break;
       }
 

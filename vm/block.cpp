@@ -48,6 +48,11 @@ RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_ar
 }
 
 // Runs the call in a given context. Useful if it's technically not a block. (great, I know.)
+RubyValue Block::call(Context *_c)
+{
+  return call(_c, _c->binding);
+}
+
 RubyValue Block::call(Context *_c, linked_ptr<Binding> &_b)
 {
   std::istringstream iss(this->code);
