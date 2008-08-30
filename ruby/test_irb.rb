@@ -4,6 +4,7 @@ input = :continue
 line_count = 0
 chaining = ""
 chaining_mode = false
+_ = nil
 
 while input == :continue
   line_count += 1
@@ -17,7 +18,7 @@ while input == :continue
     input.strip!
     if input.length > 0
       begin
-	puts "=> " + eval(chaining + input + "\n").inspect
+	puts "=> " + (_ = eval(chaining + input + "\n")).inspect
 	chaining = ""
       rescue Exception => e
 	if e.class == SyntaxError

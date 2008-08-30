@@ -119,3 +119,8 @@ RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
   return (symbols[_name] = sym);
 }
 
+RubyObject *RubyEnvironment::errno_exception(linked_ptr<Binding> &_b, int _no, const char *_msg)
+{
+  return RubyValue::from_object(SystemCallError).call(_b, "new", RubyValue::from_fixnum(_no), get_string(_msg)).object;
+}
+

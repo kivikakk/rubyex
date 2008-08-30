@@ -16,3 +16,7 @@ clean:
 relink:
 	-rm ruby
 	@make ruby
+
+rebuild:
+	@make clean
+	@make

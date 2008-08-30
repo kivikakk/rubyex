@@ -16,21 +16,27 @@ class RubyIO : public RubyObject
 {
   public:
     RubyIO(RubyEnvironment &);
-    RubyIO(RubyEnvironment &, int, const char *);
+    RubyIO(linked_ptr<Binding> &, int, const char *);
     ~RubyIO();
 
     static std::string rv_to_mode(linked_ptr<Binding> &, RubyValue);
 
-    void init(int, const char *);
-    std::string read();
-    std::string read(int);
-    int write(const std::string &);
-    void flush();
-    void close();
+    void init(linked_ptr<Binding> &, int, const char *);
+    std::string read(linked_ptr<Binding> &);
+    std::string read(linked_ptr<Binding> &, int);
+    int write(linked_ptr<Binding> &, const std::string &);
+    void flush(linked_ptr<Binding> &);
+    void close(linked_ptr<Binding> &);
 
     bool sync;
     FILE *file;
+
+  protected:
+    void _check(linked_ptr<Binding> &);
 };
+
+class IOEOFError : public std::exception
+{ };
 
 #endif
 

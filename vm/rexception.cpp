@@ -4,7 +4,8 @@
 #include "rmethod.h"
 #include "binding.h"
 
-RubyValue exception_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue exception_initialize(linked_ptr<Binding> &, RubyValue);
+RubyValue exception_initialize_message(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue exception_message(linked_ptr<Binding> &, RubyValue);
 RubyValue exception_message_assign(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
@@ -17,7 +18,7 @@ RubyValue exception_message_assign(linked_ptr<Binding> &, RubyValue, const std::
 void RubyExceptionEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cException = RubyClass::create_class(_e, "Exception");
-  rb_cException->add_method("initialize", RubyMethod::Create(exception_initialize, ARGS_ARBITRARY));
+  rb_cException->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(exception_initialize), new RubyCMethod(exception_initialize_message, 1)));
   rb_cException->add_method("message", RubyMethod::Create(exception_message));
   rb_cException->add_method("message=", RubyMethod::Create(exception_message_assign, 1));
   _e.add_class("Exception", rb_cException);
@@ -31,17 +32,22 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
   // StandardError
   DEF_EXCEPTION(StandardError, Exception)
     DEF_EXCEPTION(ArgumentError, StandardError)
+    DEF_EXCEPTION(IOError, StandardError)
     DEF_EXCEPTION(IndexError, StandardError)
     DEF_EXCEPTION(LocalJumpError, StandardError)
     DEF_EXCEPTION(NameError, StandardError)
       DEF_EXCEPTION(NoMethodError, NameError)
     DEF_EXCEPTION(RuntimeError, StandardError)
+    DEF_EXCEPTION(SystemCallError, StandardError)
     DEF_EXCEPTION(TypeError, StandardError)
 }
 
-RubyValue exception_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
-  if (_args.size() == 1)
-    _self.call(_b, "message=", _args[0]);
+RubyValue exception_initialize(linked_ptr<Binding> &_b, RubyValue _self) {
+  return _b->environment.NIL;
+}
+
+RubyValue exception_initialize_message(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  _self.call(_b, "message=", _args[0]);
   return _b->environment.NIL;
 }
 

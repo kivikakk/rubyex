@@ -23,6 +23,7 @@ class RubyMethod
     static RubyMethod *Create(RCMethodArgs, int);
 
     static bool verify_args(int, int);
+    static std::string args_error_message(int, int);
 
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue);			// adds blank arglist.
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue, Block &);		// adds blank arglist.
@@ -30,56 +31,32 @@ class RubyMethod
     virtual RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &) = 0;
 };
 
-class RubyMethodBlockNoArgs : public RubyMethod
+class RubyCMethod : public RubyMethod
 {
   public:
-    RubyMethodBlockNoArgs(RCMethodBlockNoArgs);
+    RubyCMethod(RCMethodBlockNoArgs);
+    RubyCMethod(RCMethodNoArgs);
+    RubyCMethod(RCMethodBlockArgs, int);
+    RubyCMethod(RCMethodArgs, int);
 
-    RubyValue call(linked_ptr<Binding> &, RubyValue, Block &);					// actual impl.
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// error.
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// discard args.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
-  protected:
-    RCMethodBlockNoArgs function;
+    void *function;
+    bool has_block;
+    int no_of_args;
 };
 
-class RubyMethodNoArgs : public RubyMethod
+class RubyMultiCMethod : public RubyMethod
 {
   public:
-    RubyMethodNoArgs(RCMethodNoArgs);
+    RubyMultiCMethod(RubyCMethod *, RubyCMethod *);
+    RubyMultiCMethod(RubyCMethod *, RubyCMethod *, RubyCMethod *);
 
-    RubyValue call(linked_ptr<Binding> &, RubyValue);						// actual impl.
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// discard args.
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// discard block, args.
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
-  protected:
-    RCMethodNoArgs function;
-};
-
-class RubyMethodBlockArgs : public RubyMethod
-{
-  public:
-    RubyMethodBlockArgs(RCMethodBlockArgs, int);
-
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// error.
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// actual impl.
-
-  protected:
-    RCMethodBlockArgs function;
-    int args;
-};
-
-class RubyMethodArgs : public RubyMethod
-{
-  public:
-    RubyMethodArgs(RCMethodArgs, int);
-
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);		// actual impl.
-    RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);	// discard block.
-
-  protected:
-    RCMethodArgs function;
-    int args;
+    std::vector<RubyCMethod *> methods;
 };
 
 class RubyBytecodeMethod : public RubyMethod
@@ -93,8 +70,10 @@ class RubyBytecodeMethod : public RubyMethod
     Block code;
 };
 
+// These should be used to emulate the effect of a final *args
+// only, really.
 #define ARGS_ARBITRARY (-1)
-#define ARGS_MINIMAL(x) (-1 - (x))
+#define ARGS_MINIMAL(x) (-((x) + 1))
 
 #endif
 

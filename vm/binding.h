@@ -14,6 +14,8 @@ class Binding
     Binding(RubyEnvironment &, RubyValue, RubyModule *);
     ~Binding();
 
+    static std::string get_representation(linked_ptr<Binding> &, const std::vector<RubyValue> &);
+
     std::map<std::string, RubyValue> locals;
 
     RubyEnvironment &environment;

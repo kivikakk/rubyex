@@ -49,7 +49,7 @@ RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
     // Add Proc support for 2nd argument.
 
     RubyValue second = _args[1];
-    if (second.object->get_class() != _b->environment.Binding)
+    if (second.object->get_class() != _b->environment._Binding)
       throw WorldException(_b, _b->environment.TypeError, "wrong argument type XXX (expected Binding [in future, Proc])");
 
     use_binding = second.get_special<RubyBinding>()->binding;

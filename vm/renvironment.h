@@ -7,6 +7,7 @@
 #include "rclass.h"
 #include "rmodule.h"
 #include "rstring.h"
+#include "rexception.h"
 #include "gc.h"
 
 class RubyEnvironment
@@ -31,10 +32,12 @@ class RubyEnvironment
       return RubyValue::from_object(gc.track(new RubyString(*this, _s)));
     }
 
+    RubyObject *errno_exception(linked_ptr<Binding> &, int, const char *);
+
     RubySymbol *get_symbol(const std::string &);
 
     RubyClass *Object, *Module, *Class;
-    RubyClass *Binding, *Symbol, *Fixnum, *String;
+    RubyClass *_Binding, *Symbol, *Fixnum, *String;
     RubyClass *Array, *Hash, *IO, *File;
 
     RubyClass *Exception;
@@ -43,11 +46,13 @@ class RubyEnvironment
 	RubyClass *SyntaxError;
       RubyClass *StandardError;
 	RubyClass *ArgumentError;
+	RubyClass *IOError;
 	RubyClass *IndexError;
 	RubyClass *LocalJumpError;
 	RubyClass *NameError;
 	  RubyClass *NoMethodError;
 	RubyClass *RuntimeError;
+	RubyClass *SystemCallError;
 	RubyClass *TypeError;
 
     RubyModule *Kernel;
