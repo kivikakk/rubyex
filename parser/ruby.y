@@ -147,10 +147,22 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | while_loop				{ $$ = $1; }
 ;
 
-function_name:	IDENTIFIER	{ $$ = $1; }
-	      |	CLASS		{ $$ = new IdentifierExpr("class"); }
-	      | MODULE		{ $$ = new IdentifierExpr("module"); }
-	      | DEF		{ $$ = new IdentifierExpr("def"); }
+function_name:	IDENTIFIER		{ $$ = $1; }
+	      |	CLASS			{ $$ = new IdentifierExpr("class"); }
+	      | MODULE			{ $$ = new IdentifierExpr("module"); }
+	      | DEF			{ $$ = new IdentifierExpr("def"); }
+	      | '+'			{ $$ = new IdentifierExpr("+"); }
+	      | '-'			{ $$ = new IdentifierExpr("-"); }
+	      | '*'			{ $$ = new IdentifierExpr("*"); }
+	      | '/'			{ $$ = new IdentifierExpr("/"); }
+	      | '-' '@'			{ $$ = new IdentifierExpr("-@"); }
+	      | '^'			{ $$ = new IdentifierExpr("^"); }
+	      | EQ			{ $$ = new IdentifierExpr("=="); }
+	      | NEQ			{ $$ = new IdentifierExpr("!="); }
+	      | '<'			{ $$ = new IdentifierExpr("<"); }
+	      | '>'			{ $$ = new IdentifierExpr(">"); }
+	      | LE			{ $$ = new IdentifierExpr("<="); }
+	      | GE			{ $$ = new IdentifierExpr(">="); }
 ;
 
 sigiled_variable:

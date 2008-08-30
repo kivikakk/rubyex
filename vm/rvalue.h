@@ -33,8 +33,11 @@ class RubyValue
 
     bool truthy(RubyEnvironment &) const;
     long get_fixnum() const;
-    template <typename X> X *get_special() const
-    {
+    template <typename X> bool is_a() const {
+      if (type != RV_OBJECT) return false;
+      return dynamic_cast<X *>(object) != NULL;
+    }
+    template <typename X> X *get_special() const {
       if (type != RV_OBJECT) return NULL;
       return dynamic_cast<X *>(object);		/* dynamic_cast returns NULL on failure */
     }
