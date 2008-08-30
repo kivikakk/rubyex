@@ -60,7 +60,7 @@ class RubyEnvironment
 	RubyClass *SystemCallError;
 	RubyClass *TypeError;
 
-    RubyModule *Kernel;
+    RubyModule *Kernel, *Comparable;
 
     RubyObject *main;
     RubyValue TRUE, FALSE, NIL;

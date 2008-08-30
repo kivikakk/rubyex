@@ -7,17 +7,19 @@
 #include "rmethod.h"
 #include "rstring.h"
 
+RubyValue comparable_neq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue comparable_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue comparable_lt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue comparable_gt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue comparable_le(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue comparable_ge(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+
+RubyValue fixnum_spaceship(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_negate(linked_ptr<Binding> &, RubyValue);
 RubyValue fixnum_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_multiply(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_subtract(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue fixnum_divide(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_neq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_lt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_gt(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_le(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue fixnum_ge(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &, RubyValue);
 RubyValue fixnum_times(linked_ptr<Binding> &, RubyValue, Block &);
@@ -25,20 +27,26 @@ RubyValue fixnum_upto(linked_ptr<Binding> &, RubyValue, const std::vector<RubyVa
 
 void RubyNumericEI::init(RubyEnvironment &_e)
 {
-  // TODO: the whole Numeric, Fixnum, Bignum, etc. class hierarchy.
-  RubyClass *rb_cFixnum = RubyClass::create_class(_e, "Fixnum");
+  RubyModule *rb_mComparable = new RubyModule(_e, "Comparable");
+  rb_mComparable->add_method("!=", RubyMethod::Create(comparable_neq, 1));
+  rb_mComparable->add_method("==", RubyMethod::Create(comparable_eq, 1));
+  rb_mComparable->add_method("<", RubyMethod::Create(comparable_lt, 1));
+  rb_mComparable->add_method(">", RubyMethod::Create(comparable_gt, 1));
+  rb_mComparable->add_method("<=", RubyMethod::Create(comparable_le, 1));
+  rb_mComparable->add_method(">=", RubyMethod::Create(comparable_ge, 1));
+
+  _e.add_module("Comparable", rb_mComparable);
+  _e.Comparable = rb_mComparable;
+
   // TODO: undefine Fixnum's `new'? or just redefine Numeric#new to throw a method not found error?
+  RubyClass *rb_cFixnum = RubyClass::create_class(_e, "Fixnum");
+  rb_cFixnum->include_module(rb_mComparable);
+  rb_cFixnum->add_method("<=>", RubyMethod::Create(fixnum_spaceship, 1));
   rb_cFixnum->add_method("-@", RubyMethod::Create(fixnum_negate));
   rb_cFixnum->add_method("+", RubyMethod::Create(fixnum_add, 1));
   rb_cFixnum->add_method("*", RubyMethod::Create(fixnum_multiply, 1));
   rb_cFixnum->add_method("-", RubyMethod::Create(fixnum_subtract, 1));
   rb_cFixnum->add_method("/", RubyMethod::Create(fixnum_divide, 1));
-  rb_cFixnum->add_method("!=", RubyMethod::Create(fixnum_neq, 1));
-  rb_cFixnum->add_method("==", RubyMethod::Create(fixnum_eq, 1));
-  rb_cFixnum->add_method("<", RubyMethod::Create(fixnum_lt, 1));
-  rb_cFixnum->add_method(">", RubyMethod::Create(fixnum_gt, 1));
-  rb_cFixnum->add_method("<=", RubyMethod::Create(fixnum_le, 1));
-  rb_cFixnum->add_method(">=", RubyMethod::Create(fixnum_ge, 1));
 
   rb_cFixnum->add_method("inspect", RubyMethod::Create(fixnum_inspect_to_s));
   rb_cFixnum->add_method("to_s", RubyMethod::Create(fixnum_inspect_to_s));
@@ -49,10 +57,41 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   _e.Fixnum = rb_cFixnum;
 
   RubyClass *rb_cFloat = RubyClass::create_class(_e, "Float");
+  rb_cFloat->include_module(rb_mComparable);
   _e.add_class("Float", rb_cFloat);
 }
 
+/* it's probably fine to leave the default Object#== here? */
+RubyValue comparable_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  return _b->environment.get_truth(_self.call(_b, "<=>", _operand[0]).get_fixnum() == 0);
+}
+
+RubyValue comparable_neq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  return _b->environment.get_truth(_self.call(_b, "<=>", _operand[0]).get_fixnum() != 0);
+}
+
+RubyValue comparable_lt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  return _b->environment.get_truth(_self.call(_b, "<=>", _operand[0]).get_fixnum() == -1);
+}
+
+RubyValue comparable_gt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  return _b->environment.get_truth(_self.call(_b, "<=>", _operand[0]).get_fixnum() == 1);
+}
+
+RubyValue comparable_le(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  return _b->environment.get_truth(_self.call(_b, "<=>", _operand[0]).get_fixnum() != 1);
+}
+
+RubyValue comparable_ge(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  return _b->environment.get_truth(_self.call(_b, "<=>", _operand[0]).get_fixnum() != -1);
+}
+
 // XXX bignum
+RubyValue fixnum_spaceship(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
+  int l = _self.get_fixnum(), r = _operand[0].get_fixnum();
+  return RubyValue::from_fixnum((l < r) ? -1 : ((l > r) ? 1 : 0));
+}
+
 RubyValue fixnum_negate(linked_ptr<Binding> &_b, RubyValue _self)
 { return RubyValue::from_fixnum(-_self.get_fixnum()); }
 
@@ -67,25 +106,6 @@ RubyValue fixnum_subtract(linked_ptr<Binding> &_b, RubyValue _self, const std::v
 
 RubyValue fixnum_divide(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
 { return RubyValue::from_fixnum(_self.get_fixnum() / _operand[0].get_fixnum()); }
-
-RubyValue fixnum_neq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.get_fixnum() != _operand[0].get_fixnum()); }
-
-/* it's probably fine to leave the default Object#== here? */
-RubyValue fixnum_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.get_fixnum() == _operand[0].get_fixnum()); }
-
-RubyValue fixnum_lt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.get_fixnum() < _operand[0].get_fixnum()); }
-
-RubyValue fixnum_gt(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.get_fixnum() > _operand[0].get_fixnum()); }
-
-RubyValue fixnum_le(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.get_fixnum() <= _operand[0].get_fixnum()); }
-
-RubyValue fixnum_ge(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return _b->environment.get_truth(_self.get_fixnum() >= _operand[0].get_fixnum()); }
 
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
