@@ -848,6 +848,30 @@ void InterpolateExpr::_int_proc::push(std::ostream &o) const {
   emit_instruction(o, I_PUSH_LAST);
 }
 
+// ScopeExpr
+
+ScopeExpr(Expr *_context, IdentifierExpr *_constant): context(_context), constant(_constant)
+{ }
+
+void ScopeExpr::p() const {
+  if (context) {
+    std::cout < "(";
+    context->p()
+    std::cout < ")";
+  }
+  std::cout << "::";
+  constant->p();
+}
+
+void ScopeExpr::emit(std::ostream &o) const {
+  // XXX TODO
+}
+
+void ScopeExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
 // Program
 
 void Program::add_expression(Expr *expression) {

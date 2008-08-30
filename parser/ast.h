@@ -329,6 +329,19 @@ class InterpolateExpr : public Expr
     std::list<_int_base *> data;
 };
 
+class ScopeExpr : public Expr
+{
+  public:
+    ScopeExpr(Expr *, IdentifierExpr *);
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+
+    Expr *context;
+    IdentifierExpr *constant;
+};
+
 class Program : public PrettyPrint, public Emitter
 {
   public:
