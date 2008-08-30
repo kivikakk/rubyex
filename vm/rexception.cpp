@@ -8,6 +8,7 @@ RubyValue exception_initialize(linked_ptr<Binding> &, RubyValue);
 RubyValue exception_initialize_message(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue exception_message(linked_ptr<Binding> &, RubyValue);
 RubyValue exception_message_assign(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue systemcallerror_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 #define DEF_EXCEPTION(name, inherit) \
   RubyClass *rb_c##name = RubyClass::create_class_with_super(_e, #name, rb_c##inherit); \
@@ -40,6 +41,8 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
     DEF_EXCEPTION(RuntimeError, StandardError)
     DEF_EXCEPTION(SystemCallError, StandardError)
     DEF_EXCEPTION(TypeError, StandardError)
+
+  rb_cSystemCallError->add_method("initialize", new RubyCMethod(systemcallerror_initialize, 2));
 }
 
 RubyValue exception_initialize(linked_ptr<Binding> &_b, RubyValue _self) {
@@ -58,6 +61,13 @@ RubyValue exception_message(linked_ptr<Binding> &_b, RubyValue _self) {
 RubyValue exception_message_assign(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
   _self.get_special<RubyObject>()->set_instance(_b->environment, "message", _args[0]);
   return _args[0];
+}
+
+RubyValue systemcallerror_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  RubyObject *o = _self.get_special<RubyObject>();
+  o->set_instance(_b->environment, "message", _args[1]);
+  o->set_instance(_b->environment, "errno", _args[0]);
+  return _b->environment.NIL;
 }
 
 WorldException::WorldException(linked_ptr<Binding> &_b, RubyObject *_exception): exception(_exception)

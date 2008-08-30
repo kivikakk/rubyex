@@ -50,7 +50,7 @@
 %type <identifier> opt_rescue_target
 %type <interpolated_string> interpolated_string
 
-%type <identifier> function_name
+%type <identifier> function_name sigiled_variable
 
 %type <procedure> sub_content sub_line otherwise
 %type <block> opt_rescue_else opt_rescue_ensure
@@ -100,6 +100,8 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | moduledef				{ $$ = $1; }
 	      |	funccall 				{ $$ = $1; }
 	      | funcdef					{ $$ = $1; }
+	      | sigiled_variable			{ $$ = $1; }
+	      | sigiled_variable '=' expr		{ $$ = new AssignmentExpr($1, $3); }
 	      |	IDENTIFIER				{ $$ = $1; /* Do not amalgamate this and `IDENTIFIER block' with opt_block - need to be separate for precedence, etc. */ }
 	      |	IDENTIFIER block 			{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
 	      |	FUNCTION_CALL opt_block 		{ $$ = new FuncCallExpr(NULL, $1, NULL, $2); }
@@ -149,6 +151,12 @@ function_name:	IDENTIFIER	{ $$ = $1; }
 	      |	CLASS		{ $$ = new IdentifierExpr("class"); }
 	      | MODULE		{ $$ = new IdentifierExpr("module"); }
 	      | DEF		{ $$ = new IdentifierExpr("def"); }
+;
+
+sigiled_variable:
+		'@' function_name	{ $2->id.insert(0, "@"); $$ = $2; }
+	      | '@' '@' function_name	{ $3->id.insert(0, "@@"); $$ = $3; }
+	      |	'$' function_name	{ $2->id.insert(0, "$"); $$ = $2; }
 ;
 
 compiled_expr:	expr

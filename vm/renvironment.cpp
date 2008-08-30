@@ -39,18 +39,37 @@ RubyEnvironment::RubyEnvironment()
 
 bool RubyEnvironment::global_exists(const std::string &_name) const
 {
-  return class_exists(_name) || module_exists(_name);
+  return global_var_exists(_name) || class_exists(_name) || module_exists(_name);
 }
 
-RubyObject *RubyEnvironment::get_global_by_name(const std::string &_name) const
+RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
 {
   // XXX TODO what about constants?
   if (class_exists(_name))
-    return get_class_by_name(_name);
-  if (module_exists(_name))
-    return get_module_by_name(_name);
+    return RubyValue::from_object(get_class_by_name(_name));
+  else if (module_exists(_name))
+    return RubyValue::from_object(get_module_by_name(_name));
 
   throw CannotFindGlobalError();
+}
+
+bool RubyEnvironment::global_var_exists(const std::string &_name) const
+{
+  return (globals.find(_name) != globals.end());
+}
+
+RubyValue RubyEnvironment::get_global_var_by_name(const std::string &_name) const
+{
+  if (!global_var_exists(_name))
+    throw SevereInternalError("get_global_var_by_name(): tried to get inexistant global `" + _name + "'");
+
+  return globals.find(_name)->second;
+}
+
+void RubyEnvironment::set_global_var_by_name(const std::string &_name, RubyValue _val)
+{
+  // XXX GC concerns of overwriting?
+  globals[_name] = _val;
 }
 
 bool RubyEnvironment::class_exists(const std::string &_name) const

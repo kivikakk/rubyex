@@ -63,18 +63,30 @@ void RubyModule::include_module(RubyModule *_module)
   includes.push_front(_module);
 }
 
-bool RubyModule::has_method(const std::string &_name) const
-{
+bool RubyModule::has_method(const std::string &_name) const {
   return (methods.find(_name) != methods.end());
 }
 
-RubyMethod *RubyModule::get_method(const std::string &_name) const
-{
+RubyMethod *RubyModule::get_method(const std::string &_name) const {
   std::map<std::string, RubyMethod *>::const_iterator it = methods.find(_name);
   if (it == methods.end())
     throw SevereInternalError(this->name + " missing requested method `" + _name + "'");
-
   return it->second;
+}
+
+bool RubyModule::has_class_variable(const std::string &_name) const {
+  return (class_variables.find(_name) != class_variables.end());
+}
+
+RubyValue RubyModule::get_class_variable(const std::string &_name) const {
+  std::map<std::string, RubyValue>::const_iterator it = class_variables.find(_name);
+  if (it == class_variables.end())
+    throw SevereInternalError(this->name + " missing requested class variable `" + _name + "'");
+  return it->second;
+}
+
+void RubyModule::set_class_variable(const std::string &_name, RubyValue _value) {
+  class_variables[_name] = _value;
 }
 
 void RubyModuleEI::init(RubyEnvironment &_e)

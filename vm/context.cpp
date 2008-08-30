@@ -48,6 +48,18 @@ RubyValue Context::resolve_local(const std::string &_identifier)
 
 RubyValue Context::resolve_identifier(const std::string &_identifier)
 {
+  if (_identifier[0] == '$') {
+    if (binding->environment.global_var_exists(_identifier))
+      return binding->environment.get_global_var_by_name(_identifier);
+    return binding->environment.NIL;
+  } else if (_identifier[0] == '@') {
+    if (_identifier[1] == '@') {
+      // @@var
+    } else {
+      // @var
+    }
+  }
+
   try {
     return resolve_local(_identifier);
   } catch (CannotFindLocalError)
@@ -55,7 +67,7 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
 
   // how about environment globals? (<< XXX seems conceptually incorrect - should they be exposed any other way, logically?)
   try {
-    return RubyValue::from_object(binding->environment.get_global_by_name(_identifier));
+    return binding->environment.get_global_by_name(_identifier);
   } catch (CannotFindGlobalError)
   { }
 
@@ -75,6 +87,17 @@ RubyMethod *Context::get_method(const std::string &_name)
 
 void Context::assign(const std::string &_name, RubyValue _value)
 {
+  if (_name[0] == '$') {
+    binding->environment.set_global_var_by_name(_name, _value);
+    return;
+  } else if (_name[0] == '@') {
+    if (_name[1] == '@') {
+      // @@var
+    } else {
+      // @var
+    }
+  }
+
   if (assign_if_exists(_name, _value))
     return;
 

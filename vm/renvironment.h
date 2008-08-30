@@ -19,11 +19,16 @@ class RubyEnvironment
     void add_module(const std::string &, RubyModule *);
 
     bool global_exists(const std::string &) const;
-    RubyObject *get_global_by_name(const std::string &) const;
+    RubyValue get_global_by_name(const std::string &) const;
     bool class_exists(const std::string &) const;
     RubyClass *get_class_by_name(const std::string &) const;
     bool module_exists(const std::string &) const;
     RubyModule *get_module_by_name(const std::string &) const;
+
+    // this isn't accessed as a `global'.
+    bool global_var_exists(const std::string &) const;
+    RubyValue get_global_var_by_name(const std::string &) const;
+    void set_global_var_by_name(const std::string &, RubyValue);
 
     const std::string &get_name_by_global(RubyObject *) const;
     inline RubyValue get_truth(bool _t) const { return _t ? TRUE : FALSE; }
@@ -63,6 +68,7 @@ class RubyEnvironment
     GarbageCollector gc;
 
   protected:
+    std::map<std::string, RubyValue> globals;
     std::map<std::string, RubyClass *> classes;
     std::map<std::string, RubyModule *> modules;
     std::map<std::string, RubySymbol *> symbols;

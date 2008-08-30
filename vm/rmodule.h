@@ -25,8 +25,13 @@ class RubyModule : public RubyObject
     bool has_method(const std::string &) const;
     RubyMethod *get_method(const std::string &) const;
 
+    bool has_class_variable(const std::string &) const;
+    RubyValue get_class_variable(const std::string &) const;
+    void set_class_variable(const std::string &, RubyValue);
+
   protected:
     std::string name;
+    std::map<std::string, RubyValue> class_variables;
     std::map<std::string, RubyMethod *> methods;
     std::list<RubyModule *> includes;
 };
