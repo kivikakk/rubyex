@@ -67,6 +67,10 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  method->call(context->binding, is_target ? target : context->binding->context, arguments);	// boom
 	break;
       }
+      case I_FALSITY: {
+	last_value = e.get_truth(!s.pop_value(context).truthy(e));
+	break;
+      }
 
       case I_CONSTRUCT_BLOCK: {
 	Block block(context->binding->def_target, context, yield_block);	// takes def_target of surroundings.

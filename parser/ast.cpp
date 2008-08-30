@@ -155,6 +155,30 @@ void NilLiteralExpr::push(std::ostream &o) const {
   emit_type(o, T_NIL_LITERAL);
 }
 
+// FalsityExpr
+
+FalsityExpr::FalsityExpr(Expr *_expr): expr(_expr)
+{ }
+
+FalsityExpr::~FalsityExpr() {
+  delete expr;
+}
+
+void FalsityExpr::p() const {
+  std::cout << "!";
+  expr->p();
+}
+
+void FalsityExpr::emit(std::ostream &o) const {
+  expr->push(o);
+  emit_instruction(o, I_FALSITY);
+}
+
+void FalsityExpr::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
 // ExprList
 
 ExprList::ExprList()
@@ -167,7 +191,10 @@ ExprList::ExprList(Expr *first) {
 
 ExprList::ExprList(Expr *first, Expr *second) {
   this->args.push_back(first); this->args.push_back(second);
-  // FuncCallExpr will be responsible for this->args' members later.
+}
+
+ExprList::ExprList(Expr *first, Expr *second, Expr *third) {
+  this->args.push_back(first); this->args.push_back(second); this->args.push_back(third);
 }
 
 ExprList::ExprList(ExprList *combine, Expr *also) {
@@ -181,6 +208,15 @@ ExprList::ExprList(ExprList *combine, Expr *also, Expr *and_even) {
   this->args = combine->args;
   this->args.push_back(also);
   this->args.push_back(and_even);
+
+  delete combine;
+}
+
+ExprList::ExprList(ExprList *combine, Expr *also, Expr *and_even, Expr *also_features) {
+  this->args = combine->args;
+  this->args.push_back(also);
+  this->args.push_back(and_even);
+  this->args.push_back(also_features);
 
   delete combine;
 }

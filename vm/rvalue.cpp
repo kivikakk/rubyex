@@ -44,30 +44,30 @@ RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_n
   // 		SuperSuperClass, SuperSuperClassIncludedModules ...,
   // 		...]
 
-  switch (type) {
-    case RubyValue::RV_FIXNUM: return _b->environment.Fixnum->find_method(_name);
-    case RubyValue::RV_SYMBOL: return _b->environment.Symbol->find_method(_name);
-    case RubyValue::RV_OBJECT: {
-      // MyMetaClass
-      RubyClass *c = object->get_metaclass_read();
-      if (c)
-	try {
-	  return c->find_method(_name);
-	} catch (ClassHasNoSuchMethodException) { }
-      
-      // MyClass, MyClassIncludedModules, SuperClass, SuperClassIncludedModules, SuperSuperClass,
-      // SuperSuperClassIncludedModules, ..., ...
-      try {
+    try {
+    switch (type) {
+      case RubyValue::RV_FIXNUM: return _b->environment.Fixnum->find_method(_name);
+      case RubyValue::RV_SYMBOL: return _b->environment.Symbol->find_method(_name);
+      case RubyValue::RV_OBJECT: {
+	// MyMetaClass, MyMetaClassIncludedModules, MyMetaClassSuperClass, ..
+	RubyClass *c = object->get_metaclass_read();
+	if (c)
+	  try {
+	    return c->find_method(_name);
+	  } catch (ClassHasNoSuchMethodException) { }
+	
+	// MyClass, MyClassIncludedModules, SuperClass, SuperClassIncludedModules, SuperSuperClass,
+	// SuperSuperClassIncludedModules, ..., ...
 	return object->get_class()->find_method(_name);
-      } catch (ClassHasNoSuchMethodException) {
-	throw WorldException(_b, _b->environment.NoMethodError,
-	  std::string("undefined method `") + _name + "' for " + 
-	  this->call(_b, "inspect").get_special<RubyString>()->string_value + ":" +
-	  this->get_class(_b->environment)->get_name());
+	break;
       }
-      break;
+      default: throw SevereInternalError("RubyValue::get_method doesn't know its own type");
     }
-    default: throw SevereInternalError("RubyValue::get_method doesn't know its own type");
+  } catch (ClassHasNoSuchMethodException) {
+    throw WorldException(_b, _b->environment.NoMethodError,
+      std::string("undefined method `") + _name + "' for " + 
+      this->call(_b, "inspect").get_special<RubyString>()->string_value + ":" +
+      this->get_class(_b->environment)->get_name());
   }
 }
 

@@ -7,7 +7,7 @@
 
 %option yywrap stack
 
-%x context_finish starting_block_args arglist_begins
+%x context_finish starting_block_args arglist_begins index_begins
 %s could_be_starting_block_args
 %s block_args
 
@@ -137,18 +137,6 @@
 <sstr>\\[^'\\]		string_buf += yytext;
 <sstr>[^\\\n\']+	string_buf += yytext;
 
-==		{ return EQ; }
-!=		{ return NEQ; }
-\<=		{ return LE; }
->=		{ return GE; }
-
-=>		{ return ASSOC; }
-
-\+=		{ return ADD_ASSIGN; }
--=		{ return SUB_ASSIGN; }
-\*=		{ return MUL_ASSIGN; }
-\/=		{ return DIV_ASSIGN; }
-
     /* While these would be nice to have as keywords as defined above,
      * they require some more logic. Note that `yield' is defined above,
      * but here's `yield('. */
@@ -217,6 +205,30 @@ end			{
 		  return '}';
 		}
 
+==		{ return EQ; }
+===		{ return EQQ; }
+!=		{ return NEQ; }
+\<=		{ return LE; }
+>=		{ return GE; }
+
+=>		{ return ASSOC; }
+
+\+=		{ return ADD_ASSIGN; }
+-=		{ return SUB_ASSIGN; }
+\*=		{ return MUL_ASSIGN; }
+\/=		{ return DIV_ASSIGN; }
+
+::		{ return SCOPE; }
+\<\<		{ return LEFT_SHIFT; }
+\>\>		{ return RIGHT_SHIFT; }
+\.\.\.		{ return RANGE_THREE; }
+\.\.		{ return RANGE_TWO; }
+
+&&		{ return LOGICAL_AND; }
+\|\|		{ return LOGICAL_OR; }
+\*\*		{ return EXP; }
+
+
 		/* There's gotta be a more succint way to do these. */
 
   /*
@@ -260,6 +272,18 @@ end			{
 			  yylval.identifier = new IdentifierExpr(s);
 			  yy_push_state(arglist_begins);
 			  return FUNCTION_CALL;
+
+			}
+
+[a-zA-Z][a-zA-Z0-9_]*/\[	{
+			  std::string s = yytext;
+			  yylval.identifier = new IdentifierExpr(s);
+			  yy_push_state(index_begins);
+			  return INDEX_CALL;
+			}
+<index_begins>\[		{
+			  yy_pop_state();
+			  return INDEX_BRACKET;
 			}
 
 <arglist_begins>\(		{

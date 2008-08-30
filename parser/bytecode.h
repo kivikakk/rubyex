@@ -31,6 +31,7 @@ typedef enum
   I_TARGET_CALL		= 0x11,
   I_CALL_BLOCK 		= 0x12,
   I_CALL		= 0x13,
+  I_FALSITY		= 0x14,
 
   I_CONSTRUCT_BLOCK	= 0x20,
   I_TARGET_DEF		= 0x21,

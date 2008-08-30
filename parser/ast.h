@@ -83,14 +83,29 @@ class NilLiteralExpr : public LiteralExpr
     void push(std::ostream &) const;
 };
 
+class FalsityExpr : public Expr
+{
+  public:
+    FalsityExpr(Expr *);
+    virtual ~FalsityExpr();
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+
+    Expr *expr;
+};
+
 class ExprList
 {
   public:
     ExprList();
     ExprList(Expr *);
     ExprList(Expr *, Expr *);
+    ExprList(Expr *, Expr *, Expr *);
     ExprList(ExprList *, Expr *);
     ExprList(ExprList *, Expr *, Expr *);
+    ExprList(ExprList *, Expr *, Expr *, Expr *);
     virtual ~ExprList();
 
     std::list<Expr *> args;

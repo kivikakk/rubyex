@@ -15,7 +15,7 @@
 %error-verbose
 
 %token BLOCK_ARGUMENT_START BLOCK_ARGUMENT_END
-%token ARG_BRACKET
+%token ARG_BRACKET INDEX_BRACKET
 %token NL DO END CONTEXT_FINISH
 %token END_OF_FILE 0 "$end"
 %token <symbol> SYMBOL
@@ -61,7 +61,7 @@
  * is collapsed - our wanted behaviour. */
 %right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 
-%nonassoc EQ NEQ
+%nonassoc EQ NEQ EQQ
 %left '<' '>' LE GE
 %left '+' '-'
 %left '*' '/'
@@ -69,12 +69,16 @@
 %right EXP
 
 
-%nonassoc <identifier> IDENTIFIER FUNCTION_CALL
+%nonassoc <identifier> IDENTIFIER FUNCTION_CALL INDEX_CALL
 %nonassoc '.' ASSOC
 %left '(' ')'
 %left DO END
 %left '{' '}'
 %left '[' ']'
+
+%nonassoc RANGE_TWO RANGE_THREE
+%left LOGICAL_AND LOGICAL_OR
+%left SCOPE LEFT_SHIFT RIGHT_SHIFT
 
 %%
 
@@ -116,8 +120,8 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	SYMBOL					{ $$ = $1; }
 	      | literal					{ $$ = $1; }
 	      | interpolated_string			{ $$ = $1; }
-	      | IDENTIFIER '[' exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
-	      | IDENTIFIER '[' exprlist ']' '=' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
+	      | INDEX_CALL INDEX_BRACKET exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
+	      | INDEX_CALL INDEX_BRACKET exprlist ']' '=' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | expr '[' exprlist ']' '=' expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '.' funccall 			{ $3->target = $1; $$ = $3; }
@@ -129,13 +133,26 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr '*' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ExprList($3), NULL); }
 	      | expr '/' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ExprList($3), NULL); }
 	      | '-' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
+	      | '~' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("~"), NULL, NULL); }
+	      | '!' expr %prec NEG			{ $$ = new FalsityExpr($2); }
 	      | expr '^' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ExprList($3), NULL); }
 	      | expr EQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ExprList($3), NULL); }
+	      | expr EQQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("==="), new ExprList($3), NULL); }
 	      | expr NEQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ExprList($3), NULL); }
 	      | expr '<' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("<"), new ExprList($3), NULL); }
 	      | expr '>' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr(">"), new ExprList($3), NULL); }
 	      | expr LE expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("<="), new ExprList($3), NULL); }
 	      | expr GE expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr(">="), new ExprList($3), NULL); }
+	      | expr EXP expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("**"), new ExprList($3), NULL); }
+	      | expr '&' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("&"), new ExprList($3), NULL); }
+	      | expr '|' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("|"), new ExprList($3), NULL); }
+	      | expr '%' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("%"), new ExprList($3), NULL); }
+	      | expr LOGICAL_AND expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("&&"), new ExprList($3), NULL); }
+	      | expr LOGICAL_OR expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("||"), new ExprList($3), NULL); }
+	      | expr RANGE_TWO expr			{ $$ = new FuncCallExpr(new IdentifierExpr("Range"), new IdentifierExpr("new"), new ExprList($1, $3), NULL); }
+	      | expr RANGE_THREE expr			{ $$ = new FuncCallExpr(new IdentifierExpr("Range"), new IdentifierExpr("new"), new ExprList($1, $3, new BooleanLiteralExpr(true)), NULL); }
+	      | expr LEFT_SHIFT expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("<<"), new ExprList($3), NULL); }
+	      | expr RIGHT_SHIFT expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr(">>"), new ExprList($3), NULL); }
 	      | '(' expr ')'				{ $$ = $2; }
 	      | '[' opt_exprlist ']'			{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
 	      | '{' hashlist CONTEXT_FINISH '}'		{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
@@ -156,13 +173,23 @@ function_name:	IDENTIFIER		{ $$ = $1; }
 	      | '*'			{ $$ = new IdentifierExpr("*"); }
 	      | '/'			{ $$ = new IdentifierExpr("/"); }
 	      | '-' '@'			{ $$ = new IdentifierExpr("-@"); }
+	      | '~'			{ $$ = new IdentifierExpr("~"); }
 	      | '^'			{ $$ = new IdentifierExpr("^"); }
 	      | EQ			{ $$ = new IdentifierExpr("=="); }
+	      | EQQ			{ $$ = new IdentifierExpr("==="); }
 	      | NEQ			{ $$ = new IdentifierExpr("!="); }
 	      | '<'			{ $$ = new IdentifierExpr("<"); }
 	      | '>'			{ $$ = new IdentifierExpr(">"); }
 	      | LE			{ $$ = new IdentifierExpr("<="); }
 	      | GE			{ $$ = new IdentifierExpr(">="); }
+	      | EXP			{ $$ = new IdentifierExpr("**"); }
+	      | '&'			{ $$ = new IdentifierExpr("&"); }
+	      | '|'			{ $$ = new IdentifierExpr("|"); }
+	      | '%'			{ $$ = new IdentifierExpr("%"); }
+	      | LOGICAL_AND		{ $$ = new IdentifierExpr("&&"); }
+	      | LOGICAL_OR		{ $$ = new IdentifierExpr("||"); }
+	      | LEFT_SHIFT		{ $$ = new IdentifierExpr("<<"); }
+	      | RIGHT_SHIFT		{ $$ = new IdentifierExpr("||"); }
 ;
 
 sigiled_variable:
