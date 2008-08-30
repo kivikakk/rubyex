@@ -27,6 +27,10 @@ class RubyValue
     RubyClass *get_class(RubyEnvironment &) const;
     RubyMethod *get_method(linked_ptr<Binding> &, const std::string &) const;
 
+    bool has_instance(const std::string &) const;
+    RubyValue get_instance(const std::string &) const;
+    void set_instance(const std::string &, RubyValue);
+
     bool truthy(RubyEnvironment &) const;
     long get_fixnum() const;
     template <typename X> X *get_special() const

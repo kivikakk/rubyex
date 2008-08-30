@@ -39,14 +39,19 @@ RubyClass *RubyObject::get_metaclass_read() const
   return metaklass;
 }
 
-RubyValue RubyObject::get_instance(RubyEnvironment &_e, const std::string &_name) const
+bool RubyObject::has_instance(const std::string &_name) const
+{
+  return (instance_variables.find(_name) != instance_variables.end());
+}
+
+RubyValue RubyObject::get_instance(const std::string &_name) const
 {
   if (instance_variables.find(_name) == instance_variables.end())
-    return _e.NIL;
+    throw SevereInternalError("get_instance(): tried to get inexistant instance variable `" + _name + "'");
   return instance_variables.find(_name)->second;
 }
 
-void RubyObject::set_instance(RubyEnvironment &_e, const std::string &_name, RubyValue _value)
+void RubyObject::set_instance(const std::string &_name, RubyValue _value)
 {
   instance_variables[_name] = _value;
 }

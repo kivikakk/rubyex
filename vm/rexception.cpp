@@ -55,18 +55,17 @@ RubyValue exception_initialize_message(linked_ptr<Binding> &_b, RubyValue _self,
 }
 
 RubyValue exception_message(linked_ptr<Binding> &_b, RubyValue _self) {
-  return _self.get_special<RubyObject>()->get_instance(_b->environment, "message");
+  return _self.get_instance("message");
 }
 
 RubyValue exception_message_assign(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
-  _self.get_special<RubyObject>()->set_instance(_b->environment, "message", _args[0]);
+  _self.set_instance("message", _args[0]);
   return _args[0];
 }
 
 RubyValue systemcallerror_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
-  RubyObject *o = _self.get_special<RubyObject>();
-  o->set_instance(_b->environment, "message", _args[1]);
-  o->set_instance(_b->environment, "errno", _args[0]);
+  _self.set_instance("message", _args[1]);
+  _self.set_instance("errno", _args[0]);
   return _b->environment.NIL;
 }
 

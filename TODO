@@ -13,3 +13,4 @@ Not as important right now:
  * investigate strange issue with Array.new(int)
  * better solution for new_instance() in rclass
  * methods ending in `=' should always return the RHS
+ * all RubyValues need instance variables.

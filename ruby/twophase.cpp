@@ -45,7 +45,7 @@ int twophase(int argc, char **argv)
   } catch (WorldException &w) {
     std::cerr << "Dying on exception: ";
 
-    RubyString *msg = w.exception->get_instance(e, "message").get_special<RubyString>();
+    RubyString *msg = w.exception->get_instance("message").get_special<RubyString>();
     std::string cname = w.exception->get_class()->get_name();
     if (msg)
       std::cerr << msg->string_value << " (" << cname << ")" << std::endl;

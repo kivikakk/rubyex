@@ -19,8 +19,8 @@ RubyValue eval_hook(linked_ptr<Binding> &_b, RubyValue _self, const std::string 
   int r = yyparse(&p);
   if (r != 0) {
     RubyValue rv = RubyValue::from_object(_b->environment.SyntaxError).call(_b, "new");
-    rv.get_special<RubyObject>()->set_instance(_b->environment, "message", _b->environment.get_string(std::string("compile error (") + syntax_error + ")"));
-    rv.get_special<RubyObject>()->set_instance(_b->environment, "underlying", _b->environment.get_string(syntax_error));
+    rv.set_instance("message", _b->environment.get_string(std::string("compile error (") + syntax_error + ")"));
+    rv.set_instance("underlying", _b->environment.get_string(syntax_error));
     throw WorldException(_b, rv.object);
   }
   

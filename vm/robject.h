@@ -22,8 +22,9 @@ class RubyObject
     RubyClass *get_class() const;
     RubyClass *get_metaclass_read() const;
 
-    RubyValue get_instance(RubyEnvironment &, const std::string &) const;
-    void set_instance(RubyEnvironment &, const std::string &, RubyValue);
+    bool has_instance(const std::string &) const;
+    RubyValue get_instance(const std::string &) const;
+    void set_instance(const std::string &, RubyValue);
 
     RubyClass *get_metaclass(RubyEnvironment &);
 

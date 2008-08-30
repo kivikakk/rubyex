@@ -71,6 +71,24 @@ RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_n
   }
 }
 
+bool RubyValue::has_instance(const std::string &_name) const {
+  if (type != RV_OBJECT)
+    throw SevereInternalError("RubyValue::get_instance(): not implemented for non-objects yet.");
+  return object->has_instance(_name);
+}
+
+RubyValue RubyValue::get_instance(const std::string &_name) const {
+  if (type != RV_OBJECT)
+    throw SevereInternalError("RubyValue::get_instance(): not implemented for non-objects yet.");
+  return object->get_instance(_name);
+}
+
+void RubyValue::set_instance(const std::string &_name, RubyValue _value) {
+  if (type != RV_OBJECT)
+    throw SevereInternalError("RubyValue::get_instance(): not implemented for non-objects yet.");
+  object->set_instance(_name, _value);
+}
+
 bool RubyValue::truthy(RubyEnvironment &_e) const
 {
   switch (type) {

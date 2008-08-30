@@ -55,8 +55,15 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
   } else if (_identifier[0] == '@') {
     if (_identifier[1] == '@') {
       // @@var
+      RubyClass *c = binding->context.get_class(binding->environment);
+      if (c->has_class_variable(_identifier))
+	return c->get_class_variable(_identifier);
+      return binding->environment.NIL;
     } else {
       // @var
+      if (binding->context.has_instance(_identifier))
+	return binding->context.get_instance(_identifier);
+      return binding->environment.NIL;
     }
   }
 
@@ -91,11 +98,11 @@ void Context::assign(const std::string &_name, RubyValue _value)
     binding->environment.set_global_var_by_name(_name, _value);
     return;
   } else if (_name[0] == '@') {
-    if (_name[1] == '@') {
-      // @@var
-    } else {
-      // @var
-    }
+    if (_name[1] == '@')
+      binding->context.get_class(binding->environment)->set_class_variable(_name, _value);
+    else
+      binding->context.set_instance(_name, _value);
+    return;
   }
 
   if (assign_if_exists(_name, _value))
