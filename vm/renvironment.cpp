@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <functional>
 #include "renvironment.h"
+#include "rmethod.h"
 #include "rstring.h"
 #include "rnumeric.h"
 #include "rkernel.h"
@@ -9,9 +10,12 @@
 #include "rtri.h"
 #include "rarray.h"
 #include "rhash.h"
+#include "rrange.h"
 #include "rexception.h"
 #include "rio.h"
 #include "stlext.h"
+
+RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
 RubyEnvironment::RubyEnvironment()
 {
@@ -30,15 +34,21 @@ RubyEnvironment::RubyEnvironment()
   RubyStringEI().init(*this);
   RubyArrayEI().init(*this);
   RubyHashEI().init(*this);
+  RubyRangeEI().init(*this);
 
   RubyIOEI().init(*this);
   RubyExceptionEI().init(*this);
 
   main = new RubyObject(new NamedLazyClass(*this, "Object"));
+  main->add_metaclass_method(*this, "to_s", RubyMethod::Create(main_to_s));
+  main->add_metaclass_method(*this, "inspect", RubyMethod::Create(main_to_s));
 }
 
-bool RubyEnvironment::global_exists(const std::string &_name) const
-{
+RubyValue main_to_s(linked_ptr<Binding> &_b, RubyValue _self) {
+  return _b->environment.get_string("main");
+}
+
+bool RubyEnvironment::global_exists(const std::string &_name) const {
   return global_var_exists(_name) || class_exists(_name) || module_exists(_name);
 }
 

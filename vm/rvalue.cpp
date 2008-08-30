@@ -111,8 +111,14 @@ long RubyValue::get_fixnum() const
 {
   if (type != RubyValue::RV_FIXNUM)
     throw SevereInternalError("RubyValue::get_fixnum is called on not a fixnum");
-
   return fixnum;
+}
+
+const std::string &RubyValue::get_string() const
+{
+  if (!is_a<RubyString>())
+    throw SevereInternalError("RubyValue::get_fixnum is called on not a fixnum");
+  return get_special<RubyString>()->string_value;
 }
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name) const
 { return get_method(_b, _name)->call(_b, *this); }

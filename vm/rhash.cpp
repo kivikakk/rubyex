@@ -5,8 +5,8 @@
 #include "rstring.h"
 #include "rexception.h"
 
-RubyValue hash_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue hash_new_default(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue hash_initialize(linked_ptr<Binding> &, RubyValue);
+RubyValue hash_initialize_default(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_new_idx(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue hash_index_assign_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -17,9 +17,9 @@ RubyValue hash_to_s(linked_ptr<Binding> &, RubyValue);
 void RubyHashEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cHash = RubyClass::create_class(_e, "Hash");
-  rb_cHash->add_metaclass_method(_e, "new", RubyMethod::Create(hash_new, ARGS_ARBITRARY));
   rb_cHash->add_metaclass_method(_e, "[]", RubyMethod::Create(hash_new_idx, ARGS_ARBITRARY));
 
+  rb_cHash->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(hash_initialize), new RubyCMethod(hash_initialize_default, ARGS_ARBITRARY)));
   rb_cHash->add_method("[]", RubyMethod::Create(hash_index_op, 1));
   rb_cHash->add_method("[]=", RubyMethod::Create(hash_index_assign_op, 2));
   rb_cHash->add_method("each", RubyMethod::Create(hash_each));
@@ -30,21 +30,20 @@ void RubyHashEI::init(RubyEnvironment &_e)
   _e.Hash = rb_cHash;
 }
 
-RubyValue hash_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue hash_initialize(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  switch (_args.size()) {
-    case 0:
-      return RubyValue::from_object(_b->environment.gc.track(new RubyHash(_b->environment)));
-    case 1:
-      return hash_new_default(_b, _self, _args);
-  }
-
-  throw WorldException(_b, _b->environment.ArgumentError, "hash_new not with 0..1 arguments - big problem");
+  return _b->environment.NIL;
 }
 
-RubyValue hash_new_default(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue hash_initialize_default(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  return RubyValue::from_object(_b->environment.gc.track(new RubyHash(_b->environment, _args[0])));
+  if (_args.size() % 2 == 1)
+    throw WorldException(_b, _b->environment.ArgumentError, "odd number of arguments for Hash");
+
+  RubyHash *self = _self.get_special<RubyHash>();
+  for (unsigned int idx = 0; idx < _args.size(); idx += 2)
+    self->set(_b, _args[idx + 0], _args[idx + 1]);
+  return _b->environment.NIL;
 }
 
 RubyValue hash_new_idx(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

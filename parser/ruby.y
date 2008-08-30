@@ -61,7 +61,7 @@
  * is collapsed - our wanted behaviour. */
 %right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 
-%nonassoc EQ NEQ EQQ
+%nonassoc EQ NEQ EQQ SPACESHIP
 %left '<' '>' LE GE
 %left '+' '-'
 %left '*' '/'
@@ -136,6 +136,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | '~' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("~"), NULL, NULL); }
 	      | '!' expr %prec NEG			{ $$ = new FalsityExpr($2); }
 	      | expr '^' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ExprList($3), NULL); }
+	      | expr SPACESHIP expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("<=>"), new ExprList($3), NULL); }
 	      | expr EQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ExprList($3), NULL); }
 	      | expr EQQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("==="), new ExprList($3), NULL); }
 	      | expr NEQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("!="), new ExprList($3), NULL); }
@@ -175,6 +176,7 @@ function_name:	IDENTIFIER		{ $$ = $1; }
 	      | '-' '@'			{ $$ = new IdentifierExpr("-@"); }
 	      | '~'			{ $$ = new IdentifierExpr("~"); }
 	      | '^'			{ $$ = new IdentifierExpr("^"); }
+	      | SPACESHIP		{ $$ = new IdentifierExpr("<=>"); }
 	      | EQ			{ $$ = new IdentifierExpr("=="); }
 	      | EQQ			{ $$ = new IdentifierExpr("==="); }
 	      | NEQ			{ $$ = new IdentifierExpr("!="); }

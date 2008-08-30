@@ -67,6 +67,9 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
     }
   }
 
+  if (_identifier == "self")
+    return binding->context;
+
   try {
     return resolve_local(_identifier);
   } catch (CannotFindLocalError)

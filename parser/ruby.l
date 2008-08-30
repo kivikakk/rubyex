@@ -205,6 +205,7 @@ end			{
 		  return '}';
 		}
 
+\<=>		{ return SPACESHIP; }
 ==		{ return EQ; }
 ===		{ return EQQ; }
 !=		{ return NEQ; }
