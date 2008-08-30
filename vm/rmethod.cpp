@@ -127,17 +127,14 @@ RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, con
 {
   if (!verify_args(code.args.size(), (int)_args.size()))
     throw WorldException(_b, _b->environment.ArgumentError, args_error_message(code.args.size(), (int)_args.size()));
-
-  // XXX: I notice self is being lost here.
-  return code.call(_b, _args);
+  // _self is passed as the new context.
+  return code.call(_b, _self, _args);
 }
 
 RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
 {
   if (!verify_args(code.args.size(), (int)_args.size()))
     throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
-  //
-  // XXX: Here too!
-  return code.call(_b, _args, _block);
+  return code.call(_b, _self, _args, _block);
 }
 

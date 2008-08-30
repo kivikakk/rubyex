@@ -21,13 +21,18 @@ RubyValue Block::call(linked_ptr<Binding> &_b, RubyValue _arg1)
 
 RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_args)
 {
+  return call(_b, _b->context, _args);
+}
+
+RubyValue Block::call(linked_ptr<Binding> &_b, RubyValue _context, const std::vector<RubyValue> &_args)
+{
   std::istringstream iss(this->code);
   Reader r = Reader(iss);
 
   // N.B. new Context's `self' is the same as the one from outside.
   // Hence `self' in a block still refers to the `self' from outside,
   // which makes sense.
-  Context *c = new Context(_b->environment, _b->context, def_target, caller_context);
+  Context *c = new Context(_b->environment, _context, def_target, caller_context);
 
   // We now create the block variable arguments in this context.
   // In true MRI fashion, we ignore extra arguments that aren't being used
@@ -81,10 +86,15 @@ RubyValue Block::call(Context *_c, linked_ptr<Binding> &_b, const std::vector<Ru
 
 RubyValue Block::call(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_args, Block &_block)
 {
+  return call(_b, _b->context, _args, _block);
+}
+
+RubyValue Block::call(linked_ptr<Binding> &_b, RubyValue _context, const std::vector<RubyValue> &_args, Block &_block)
+{
   std::istringstream iss(this->code);
   Reader r = Reader(iss);
 
-  Context *c = new Context(_b->environment, _b->context, def_target, caller_context);
+  Context *c = new Context(_b->environment, _context, def_target, caller_context);
 
   unsigned int given_args_to_add = std::min(this->args.size(), _args.size());
   for (unsigned int i = 0; i < given_args_to_add; ++i)
