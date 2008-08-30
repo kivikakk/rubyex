@@ -29,5 +29,5 @@ At the moment, a fairly large subset of the Ruby core is implemented, to name a 
 * string interpolation, and
 * Ruby's class hierarchy and introspective abilities.
 
-A simple @irb@ program (see @"ruby/test_irb.rb":http://github.com/celtic/rubyex/tree/master/ruby/test_irb.rb@) can run in both MRI and RX equally. The main work now is on writing the standard library that surrounds Ruby. It would also be nice to support linkage with Ruby's C library extensions.
+A simple @irb@ program (see "@ruby/test_irb.rb@":http://github.com/celtic/rubyex/tree/master/ruby/test_irb.rb) can run in both MRI and RX equally. The main work now is on writing the standard library that surrounds Ruby. It would also be nice to support linkage with Ruby's C library extensions.
 
