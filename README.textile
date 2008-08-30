@@ -1,13 +1,33 @@
 h1. RubyEx
 
-h2. What, why, how?
+h2. What?
 
-RubyEx is my attempt at creating a cute little Ruby parser, byte-code generator and VM for that byte-code. I'm no byte-code designer, I'm no parser writer, and I sure have no idea how to structure a VM, but for a first try it's all working out rather well.
+RubyEx is my attempt at creating a Ruby parser, byte-code generator and VM for that byte-code.
 
-I am an avid Rubyist, and my only motivating factor to write this is since I thought it'd be a good bit of fun. Originally my plan was to write an interpreter for the byte-code to run as a kernel module (speed?!) - I may still try to do it, but that's risky like nothing else and a complex beast to run in kernel space that we'd all rather not. So in the end, RubyEx has turned out to be my parser and VM.
+I've never written a parser, byte-code or VM before, and hence the entire codebase is often completely refactored at once in some commits.
 
-The parser is written using bison/flex, and generates byte-code from a lovely object-oriented AST. It can also generate Ruby from the AST (future: Ruby lint or code-cleaner?), and the current design means it wouldn't be too hard to add other forms of output for the AST.
+h2. Why?
 
-The VM is written in C++, and has been (and no doubt will continue to be) a learning experience for me as I learn just how much Ruby gives us.
+I am an avid Rubyist, and my only motivating factor to write this is since I thought it'd be a good bit of fun.
 
-I'd still like a better name for RubyEx, too.
+Originally my plan was to write an interpreter for the byte-code to run as a kernel module (speed?!) - I may still try to do it, but that's risky like nothing else and a complex beast to run in kernel space that we'd all rather not. So, RubyEx turned out instead just to be my parser and VM.
+
+h2. How?
+
+The parser is written using flex/bison, and generates byte-code from an object-oriented AST. The AST can also produce messy Ruby instead, and the current design means it wouldn't be too hard to add other forms of output for the AST.
+
+The VM is written in C++, and is a learning experience for me as I learn just how much Ruby gives us, by having to implement it myself.
+
+h2. Now?
+
+At the moment, a fairly large subset of the Ruby core is implemented, to name a few major points:
+
+* Defining classes and methods,
+* blocks,
+* @eval@,
+* exceptions,
+* string interpolation, and
+* Ruby's class hierarchy and introspective abilities.
+
+A simple @irb@ program (see @"ruby/test_irb.rb":http://github.com/celtic/rubyex/tree/master/ruby/test_irb.rb@) can run in both MRI and RX equally. The main work now is on writing the standard library that surrounds Ruby. It would also be nice to support linkage with Ruby's C library extensions.
+
