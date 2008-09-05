@@ -127,6 +127,8 @@ void RubyEnvironment::add_class(const std::string &_name, RubyClass *_klass)
 {
   if (classes.find(_name) != classes.end())
     throw SevereInternalError("add_class(): tried to add class `" + _name + "' where one exists already");
+  if (modules.find(_name) != modules.end())
+    throw SevereInternalError("add_class(): tried to add class `" + _name + "' where a module of the same name exists already");
 
   classes[_name] = _klass;
 }
@@ -135,6 +137,8 @@ void RubyEnvironment::add_module(const std::string &_name, RubyModule *_module)
 {
   if (modules.find(_name) != modules.end())
     throw SevereInternalError("add_module(): tried to add module `" + _name + "' where one exists already");
+  if (classes.find(_name) != classes.end())
+    throw SevereInternalError("add_module(): tried to add module `" + _name + "' where a class of the same name exists already");
 
   modules[_name] = _module;
 }

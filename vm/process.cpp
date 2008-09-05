@@ -38,6 +38,11 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	}
 	break;
       }
+      case I_SCOPE_ROOT:
+      case I_SCOPE_CONTEXT: {
+	break;
+      }
+
       case I_TARGET_CALL_BLOCK:
       case I_TARGET_CALL:
       case I_CALL_BLOCK:
@@ -148,6 +153,9 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
 	
 	bool already_exists = e.class_exists(name);
+	if (!already_exists && e.module_exists(name))
+	  throw WorldException(context->binding, e.TypeError, name + " is not a class");
+
 	RubyClass *c = already_exists ? e.get_class_by_name(name) : RubyClass::create_class_with_super(e, name, super);
 
 	// Specify a new context, with a new def_target, etc.
@@ -170,6 +178,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	Block code = s.pop_block();
 
 	bool already_exists = e.module_exists(name);
+	if (!already_exists && e.class_exists(name))
+	  throw WorldException(context->binding, e.TypeError, name + " is not a module");
 	RubyModule *m = already_exists ? e.get_module_by_name(name) : new RubyModule(e, name);
 
 	// Specify a new context, with a new def_target, etc.
