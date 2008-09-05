@@ -26,6 +26,8 @@ typedef enum
 {
   I_ASSIGNMENT		= 0x01,
   I_EXECUTE		= 0x02,
+  I_SCOPE_ROOT		= 0x03,
+  I_SCOPE_CONTEXT	= 0x04,
 
   I_TARGET_CALL_BLOCK	= 0x10,
   I_TARGET_CALL		= 0x11,

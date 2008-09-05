@@ -80,8 +80,7 @@
 		  yylval.string_literal = new StringLiteralExpr(string_buf);
 		  return STRING_LITERAL;
 		}
-<dbstr>#\{		{ /* string interpolation */
-		  unput('!');
+<dbstr>#/\{		{ /* string interpolation */
 		  BEGIN(dbs_begin);
 
 		  if (doing_symbol) {
@@ -93,7 +92,7 @@
 		  return STRING_LITERAL;
 		}
 
-<dbs_begin>!	{ BEGIN(dbs_interpolating); return INTERPOLATION_START; }
+<dbs_begin>\{	{ BEGIN(dbs_interpolating); return INTERPOLATION_START; }
 
 <dbstr>\n	string_buf += '\n';
 <dbstr>\\a	string_buf += '\a';

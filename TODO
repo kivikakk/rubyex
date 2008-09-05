@@ -14,3 +14,4 @@ Not as important right now:
  * better solution for new_instance() in rclass
  * methods ending in `=' should always return the RHS
  * all RubyValues need instance variables.
+ * sometimes flex encounters a push-back overflow due to braces (blocks)
