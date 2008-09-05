@@ -68,6 +68,7 @@
 %left NEG
 %right EXP
 
+%left SCOPE
 
 %nonassoc <identifier> IDENTIFIER FUNCTION_CALL INDEX_CALL
 %nonassoc '.' ASSOC
@@ -78,7 +79,7 @@
 
 %nonassoc RANGE_TWO RANGE_THREE
 %left LOGICAL_AND LOGICAL_OR
-%left SCOPE LEFT_SHIFT RIGHT_SHIFT
+%left LEFT_SHIFT RIGHT_SHIFT
 
 %%
 

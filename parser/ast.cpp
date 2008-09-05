@@ -850,14 +850,14 @@ void InterpolateExpr::_int_proc::push(std::ostream &o) const {
 
 // ScopeExpr
 
-ScopeExpr(Expr *_context, IdentifierExpr *_constant): context(_context), constant(_constant)
+ScopeExpr::ScopeExpr(Expr *_context, IdentifierExpr *_constant): context(_context), constant(_constant)
 { }
 
 void ScopeExpr::p() const {
   if (context) {
-    std::cout < "(";
-    context->p()
-    std::cout < ")";
+    std::cout << "(";
+    context->p();
+    std::cout << ")";
   }
   std::cout << "::";
   constant->p();

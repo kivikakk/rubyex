@@ -5,9 +5,9 @@
 #include "rstring.h"
 #include "rexception.h"
 
-RubyValue array_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue array_new_length(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
-RubyValue array_new_copies(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue array_initialize(linked_ptr<Binding> &, RubyValue);
+RubyValue array_initialize_length(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue array_initialize_copies(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_new_idx(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue array_index_assign_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -18,8 +18,10 @@ RubyValue array_to_s(linked_ptr<Binding> &, RubyValue);
 void RubyArrayEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cArray = RubyClass::create_class(_e, "Array");
-  rb_cArray->add_metaclass_method(_e, "new", RubyMethod::Create(array_new, ARGS_ARBITRARY));
   rb_cArray->add_metaclass_method(_e, "[]", RubyMethod::Create(array_new_idx, ARGS_ARBITRARY));
+
+  rb_cArray->add_method("initialize", new RubyMultiCMethod(
+    new RubyCMethod(array_initialize), new RubyCMethod(array_initialize_length, 1), new RubyCMethod(array_initialize_copies, 2)));
 
   rb_cArray->add_method("[]", RubyMethod::Create(array_index_op, 1));
   rb_cArray->add_method("[]=", RubyMethod::Create(array_index_assign_op, 2));
@@ -31,29 +33,25 @@ void RubyArrayEI::init(RubyEnvironment &_e)
   _e.Array = rb_cArray;
 }
 
-RubyValue array_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue array_initialize(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  switch (_args.size()) {
-    case 0:
-      return RubyValue::from_object(_b->environment.gc.track(new RubyArray(_b->environment)));
-    case 1:
-      return array_new_length(_b, _self, _args);
-    case 2:
-      return array_new_copies(_b, _self, _args);
-  }
-
-  throw WorldException(_b, _b->environment.RuntimeError, "array_new with not 0..2 args - big problem");
+  // Nothing to do.
+  return _b->environment.NIL;
 }
 
-RubyValue array_new_length(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue array_initialize_length(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  // XXX doesn't work?
-  return RubyValue::from_object(_b->environment.gc.track(new RubyArray(_b->environment, _args[0].get_fixnum())));
+  // XXX We probably need to override new here to actually do what this method is for.
+  RubyArray *a = _self.get_special<RubyArray>();
+  a->data = std::vector<RubyValue>(_args[0].get_fixnum());
+  return _b->environment.NIL;
 }
 
-RubyValue array_new_copies(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+RubyValue array_initialize_copies(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  return RubyValue::from_object(_b->environment.gc.track(new RubyArray(_b->environment, _args[0].get_fixnum(), _args[1])));
+  RubyArray *a = _self.get_special<RubyArray>();
+  a->data = std::vector<RubyValue>(_args[0].get_fixnum(), _args[1]);
+  return _b->environment.NIL;
 }
 
 RubyValue array_new_idx(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
