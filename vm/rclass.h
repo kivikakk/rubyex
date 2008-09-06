@@ -10,6 +10,7 @@ class RubyClass : public RubyModule
   public:
     RubyClass(RubyEnvironment &, const std::string &);
     RubyClass(RubyEnvironment &, const std::string &, RubyClass *);
+    RubyClass(RubyEnvironment &, const std::string &, RubyClass *, RubyModule *);
 
     RubyMethod *find_method(const std::string &) const;
     bool has_ancestor(RubyClass *) const;

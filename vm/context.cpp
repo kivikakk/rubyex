@@ -97,7 +97,9 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
 
 RubyValue Context::resolve_constant(const std::string &_identifier)
 {
-  return binding->context.get_class(binding->environment)->resolve_constant(binding, _identifier, true);
+  // XXX ??? 这两个有什么不同的？？
+  // return binding->context.get_class(binding->environment)->resolve_constant(binding, _identifier, true);
+  return binding->def_target->resolve_constant(binding, _identifier, true);
 }
 
 RubyMethod *Context::get_method(const std::string &_name)
@@ -107,16 +109,17 @@ RubyMethod *Context::get_method(const std::string &_name)
 
 void Context::assign(const std::string &_name, RubyValue _value)
 {
-  if (_name[0] == '$') {
-    binding->environment.set_global_by_name(_name, _value);
-    return;
-  } else if (_name[0] == '@') {
+  if (_name[0] == '$')
+    return binding->environment.set_global_by_name(_name, _value);
+  else if (_name[0] == '@') {
     if (_name[1] == '@')
       binding->context.get_class(binding->environment)->set_class_variable(_name, _value);
     else
       binding->context.set_instance(_name, _value);
     return;
-  }
+  } else if (isupper(_name[0]))
+    // XXX don't use def_target?
+    return binding->def_target->set_constant(_name, _value);
 
   if (assign_if_exists(_name, _value))
     return;

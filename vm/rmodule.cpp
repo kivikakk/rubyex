@@ -147,8 +147,20 @@ const std::string &RubyModule::get_name_by_constant(RubyValue _constant) const {
 }
 
 void RubyModule::set_constant(const std::string &_name, RubyValue _value) {
+  if (has_constant(_name)) {
+    // GC?
+    std::cerr << "warning: already initialized constant " << _name << std::endl;	// XXX proper warning
+  }
   constants[_name] = _value;
 }
 
-void RubyModuleEI::init(RubyEnvironment &_e)
-{ }
+RubyValue module_parent(linked_ptr<Binding> &, RubyValue);
+
+void RubyModuleEI::init(RubyEnvironment &_e) {
+  _e.Module->add_method("parent", RubyMethod::Create(module_parent));
+}
+
+RubyValue module_parent(linked_ptr<Binding> &_b, RubyValue _self) {
+  return O2V(_self.get_special<RubyModule>()->get_parent());
+}
+

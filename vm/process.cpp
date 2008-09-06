@@ -162,8 +162,9 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	if (!super)
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
 	
-	bool already_exists = e.global_exists(name);
-	RubyClass *c = already_exists ? e.get_global_by_name(name).get_special<RubyClass>() : new RubyClass(e, name, super);
+	// XXX don't use def_target here, but something else?
+	bool already_exists = context->binding->def_target->has_constant(name);
+	RubyClass *c = already_exists ? context->binding->def_target->get_constant(name).get_special<RubyClass>() : new RubyClass(e, name, super, context->binding->def_target);
 	if (!c || c->get_class() != e.Class)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a class");
 
@@ -181,7 +182,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	delete class_def_ctx;
 	if (!already_exists)
-	  e.set_global_by_name(name, c);		// XXX what about subclasses, classes of modules, etc.?
+	  context->binding->def_target->set_constant(name, O2V(c));		// XXX what about subclasses, classes of modules, etc.?
 
 	break;
       }
@@ -189,8 +190,9 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	std::string name = s.pop_identifier();
 	Block code = s.pop_block();
 
-	bool already_exists = e.global_exists(name);
-	RubyModule *m = already_exists ? e.get_global_by_name(name).get_special<RubyModule>() : new RubyModule(e, name);
+	// XXX don't use def_target here, but something else?
+	bool already_exists = context->binding->def_target->has_constant(name);
+	RubyModule *m = already_exists ? context->binding->def_target->get_constant(name).get_special<RubyModule>() : new RubyModule(e, name, context->binding->def_target);
 	if (!m || m->get_class() != e.Module)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a module");
 
@@ -208,7 +210,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	delete module_def_ctx;
 	if (!already_exists)
-	  e.set_global_by_name(name, m);		// XXX what modules of modules/classes, etc.?
+	  context->binding->def_target->set_constant(name, O2V(m));		// XXX what modules of modules/classes, etc.?
 
 	break;
       }
