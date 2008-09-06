@@ -295,7 +295,6 @@ class InterpolateExpr : public Expr
 
     void append(StringLiteralExpr *);
     void append(Procedure *);
-    void steal(InterpolateExpr *);
 
     void p() const;
     void emit(std::ostream &) const;
