@@ -14,7 +14,7 @@ void RubySymbolEI::init(RubyEnvironment &_e)
   rb_cSymbol->add_method("inspect", RubyMethod::Create(symbol_inspect));
   rb_cSymbol->add_method("to_s", RubyMethod::Create(symbol_to_s));
 
-  _e.add_class("Symbol", rb_cSymbol);
+  _e.set_global_by_name("Symbol", rb_cSymbol);
   _e.Symbol = rb_cSymbol;
 }
 

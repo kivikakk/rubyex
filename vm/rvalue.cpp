@@ -14,6 +14,11 @@ bool RubyValue::operator <(const RubyValue &_rhs) const
   return fixnum < _rhs.fixnum;
 }
 
+bool RubyValue::operator ==(const RubyValue &_rhs) const
+{
+  return (type == _rhs.type) && (fixnum == _rhs.fixnum);
+}
+
 RubyValue RubyValue::from_fixnum(long _value)
 { return RubyValue(_value); }
 

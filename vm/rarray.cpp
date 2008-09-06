@@ -29,7 +29,7 @@ void RubyArrayEI::init(RubyEnvironment &_e)
   rb_cArray->add_method("inspect", RubyMethod::Create(array_inspect));
   rb_cArray->add_method("to_s", RubyMethod::Create(array_to_s));
 
-  _e.add_class("Array", rb_cArray);
+  _e.set_global_by_name("Array", rb_cArray);
   _e.Array = rb_cArray;
 }
 

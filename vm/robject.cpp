@@ -97,14 +97,14 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   rb_cObject->add_method("class", RubyMethod::Create(object_class));
   rb_cObject->include_module(_e.Kernel);
 
-  _e.add_class("Object", rb_cObject);
+  _e.set_global_by_name("Object", rb_cObject);
   _e.Object = rb_cObject;
 }
 
 RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   try {
-    return _b->environment.get_string(_b->environment.get_name_by_global(_self.object));
+    return _b->environment.get_string(_b->environment.get_name_by_global(V2O(_self.object)));
   } catch (CannotFindGlobalError)
   { }
 

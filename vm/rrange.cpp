@@ -17,7 +17,7 @@ void RubyRangeEI::init(RubyEnvironment &_e) {
   rb_cRange->add_method("inspect", RubyMethod::Create(range_inspect));
   rb_cRange->add_method("to_s", RubyMethod::Create(range_inspect));
 
-  _e.add_class("Range", rb_cRange);
+  _e.set_global_by_name("Range", rb_cRange);
   _e.Range = rb_cRange;
 }
 

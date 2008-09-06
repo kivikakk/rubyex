@@ -152,11 +152,10 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	if (!super)
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
 	
-	bool already_exists = e.class_exists(name);
-	if (!already_exists && e.module_exists(name))
+	bool already_exists = e.global_exists(name);
+	RubyClass *c = already_exists ? e.get_global_by_name(name).get_special<RubyClass>() : RubyClass::create_class_with_super(e, name, super);
+	if (!c || c->get_class() != e.Class)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a class");
-
-	RubyClass *c = already_exists ? e.get_class_by_name(name) : RubyClass::create_class_with_super(e, name, super);
 
 	// Specify a new context, with a new def_target, etc.
 	Context *class_def_ctx = new Context(e, RubyValue::from_object(c), c, context);
@@ -169,7 +168,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	delete class_def_ctx;
 	if (!already_exists)
-	  e.add_class(name, c);		// XXX what about subclasses, classes of modules, etc.?
+	  e.set_global_by_name(name, c);		// XXX what about subclasses, classes of modules, etc.?
 
 	break;
       }
@@ -177,10 +176,10 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	std::string name = s.pop_identifier();
 	Block code = s.pop_block();
 
-	bool already_exists = e.module_exists(name);
-	if (!already_exists && e.class_exists(name))
+	bool already_exists = e.global_exists(name);
+	RubyModule *m = already_exists ? e.get_global_by_name(name).get_special<RubyModule>() : new RubyModule(e, name);
+	if (!m || m->get_class() != e.Module)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a module");
-	RubyModule *m = already_exists ? e.get_module_by_name(name) : new RubyModule(e, name);
 
 	// Specify a new context, with a new def_target, etc.
 	Context *module_def_ctx = new Context(e, RubyValue::from_object(m), m, context);
@@ -193,7 +192,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	delete module_def_ctx;
 	if (!already_exists)
-	  e.add_module(name, m);		// XXX what modules of modules/classes, etc.?
+	  e.set_global_by_name(name, m);		// XXX what modules of modules/classes, etc.?
 
 	break;
       }

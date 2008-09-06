@@ -6,7 +6,7 @@ void RubyBindingEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cBinding = RubyClass::create_class(_e, "Binding");
 
-  _e.add_class("Binding", rb_cBinding);
+  _e.set_global_by_name("Binding", rb_cBinding);
   _e._Binding = rb_cBinding;
 }
 

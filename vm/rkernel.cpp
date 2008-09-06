@@ -28,7 +28,7 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
 
-  _e.add_module("Kernel", rb_mKernel);
+  _e.set_global_by_name("Kernel", rb_mKernel);
   _e.Kernel = rb_mKernel;
 }
 

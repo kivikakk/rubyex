@@ -12,7 +12,7 @@ RubyValue systemcallerror_initialize(linked_ptr<Binding> &, RubyValue, const std
 
 #define DEF_EXCEPTION(name, inherit) \
   RubyClass *rb_c##name = RubyClass::create_class_with_super(_e, #name, rb_c##inherit); \
-  _e.add_class(#name, rb_c##name); \
+  _e.set_global_by_name(#name, rb_c##name); \
   _e.name = rb_c##name;
 // Forgive me father, for I have sinned (and used macros).
 
@@ -22,7 +22,7 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
   rb_cException->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(exception_initialize), new RubyCMethod(exception_initialize_message, 1)));
   rb_cException->add_method("message", RubyMethod::Create(exception_message));
   rb_cException->add_method("message=", RubyMethod::Create(exception_message_assign, 1));
-  _e.add_class("Exception", rb_cException);
+  _e.set_global_by_name("Exception", rb_cException);
   _e.Exception = rb_cException;
 
   // ScriptErrors

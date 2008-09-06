@@ -49,8 +49,8 @@ RubyValue Context::resolve_local(const std::string &_identifier)
 RubyValue Context::resolve_identifier(const std::string &_identifier)
 {
   if (_identifier[0] == '$') {
-    if (binding->environment.global_var_exists(_identifier))
-      return binding->environment.get_global_var_by_name(_identifier);
+    if (binding->environment.global_exists(_identifier))
+      return binding->environment.get_global_by_name(_identifier);
     return binding->environment.NIL;
   } else if (_identifier[0] == '@') {
     if (_identifier[1] == '@') {
@@ -98,7 +98,7 @@ RubyMethod *Context::get_method(const std::string &_name)
 void Context::assign(const std::string &_name, RubyValue _value)
 {
   if (_name[0] == '$') {
-    binding->environment.set_global_var_by_name(_name, _value);
+    binding->environment.set_global_by_name(_name, _value);
     return;
   } else if (_name[0] == '@') {
     if (_name[1] == '@')

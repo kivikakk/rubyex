@@ -35,7 +35,7 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   rb_mComparable->add_method("<=", RubyMethod::Create(comparable_le, 1));
   rb_mComparable->add_method(">=", RubyMethod::Create(comparable_ge, 1));
 
-  _e.add_module("Comparable", rb_mComparable);
+  _e.set_global_by_name("Comparable", rb_mComparable);
   _e.Comparable = rb_mComparable;
 
   // TODO: undefine Fixnum's `new'? or just redefine Numeric#new to throw a method not found error?
@@ -53,12 +53,12 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   rb_cFixnum->add_method("times", RubyMethod::Create(fixnum_times));
   rb_cFixnum->add_method("upto", RubyMethod::Create(fixnum_upto, 1));
 
-  _e.add_class("Fixnum", rb_cFixnum);
+  _e.set_global_by_name("Fixnum", rb_cFixnum);
   _e.Fixnum = rb_cFixnum;
 
   RubyClass *rb_cFloat = RubyClass::create_class(_e, "Float");
   rb_cFloat->include_module(rb_mComparable);
-  _e.add_class("Float", rb_cFloat);
+  _e.set_global_by_name("Float", rb_cFloat);
 }
 
 /* it's probably fine to leave the default Object#== here? */

@@ -38,7 +38,7 @@ void RubyStringEI::init(RubyEnvironment &_e)
   rb_cString->add_method("to_s", RubyMethod::Create(string_to_s));
   rb_cString->add_method("to_sym", RubyMethod::Create(string_to_sym));
 
-  _e.add_class("String", rb_cString);
+  _e.set_global_by_name("String", rb_cString);
   _e.String = rb_cString;
 }
 

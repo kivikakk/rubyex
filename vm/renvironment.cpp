@@ -48,99 +48,38 @@ RubyValue main_to_s(linked_ptr<Binding> &_b, RubyValue _self) {
   return _b->environment.get_string("main");
 }
 
-bool RubyEnvironment::global_exists(const std::string &_name) const {
-  return global_var_exists(_name) || class_exists(_name) || module_exists(_name);
-}
-
-RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
-{
-  // XXX TODO what about constants?
-  if (class_exists(_name))
-    return RubyValue::from_object(get_class_by_name(_name));
-  else if (module_exists(_name))
-    return RubyValue::from_object(get_module_by_name(_name));
-
-  throw CannotFindGlobalError();
-}
-
-bool RubyEnvironment::global_var_exists(const std::string &_name) const
+bool RubyEnvironment::global_exists(const std::string &_name) const
 {
   return (globals.find(_name) != globals.end());
 }
 
-RubyValue RubyEnvironment::get_global_var_by_name(const std::string &_name) const
+RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
 {
-  if (!global_var_exists(_name))
-    throw SevereInternalError("get_global_var_by_name(): tried to get inexistant global `" + _name + "'");
+  if (!global_exists(_name))
+    throw CannotFindGlobalError();
 
   return globals.find(_name)->second;
 }
 
-void RubyEnvironment::set_global_var_by_name(const std::string &_name, RubyValue _val)
+void RubyEnvironment::set_global_by_name(const std::string &_name, RubyValue _val)
 {
   // XXX GC concerns of overwriting?
   globals[_name] = _val;
 }
 
-bool RubyEnvironment::class_exists(const std::string &_name) const
+void RubyEnvironment::set_global_by_name(const std::string &_name, RubyObject *_val)
 {
-  return (classes.find(_name) != classes.end());
+  globals[_name] = V2O(_val);
 }
 
-RubyClass *RubyEnvironment::get_class_by_name(const std::string &_name) const
+const std::string &RubyEnvironment::get_name_by_global(RubyValue _global) const
 {
-  if (!class_exists(_name))
-    throw SevereInternalError("get_class_by_name(): tried to get inexistant class `" + _name + "'");
-
-  return classes.find(_name)->second;
-}
-
-bool RubyEnvironment::module_exists(const std::string &_name) const
-{
-  return (modules.find(_name) != modules.end());
-}
-
-RubyModule *RubyEnvironment::get_module_by_name(const std::string &_name) const
-{
-  if (!module_exists(_name))
-    throw SevereInternalError("get_module_by_name(): tried to get inexistant module `" + _name + "'");
-
-  return modules.find(_name)->second;
-}
-
-const std::string &RubyEnvironment::get_name_by_global(RubyObject *_global) const
-{
-  std::map<std::string, RubyClass *>::const_iterator cls =
-    std::find_if(classes.begin(), classes.end(), second_equal_to<std::map<std::string, RubyObject *>::value_type>(_global));
-  if (cls != classes.end())
-    return cls->first;
-
-  std::map<std::string, RubyModule *>::const_iterator mod =
-    std::find_if(modules.begin(), modules.end(), second_equal_to<std::map<std::string, RubyObject *>::value_type>(_global));
-  if (mod != modules.end())
-    return mod->first;
+  std::map<std::string, RubyValue>::const_iterator obj =
+    std::find_if(globals.begin(), globals.end(), second_equal_to<std::map<std::string, RubyValue>::value_type>(_global));
+  if (obj != globals.end())
+    return obj->first;
 
   throw CannotFindGlobalError();
-}
-
-void RubyEnvironment::add_class(const std::string &_name, RubyClass *_klass)
-{
-  if (classes.find(_name) != classes.end())
-    throw SevereInternalError("add_class(): tried to add class `" + _name + "' where one exists already");
-  if (modules.find(_name) != modules.end())
-    throw SevereInternalError("add_class(): tried to add class `" + _name + "' where a module of the same name exists already");
-
-  classes[_name] = _klass;
-}
-
-void RubyEnvironment::add_module(const std::string &_name, RubyModule *_module)
-{
-  if (modules.find(_name) != modules.end())
-    throw SevereInternalError("add_module(): tried to add module `" + _name + "' where one exists already");
-  if (classes.find(_name) != classes.end())
-    throw SevereInternalError("add_module(): tried to add module `" + _name + "' where a class of the same name exists already");
-
-  modules[_name] = _module;
 }
 
 RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
@@ -154,6 +93,6 @@ RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
 
 RubyObject *RubyEnvironment::errno_exception(linked_ptr<Binding> &_b, int _no, const char *_msg)
 {
-  return RubyValue::from_object(SystemCallError).call(_b, "new", RubyValue::from_fixnum(_no), get_string(_msg)).object;
+  return V2O(SystemCallError).call(_b, "new", RubyValue::from_fixnum(_no), get_string(_msg)).object;
 }
 

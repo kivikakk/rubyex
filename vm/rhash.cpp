@@ -26,7 +26,7 @@ void RubyHashEI::init(RubyEnvironment &_e)
   rb_cHash->add_method("inspect", RubyMethod::Create(hash_inspect));
   rb_cHash->add_method("to_s", RubyMethod::Create(hash_to_s));
 
-  _e.add_class("Hash", rb_cHash);
+  _e.set_global_by_name("Hash", rb_cHash);
   _e.Hash = rb_cHash;
 }
 

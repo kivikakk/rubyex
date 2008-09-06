@@ -30,9 +30,9 @@ void RubyTriEI::init(RubyEnvironment &_e)
   rb_cNilClass->add_method("to_s", RubyMethod::Create(nil_to_s));
   rb_cNilClass->add_method("nil?", RubyMethod::Create(nil_nil));
 
-  _e.add_class("TrueClass", rb_cTrueClass);
-  _e.add_class("FalseClass", rb_cFalseClass);
-  _e.add_class("NilClass", rb_cNilClass);
+  _e.set_global_by_name("TrueClass", rb_cTrueClass);
+  _e.set_global_by_name("FalseClass", rb_cFalseClass);
+  _e.set_global_by_name("NilClass", rb_cNilClass);
 
   RubyObject *rb_oTrue =  rb_cTrueClass->new_instance(_e),
 	     *rb_oFalse = rb_cFalseClass->new_instance(_e),

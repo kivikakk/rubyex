@@ -26,6 +26,6 @@ NamedLazyClass::NamedLazyClass(RubyEnvironment &_e, const std::string &_name): e
 { }
 
 RubyClass *NamedLazyClass::internal_resolve() const {
-  return e->get_class_by_name(name);
+  return e->get_global_by_name(name).get_special<RubyClass>();
 }
 

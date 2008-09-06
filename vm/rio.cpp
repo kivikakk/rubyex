@@ -40,13 +40,13 @@ void RubyIOEI::init(RubyEnvironment &_e)
   rb_cIO->add_method("sync", RubyMethod::Create(io_sync));
   rb_cIO->add_method("sync=", RubyMethod::Create(io_sync_set, 1));
 
-  _e.add_class("IO", rb_cIO);
+  _e.set_global_by_name("IO", rb_cIO);
   _e.IO = rb_cIO;
 
   RubyClass *rb_cFile = RubyClass::create_class_with_super(_e, "File", rb_cIO);
   rb_cFile->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(file_initialize_file, 1), new RubyCMethod(file_initialize_file_mode, 2)));
 
-  _e.add_class("File", rb_cFile);
+  _e.set_global_by_name("File", rb_cFile);
   _e.File = rb_cFile;
 }
 

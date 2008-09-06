@@ -19,6 +19,7 @@ class RubyValue
     RubyValue();
 
     bool operator <(const RubyValue &) const;	// needed to use RV as a STL map key
+    bool operator ==(const RubyValue &) const;
 
     static RubyValue from_fixnum(long);
     static RubyValue from_symbol(RubySymbol *);
@@ -69,6 +70,8 @@ class RubyValue
     explicit RubyValue(RubySymbol *);
     explicit RubyValue(RubyObject *);
 };
+
+#define V2O(x) RubyValue::from_object((x))
 
 #endif
 
