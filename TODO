@@ -1,12 +1,11 @@
 Game plan:
- * optional arguments; (builtin) functions which could take a block or not? (IO::open)
+ * optional arguments
  * IO
  * require
  * catch/throw (not keywords)
  * attr_*
  * *_eval
  * regexps -- oniguruma
- * classes/modules nested
 
 Not as important right now:
  * our float range sucks (double). Fix.
