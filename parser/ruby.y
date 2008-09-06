@@ -57,10 +57,8 @@
 
 %nonassoc INTERPOLATION_START
 
-/* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
- * is collapsed - our wanted behaviour. */
-
-%nonassoc TERN
+/* Note this implies '=', RANGE, etc. get applied *after* everything else is in groups delimited by them. */
+%nonassoc TERN '?' ':'
 /* here: AND, OR */
 /* here: NOT */
 %right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN

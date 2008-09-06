@@ -16,5 +16,4 @@ Not as important right now:
  * sometimes flex encounters a push-back overflow due to braces (blocks)
  * Kernel::method() needs to work
  * even though '`' is in the function_name rule, it'll never be sent to the parser. (lexer starts interpreting already.)
- * ``1==2? a : b'' is resolving to ``1==(2 ? a : b)''
  * Dir::glob only works with glob(3)'s syntax, not MRI's (e.g. `**', flags.)
