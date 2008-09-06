@@ -26,7 +26,7 @@
 %token WHILE
 %token CLASS MODULE
 
-%token <string_literal> STRING_LITERAL 
+%token <string_literal> STRING_LITERAL BACKTICK_LITERAL
 %token <integer_literal> INTEGER_LITERAL
 %token <floating_literal> FLOATING_LITERAL
 %token <boolean_literal> BOOLEAN_LITERAL
@@ -48,7 +48,7 @@
 %type <begin_section> begin_section
 %type <rescue> opt_rescue
 %type <identifier> opt_rescue_target
-%type <interpolated_string> interpolated_string
+%type <interpolated_expr> interpolated_string interpolated_backtick_string
 
 %type <identifier> function_name sigiled_variable
 
@@ -127,6 +127,8 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	SYMBOL					{ $$ = $1; }
 	      | literal					{ $$ = $1; }
 	      | interpolated_string			{ $$ = $1; }
+	      | interpolated_backtick_string		{ $$ = new FuncCallExpr(NULL, new IdentifierExpr("`"), new ExprList($1), NULL); }
+	      | BACKTICK_LITERAL			{ $$ = new FuncCallExpr(NULL, new IdentifierExpr("`"), new ExprList($1), NULL); }
 	      | INDEX_CALL INDEX_BRACKET exprlist ']'		{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
 	      | INDEX_CALL INDEX_BRACKET exprlist ']' '=' expr	{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]="), new ExprList($3, $6), NULL); }
 	      | expr '[' exprlist ']'			{ $$ = new FuncCallExpr($1, new IdentifierExpr("[]"), $3, NULL); }
@@ -315,6 +317,14 @@ interpolated_string:
 		{ $$ = new InterpolateExpr(); $$->append($1); $$->append($3); $$->append($6); }
 
 	      |	interpolated_string INTERPOLATION_START sub_content '}' {restart_string_literal();} STRING_LITERAL
+		{ $$ = $1; $$->append($3); $$->append($6); }
+;
+
+interpolated_backtick_string:
+		BACKTICK_LITERAL INTERPOLATION_START sub_content '}' {restart_backtick_literal();} BACKTICK_LITERAL
+		{ $$ = new InterpolateExpr(); $$->append($1); $$->append($3); $$->append($6); }
+
+	      |	interpolated_backtick_string INTERPOLATION_START sub_content '}' {restart_backtick_literal();} BACKTICK_LITERAL
 		{ $$ = $1; $$->append($3); $$->append($6); }
 ;
 

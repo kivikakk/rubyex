@@ -790,6 +790,10 @@ void InterpolateExpr::append(Procedure *_proc) {
   data.push_back(new _int_proc(_proc));
 }
 
+void InterpolateExpr::steal(InterpolateExpr *_int) {
+  data.splice(data.end(), _int->data);
+}
+
 void InterpolateExpr::p() const {
   std::cout << '\"';
   for (std::list<InterpolateExpr::_int_base *>::const_iterator it = data.begin(); it != data.end(); ++it)

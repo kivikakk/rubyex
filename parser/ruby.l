@@ -11,8 +11,7 @@
 %s could_be_starting_block_args
 %s block_args
 
-%x dbstr sstr dbs_begin
-%s dbs_interpolating
+%x dbstr sstr interpolate_begin backtickstr
 
 %{
   std::string string_buf;
@@ -57,10 +56,13 @@
 
 
 %%
-
+    /* TODO: DRY this, maybe with a stack which we can push onto when we start a string/backtick/etc. */
     if (string_lit_rs) {
       string_lit_rs = false;
       string_buf = ""; doing_symbol = false; BEGIN(dbstr);
+    } else if (backtick_lit_rs) {
+      backtick_lit_rs = false;
+      string_buf = ""; BEGIN(backtickstr);
     }
 
 #[^\n]*		{ }
@@ -81,7 +83,7 @@
 		  return STRING_LITERAL;
 		}
 <dbstr>#/\{		{ /* string interpolation */
-		  BEGIN(dbs_begin);
+		  BEGIN(interpolate_begin);
 
 		  if (doing_symbol) {
 		    yylval.symbol = new SymbolExpr(string_buf);
@@ -92,7 +94,7 @@
 		  return STRING_LITERAL;
 		}
 
-<dbs_begin>\{	{ BEGIN(dbs_interpolating); return INTERPOLATION_START; }
+<interpolate_begin>\{	{ BEGIN(INITIAL); return INTERPOLATION_START; }
 
 <dbstr>\n	string_buf += '\n';
 <dbstr>\\a	string_buf += '\a';
@@ -136,8 +138,41 @@
 <sstr>\\[^'\\]		string_buf += yytext;
 <sstr>[^\\\n\']+	string_buf += yytext;
 
-    /* While these would be nice to have as keywords as defined above,
-     * they require some more logic. Note that `yield' is defined above,
+  /* ` backtick */
+`			{
+		  string_buf = "";
+		  yy_push_state(backtickstr);
+		}
+    /* The below is almost entirely copied from dbstr.
+     * Please DRY this !! XXX */
+
+<backtickstr>#/\{		{
+		  BEGIN(interpolate_begin);
+		  yylval.string_literal = new StringLiteralExpr(string_buf);
+		  return BACKTICK_LITERAL;
+		}
+
+<backtickstr>\n	string_buf += '\n';
+<backtickstr>\\a	string_buf += '\a';
+<backtickstr>\\b	string_buf += '\b';
+<backtickstr>\\t	string_buf += '\t';
+<backtickstr>\\n	string_buf += '\n';
+<backtickstr>\\v	string_buf += '\v';
+<backtickstr>\\f	string_buf += '\f';
+<backtickstr>\\r	string_buf += '\r';
+<backtickstr>\\x[0-9a-fA-F]{1,2}	string_buf += (char)strtol(yytext + 2, NULL, 16);
+<backtickstr>\\[0-7]{1,3}		string_buf += (char)strtol(yytext + 1, NULL, 8);
+<backtickstr>\\(.|\n)	string_buf += yytext[1];
+<backtickstr>[^\\\n`#]+	string_buf += yytext;
+<backtickstr>#		string_buf += yytext[0];
+<backtickstr>`		{
+		  yy_pop_state();
+		  yylval.string_literal = new StringLiteralExpr(string_buf);
+		  return BACKTICK_LITERAL;
+		}
+
+    /* While these would be nice to have as keywords as defined below,
+     * they require some more logic. Note that `yield' is defined below,
      * but here's `yield('. */
 
 true		{ yylval.boolean_literal = new BooleanLiteralExpr(true); return BOOLEAN_LITERAL; }

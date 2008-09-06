@@ -295,6 +295,7 @@ class InterpolateExpr : public Expr
 
     void append(StringLiteralExpr *);
     void append(Procedure *);
+    void steal(InterpolateExpr *);
 
     void p() const;
     void emit(std::ostream &) const;
@@ -307,6 +308,10 @@ class InterpolateExpr : public Expr
 	virtual void p() const = 0;
 	virtual void push(std::ostream &) const = 0;
     };
+
+  public:
+    std::list<_int_base *> data;
+
 
     class _int_str : public _int_base {
       public:
@@ -325,8 +330,6 @@ class InterpolateExpr : public Expr
 	void push(std::ostream &) const;
 	Procedure *proc;
     };
-
-    std::list<_int_base *> data;
 };
 
 class ScopeExpr : public Expr

@@ -39,7 +39,7 @@ typedef union {
   WhileExpr *while_loop;
   BeginSectionExpr *begin_section;
   Rescue *rescue;
-  InterpolateExpr *interpolated_string;
+  InterpolateExpr *interpolated_expr;
 
   Procedure *procedure;
 } expu;
@@ -48,8 +48,10 @@ typedef union {
 
 extern int context_depths, context_lines;
 extern bool string_lit_rs;
+extern bool backtick_lit_rs;
 
 void restart_string_literal();
+void restart_backtick_literal();
 void enter_context(); void enter_context_line();
 void exit_context(); void exit_context_line();
 bool in_context();
