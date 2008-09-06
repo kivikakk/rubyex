@@ -17,6 +17,8 @@ RubyValue kernel_puts(linked_ptr<Binding> &, RubyValue, const std::vector<RubyVa
 RubyValue kernel_p(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_gets(linked_ptr<Binding> &, RubyValue);
 
+RubyValue kernel_backtick(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
   _e.Kernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
@@ -27,6 +29,8 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
   _e.Kernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
   _e.Kernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
+
+  _e.Kernel->add_module_method(_e, "`", RubyMethod::Create(kernel_backtick, 1));
 }
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
@@ -131,5 +135,22 @@ RubyValue kernel_gets(linked_ptr<Binding> &_b, RubyValue _self)
     return _b->environment.NIL;
 
   return _b->environment.get_string(inp);
+}
+
+RubyValue kernel_backtick(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  FILE *pipe = popen(_args[0].get_string().c_str(), "r");
+  std::string r; char buffer[1024]; int ar;
+
+  while (!feof(pipe)) {
+    ar = fread(buffer, 1, 1023, pipe);
+    if (ar <= 0)
+      break;
+    buffer[ar] = 0;
+    r += buffer;
+  }
+  ar = pclose(pipe);
+  // TODO XXX: set $? to ar
+  return _b->environment.get_string(r);
 }
 
