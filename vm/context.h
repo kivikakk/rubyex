@@ -27,7 +27,8 @@ class Context
     RubyValue entry_to_value(const Stack::StackEntry &);
     RubyValue resolve_local(const std::string &);
     RubyValue resolve_identifier(const std::string &);
-    // these two not const - could result in method call.
+    RubyValue resolve_constant(const std::string &);
+    // these three not const - could result in method call.
 
     void assign(const std::string &, RubyValue);
     bool assign_if_exists(const std::string &, RubyValue);

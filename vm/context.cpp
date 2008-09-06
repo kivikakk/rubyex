@@ -61,17 +61,15 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
       RubyClass *c = binding->context.get_class(binding->environment);
       if (c->has_class_variable(_identifier))
 	return c->get_class_variable(_identifier);
-      throw WorldException(binding, binding->environment.NameError, std::string("uninitialized class variable ") + _identifier + " in " + c->get_name());
+      throw WorldException(binding, binding->environment.NameError, "uninitialized class variable " + _identifier + " in " + c->get_name());
     } else {
       // @var
       if (binding->context.has_instance(_identifier))
 	return binding->context.get_instance(_identifier);
       return binding->environment.NIL;
     }
-  } else if (isupper(_identifier[0])) {
-    // Constant.
-    std::cerr << "binding is " << binding->context.call(binding, "inspect").get_string() << std::endl;
-  }
+  } else if (isupper(_identifier[0]))
+    return resolve_constant(_identifier);
 
   if (_identifier == "self")
     return binding->context;
@@ -93,7 +91,12 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
   } catch (std::exception)	// XXX: better defined exception.
   { }
 
-  throw WorldException(binding, binding->environment.NameError, std::string("undefined local variable or method `") + _identifier + '\'');
+  throw WorldException(binding, binding->environment.NameError, "undefined local variable or method `" + _identifier + '\'');
+}
+
+RubyValue Context::resolve_constant(const std::string &_identifier)
+{
+  throw WorldException(binding, binding->environment.NameError, "unininitialized constant " + _identifier);
 }
 
 RubyMethod *Context::get_method(const std::string &_name)
