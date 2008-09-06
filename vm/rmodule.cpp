@@ -119,6 +119,24 @@ RubyValue RubyModule::get_constant(const std::string &_name) const {
   return it->second;
 }
 
+RubyValue RubyModule::resolve_constant(linked_ptr<Binding> &_b, const std::string &_identifier, bool _recurse) const
+{
+  const RubyModule *search = this, *last = NULL;
+
+  while (last != _b->environment.Object) {
+    if (search->has_constant(_identifier))
+      return search->get_constant(_identifier);
+    
+    if (!_recurse)
+      break;
+
+    last = search;
+    search = search->get_parent();
+  }
+
+  throw WorldException(_b, _b->environment.NameError, "unininitialized constant " + _identifier);
+}
+
 const std::string &RubyModule::get_name_by_constant(RubyValue _constant) const {
   std::map<std::string, RubyValue>::const_iterator obj =
     std::find_if(constants.begin(), constants.end(), second_equal_to<std::map<std::string, RubyValue>::value_type>(_constant));

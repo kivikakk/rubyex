@@ -97,17 +97,7 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
 
 RubyValue Context::resolve_constant(const std::string &_identifier)
 {
-  RubyModule *search = binding->context.get_class(binding->environment), *last = NULL;
-
-  while (last != binding->environment.Object) {
-    if (search->has_constant(_identifier))
-      return search->get_constant(_identifier);
-
-    last = search;
-    search = search->get_parent();
-  }
-
-  throw WorldException(binding, binding->environment.NameError, "unininitialized constant " + _identifier);
+  return binding->context.get_class(binding->environment)->resolve_constant(binding, _identifier, true);
 }
 
 RubyMethod *Context::get_method(const std::string &_name)

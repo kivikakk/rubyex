@@ -49,8 +49,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	}
 
 	std::string name = r.read_string();
-
-	std::cout << "Searching for " << name << " under " << O2V(search).inspect(context->binding) << std::endl;
+	last_value = search->resolve_constant(context->binding, name, false);
 	break;
       }
 

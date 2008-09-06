@@ -37,6 +37,7 @@ class RubyModule : public RubyObject
 
     bool has_constant(const std::string &) const;
     RubyValue get_constant(const std::string &) const;
+    RubyValue resolve_constant(linked_ptr<Binding> &, const std::string &, bool) const;
     const std::string &get_name_by_constant(RubyValue) const;
     void set_constant(const std::string &, RubyValue);
 

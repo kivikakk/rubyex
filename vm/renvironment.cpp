@@ -11,6 +11,7 @@
 #include "rrange.h"
 #include "rexception.h"
 #include "rio.h"
+#include "global.h"
 
 RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
@@ -55,6 +56,10 @@ RubyEnvironment::RubyEnvironment()
 
   RubyIOEI().init(*this);
   RubyExceptionEI().init(*this);
+
+  this->set_global_by_name("VERSION", this->get_string(RX_VERSION));
+  this->set_global_by_name("RUBY_PLATFORM", this->get_string(RX_PLATFORM));
+  this->set_global_by_name("RUBY_RELEASE_DATE", this->get_string(RX_RELEASE_DATE));
 
   main = new RubyObject(this->Object);
   main->add_metaclass_method(*this, "to_s", RubyMethod::Create(main_to_s));

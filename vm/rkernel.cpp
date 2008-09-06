@@ -27,10 +27,6 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
   _e.Kernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
   _e.Kernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
-
-  _e.Kernel->set_constant("VERSION", _e.get_string(RX_VERSION));
-  _e.Kernel->set_constant("RUBY_PLATFORM", _e.get_string(RX_PLATFORM));
-  _e.Kernel->set_constant("RUBY_RELEASE_DATE", _e.get_string(RX_RELEASE_DATE));
 }
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
