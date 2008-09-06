@@ -59,13 +59,21 @@
 
 /* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
  * is collapsed - our wanted behaviour. */
-%right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 
-%nonassoc EQ NEQ EQQ SPACESHIP
-%left '<' '>' LE GE
+/* here: AND, OR */
+/* here: NOT */
+%right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
+%nonassoc RANGE_TWO RANGE_THREE
+%left LOGICAL_OR
+%left LOGICAL_AND
+%nonassoc EQ NEQ EQQ SPACESHIP EQREX NEQREX
+%left '<' LE GE '>'
+%left '|' '^'
+%left '&'
+%left LEFT_SHIFT RIGHT_SHIFT
 %left '+' '-'
-%left '*' '/'
-%left NEG
+%left '*' '/' '%'
+%left NEG '!' '~'
 %right EXP
 
 %left SCOPE
@@ -76,10 +84,6 @@
 %left DO END
 %left '{' '}'
 %left '[' ']'
-
-%nonassoc RANGE_TWO RANGE_THREE
-%left LOGICAL_AND LOGICAL_OR
-%left LEFT_SHIFT RIGHT_SHIFT
 
 %%
 
