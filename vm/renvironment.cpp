@@ -19,6 +19,20 @@ RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
 RubyEnvironment::RubyEnvironment()
 {
+  this->Object = RubyClass::create_class_with_super(*this, "Object", NULL);	// Object<nil, NOT Object<Object(!!)
+  this->set_global_by_name("Object", this->Object);
+
+  this->Kernel = new RubyModule(*this, "Kernel");
+  this->set_global_by_name("Kernel", this->Kernel);
+  this->Object->include_module(this->Kernel);
+
+  // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
+  this->Module = RubyClass::create_class_with_super(*this, "Module", this->Object);
+  this->set_global_by_name("Module", this->Module);
+
+  this->Class = RubyClass::create_class_with_super(*this, "Class", this->Module);
+  this->set_global_by_name("Class", this->Class);
+
   // Let's bring this online.
   RubyKernelEI().init(*this);
 
@@ -50,11 +64,17 @@ RubyValue main_to_s(linked_ptr<Binding> &_b, RubyValue _self) {
 
 bool RubyEnvironment::global_exists(const std::string &_name) const
 {
+  if (_name[0] != '$')
+    return this->Object->has_constant(_name);
+
   return (globals.find(_name) != globals.end());
 }
 
 RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
 {
+  if (_name[0] != '$')
+    return this->Object->get_constant(_name);
+
   if (!global_exists(_name))
     throw CannotFindGlobalError();
 
@@ -63,13 +83,16 @@ RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
 
 void RubyEnvironment::set_global_by_name(const std::string &_name, RubyValue _val)
 {
+  if (_name[0] != '$')
+    return this->Object->set_constant(_name, _val);
+
   // XXX GC concerns of overwriting?
   globals[_name] = _val;
 }
 
 void RubyEnvironment::set_global_by_name(const std::string &_name, RubyObject *_val)
 {
-  globals[_name] = O2V(_val);
+  return set_global_by_name(_name, O2V(_val));
 }
 
 const std::string &RubyEnvironment::get_name_by_global(RubyValue _global) const

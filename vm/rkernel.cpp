@@ -19,22 +19,18 @@ RubyValue kernel_gets(linked_ptr<Binding> &, RubyValue);
 
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
-  RubyModule *rb_mKernel = new RubyModule(_e, "Kernel");
-  rb_mKernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
-  rb_mKernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
-  rb_mKernel->add_module_method(_e, "raise", RubyMethod::Create(kernel_raise, ARGS_ARBITRARY));
+  _e.Kernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
+  _e.Kernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
+  _e.Kernel->add_module_method(_e, "raise", RubyMethod::Create(kernel_raise, ARGS_ARBITRARY));
 
-  rb_mKernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
-  rb_mKernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
-  rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
-  rb_mKernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
+  _e.Kernel->add_module_method(_e, "print", RubyMethod::Create(kernel_print, ARGS_ARBITRARY));
+  _e.Kernel->add_module_method(_e, "puts", RubyMethod::Create(kernel_puts, ARGS_ARBITRARY));
+  _e.Kernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
+  _e.Kernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
 
-  rb_mKernel->set_constant("VERSION", _e.get_string(RX_VERSION));
-  rb_mKernel->set_constant("RUBY_PLATFORM", _e.get_string(RX_PLATFORM));
-  rb_mKernel->set_constant("RUBY_RELEASE_DATE", _e.get_string(RX_RELEASE_DATE));
-
-  _e.set_global_by_name("Kernel", rb_mKernel);
-  _e.Kernel = rb_mKernel;
+  _e.Kernel->set_constant("VERSION", _e.get_string(RX_VERSION));
+  _e.Kernel->set_constant("RUBY_PLATFORM", _e.get_string(RX_PLATFORM));
+  _e.Kernel->set_constant("RUBY_RELEASE_DATE", _e.get_string(RX_RELEASE_DATE));
 }
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)

@@ -105,10 +105,4 @@ void RubyModule::set_constant(const std::string &_name, RubyValue _value) {
 }
 
 void RubyModuleEI::init(RubyEnvironment &_e)
-{
-  // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
-  RubyClass *rb_cModule = RubyClass::create_class_with_super(_e, "Module", new NamedLazyClass(_e, "Object"));
-
-  _e.set_global_by_name("Module", rb_cModule);
-  _e.Module = rb_cModule;
-}
+{ }

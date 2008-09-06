@@ -89,11 +89,7 @@ RubyValue class_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValu
 
 void RubyClassEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cClass = RubyClass::create_class_with_super(_e, "Class", new NamedLazyClass(_e, "Module"));
-  rb_cClass->add_method("new", RubyMethod::Create(class_new, ARGS_ARBITRARY));
-
-  _e.set_global_by_name("Class", rb_cClass);
-  _e.Class = rb_cClass;
+  _e.Class->add_method("new", RubyMethod::Create(class_new, ARGS_ARBITRARY));
 }
 
 RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

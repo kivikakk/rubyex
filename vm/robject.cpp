@@ -82,23 +82,17 @@ RubyValue object_nil(linked_ptr<Binding> &, RubyValue);
 
 void RubyObjectEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cObject = RubyClass::create_class_with_super(_e, "Object", NULL);
-  // Object<nil, NOT Object<Object(!!)
-  rb_cObject->add_method("inspect", RubyMethod::Create(object_inspect_to_s));
-  rb_cObject->add_method("to_s", RubyMethod::Create(object_inspect_to_s));
-  rb_cObject->add_method("send", RubyMethod::Create(object_send, ARGS_ARBITRARY));
+  _e.Object->add_method("inspect", RubyMethod::Create(object_inspect_to_s));
+  _e.Object->add_method("to_s", RubyMethod::Create(object_inspect_to_s));
+  _e.Object->add_method("send", RubyMethod::Create(object_send, ARGS_ARBITRARY));
 
-  rb_cObject->add_method("==", RubyMethod::Create(object_eq_op, 1));
-  rb_cObject->add_method("eql?", RubyMethod::Create(object_eql, 1));
-  rb_cObject->add_method("!=", RubyMethod::Create(object_neql, 1));
+  _e.Object->add_method("==", RubyMethod::Create(object_eq_op, 1));
+  _e.Object->add_method("eql?", RubyMethod::Create(object_eql, 1));
+  _e.Object->add_method("!=", RubyMethod::Create(object_neql, 1));
 
-  rb_cObject->add_method("nil?", RubyMethod::Create(object_nil));
+  _e.Object->add_method("nil?", RubyMethod::Create(object_nil));
 
-  rb_cObject->add_method("class", RubyMethod::Create(object_class));
-  rb_cObject->include_module(_e.Kernel);
-
-  _e.set_global_by_name("Object", rb_cObject);
-  _e.Object = rb_cObject;
+  _e.Object->add_method("class", RubyMethod::Create(object_class));
 }
 
 RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
