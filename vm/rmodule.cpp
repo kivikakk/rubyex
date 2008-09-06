@@ -5,10 +5,16 @@
 #include "rmethod.h"
 #include "rexception.h"
 
-RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(_e.Module), name(_name)
+RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(_e.Module), name(_name), parent(_e.Object)
 { }
 
-RubyModule::RubyModule(RubyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name)
+RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name, RubyModule *_parent): RubyObject(_e.Module), name(_name), parent(_parent)
+{ }
+
+RubyModule::RubyModule(RubyEnvironment &_e, RubyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name), parent(_e.Object)
+{ }
+
+RubyModule::RubyModule(RubyClass *_klass, const std::string &_name, RubyModule *_parent): RubyObject(_klass), name(_name), parent(_parent)
 { }
 
 RubyModule::~RubyModule()
@@ -20,6 +26,16 @@ RubyModule::~RubyModule()
 const std::string &RubyModule::get_name() const
 {
   return name;
+}
+
+RubyModule *RubyModule::get_parent() const
+{
+  return parent;
+}
+
+void RubyModule::set_parent(RubyModule *_parent)
+{
+  parent = _parent;
 }
 
 void RubyModule::add_method(const std::string &_name, RubyMethod *_method)

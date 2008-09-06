@@ -64,9 +64,9 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
     // Metaclass land is scary.
     RubyClass *this_class = dynamic_cast<RubyClass *>(this);
     if (this_class && this_class->superklass)
-      metaklass = RubyClass::create_class_with_super(_e, "<some inheriting metaclass>", this_class->superklass->get_metaclass(_e));
+      metaklass = new RubyClass(_e, "<some inheriting metaclass>", this_class->superklass->get_metaclass(_e));
     else
-      metaklass = RubyClass::create_class(_e, "<some metaclass>");
+      metaklass = new RubyClass(_e, "<some metaclass>");
   }
 
   return metaklass;

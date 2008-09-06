@@ -7,15 +7,11 @@
 #include "rhash.h"
 #include "rio.h"
 
-RubyClass *RubyClass::create_class(RubyEnvironment &_e, const std::string &_name)
-{
-  return new RubyClass(_e, _e.Object, _name);
-}
+RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name): RubyModule(_e, _e.Class, _name), superklass(_e.Object)
+{ }
 
-RubyClass *RubyClass::create_class_with_super(RubyEnvironment &_e, const std::string &_name, RubyClass *_superklass)
-{
-  return new RubyClass(_e, _superklass, _name);
-}
+RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name, RubyClass *_superklass): RubyModule(_e, _superklass, _name), superklass(_superklass)
+{ }
 
 RubyMethod *RubyClass::find_method(const std::string &_name) const
 {
@@ -60,7 +56,7 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
   // XXX: this whole thing is so fishy.
   //
   if (has_ancestor(_e.Class))
-    return RubyClass::create_class(_e, "" /* XXX */);
+    return new RubyClass(_e, "" /* XXX */);
   else if (has_ancestor(_e.Module))
     return new RubyModule(_e, "" /* XXX */);
   else if (has_ancestor(_e.String))
@@ -73,11 +69,7 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return _e.gc.track(new RubyIO(_e));
   else
     return new RubyObject(this);
-}
-
-RubyClass::RubyClass(RubyEnvironment &_e, RubyClass *_superklass, const std::string &_name): RubyModule(_e.Class, _name), superklass(_superklass)
-{ }
-    
+} 
 
 RubyValue class_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 

@@ -12,18 +12,24 @@ class RubyModule : public RubyObject
 {
   public:
     RubyModule(RubyEnvironment &, const std::string &);
-    RubyModule(RubyClass *, const std::string &);
+    RubyModule(RubyEnvironment &, const std::string &, RubyModule *);
+    RubyModule(RubyEnvironment &, RubyClass *, const std::string &);
+    RubyModule(RubyClass *, const std::string &, RubyModule *);
     virtual ~RubyModule();
 
-    void add_method(const std::string &, RubyMethod *);
-    void def_method(const std::string &, RubyMethod *);
-    void remove_method(const std::string &);
     void add_module_method(RubyEnvironment &, const std::string &, RubyMethod *);
     void include_module(RubyModule *);
 
     const std::string &get_name() const;
+
+    RubyModule *get_parent() const;
+    void set_parent(RubyModule *);
+
     bool has_method(const std::string &) const;
     RubyMethod *get_method(const std::string &) const;
+    void add_method(const std::string &, RubyMethod *);
+    void def_method(const std::string &, RubyMethod *);
+    void remove_method(const std::string &);
 
     bool has_class_variable(const std::string &) const;
     RubyValue get_class_variable(const std::string &) const;
@@ -35,6 +41,7 @@ class RubyModule : public RubyObject
 
   protected:
     std::string name;
+    RubyModule *parent;
     std::map<std::string, RubyValue> class_variables;
     std::map<std::string, RubyValue> constants;
     std::map<std::string, RubyMethod *> methods;

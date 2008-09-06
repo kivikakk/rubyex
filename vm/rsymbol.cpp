@@ -9,7 +9,7 @@ RubyValue symbol_to_s(linked_ptr<Binding> &, RubyValue);
 
 void RubySymbolEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cSymbol = RubyClass::create_class(_e, "Symbol");
+  RubyClass *rb_cSymbol = new RubyClass(_e, "Symbol");
 
   rb_cSymbol->add_method("inspect", RubyMethod::Create(symbol_inspect));
   rb_cSymbol->add_method("to_s", RubyMethod::Create(symbol_to_s));

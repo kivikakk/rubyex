@@ -96,6 +96,11 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
 
 RubyValue Context::resolve_constant(const std::string &_identifier)
 {
+  // RubyModule *search = binding->context.get_class();
+  //do { 
+    // search = search
+  //} while (search != binding->environment.Object);
+
   throw WorldException(binding, binding->environment.NameError, "unininitialized constant " + _identifier);
 }
 

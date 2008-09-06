@@ -9,7 +9,7 @@ RubyValue range_each(linked_ptr<Binding> &, RubyValue, Block &);
 RubyValue range_inspect(linked_ptr<Binding> &, RubyValue);
 
 void RubyRangeEI::init(RubyEnvironment &_e) {
-  RubyClass *rb_cRange = RubyClass::create_class(_e, "Range");
+  RubyClass *rb_cRange = new RubyClass(_e, "Range");
   rb_cRange->add_method("initialize", new RubyMultiCMethod(
     new RubyCMethod(range_initialize, 2),
     new RubyCMethod(range_initialize_excl, 3)));

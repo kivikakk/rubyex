@@ -153,7 +153,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
 	
 	bool already_exists = e.global_exists(name);
-	RubyClass *c = already_exists ? e.get_global_by_name(name).get_special<RubyClass>() : RubyClass::create_class_with_super(e, name, super);
+	RubyClass *c = already_exists ? e.get_global_by_name(name).get_special<RubyClass>() : new RubyClass(e, name, super);
 	if (!c || c->get_class() != e.Class)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a class");
 

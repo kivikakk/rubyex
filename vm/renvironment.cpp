@@ -19,10 +19,10 @@ RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
 RubyEnvironment::RubyEnvironment()
 {
-  this->Object = RubyClass::create_class_with_super(*this, "Object", NULL);	// Object<nil, NOT Object<Object(!!)
+  this->Object = new RubyClass(*this, "Object", NULL);	// Object<nil, NOT Object<Object(!!)
   this->Kernel = new RubyModule(*this, "Kernel");
-  this->Module = RubyClass::create_class_with_super(*this, "Module", this->Object); 	// I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
-  this->Class = RubyClass::create_class_with_super(*this, "Class", this->Module);
+  this->Module = new RubyClass(*this, "Module", this->Object); 	// I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
+  this->Class = new RubyClass(*this, "Class", this->Module);
 
   // Since Module and Class didn't exist when Object and Kernel were made,
   // they need to be reset explicitly.

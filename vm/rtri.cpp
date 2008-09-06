@@ -16,9 +16,9 @@ RubyValue nil_nil(linked_ptr<Binding> &, RubyValue);
 
 void RubyTriEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cTrueClass = RubyClass::create_class(_e, "TrueClass"),
-	    *rb_cFalseClass = RubyClass::create_class(_e, "FalseClass"),
-	    *rb_cNilClass = RubyClass::create_class(_e, "NilClass");
+  RubyClass *rb_cTrueClass = new RubyClass(_e, "TrueClass"),
+	    *rb_cFalseClass = new RubyClass(_e, "FalseClass"),
+	    *rb_cNilClass = new RubyClass(_e, "NilClass");
 
   rb_cTrueClass->add_method("==", RubyMethod::Create(tfn_eql, 1));
   rb_cFalseClass->add_method("==", RubyMethod::Create(tfn_eql, 1));

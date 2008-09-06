@@ -8,8 +8,8 @@
 class RubyClass : public RubyModule
 {
   public:
-    static RubyClass *create_class(RubyEnvironment &, const std::string &);
-    static RubyClass *create_class_with_super(RubyEnvironment &, const std::string &, RubyClass *);
+    RubyClass(RubyEnvironment &, const std::string &);
+    RubyClass(RubyEnvironment &, const std::string &, RubyClass *);
 
     RubyMethod *find_method(const std::string &) const;
     bool has_ancestor(RubyClass *) const;
@@ -17,9 +17,6 @@ class RubyClass : public RubyModule
     RubyObject *new_instance(RubyEnvironment &);
 
     RubyClass *superklass;
-
-  protected:
-    explicit RubyClass(RubyEnvironment &, RubyClass *, const std::string &);
 };
 
 class ClassHasNoSuchMethodException : public std::exception

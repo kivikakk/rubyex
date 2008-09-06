@@ -17,7 +17,7 @@ RubyValue array_to_s(linked_ptr<Binding> &, RubyValue);
 
 void RubyArrayEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cArray = RubyClass::create_class(_e, "Array");
+  RubyClass *rb_cArray = new RubyClass(_e, "Array");
   rb_cArray->add_metaclass_method(_e, "[]", RubyMethod::Create(array_new_idx, ARGS_ARBITRARY));
 
   rb_cArray->add_method("initialize", new RubyMultiCMethod(

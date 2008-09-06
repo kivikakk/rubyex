@@ -23,7 +23,7 @@ RubyValue file_initialize_file_mode(linked_ptr<Binding> &, RubyValue, const std:
 
 void RubyIOEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cIO = RubyClass::create_class(_e, "IO");
+  RubyClass *rb_cIO = new RubyClass(_e, "IO");
   rb_cIO->add_metaclass_method(_e, "open",
     new RubyMultiCMethod(
       new RubyCMethod(io_open, ARGS_MINIMAL(1)),
@@ -43,7 +43,7 @@ void RubyIOEI::init(RubyEnvironment &_e)
   _e.set_global_by_name("IO", rb_cIO);
   _e.IO = rb_cIO;
 
-  RubyClass *rb_cFile = RubyClass::create_class_with_super(_e, "File", rb_cIO);
+  RubyClass *rb_cFile = new RubyClass(_e, "File", rb_cIO);
   rb_cFile->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(file_initialize_file, 1), new RubyCMethod(file_initialize_file_mode, 2)));
 
   _e.set_global_by_name("File", rb_cFile);
