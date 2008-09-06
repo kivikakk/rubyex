@@ -29,3 +29,8 @@ out/lex.yy.c: ruby.l
 
 clean:
 	-rm out/*.o out/*.tab.? out/lex.yy.c parser parser.a
+
+rebuild:
+	@make clean
+	@make
+
