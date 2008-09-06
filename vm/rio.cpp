@@ -1,9 +1,12 @@
 #include <string.h>
+#include <glob.h>
 #include "rio.h"
 #include "rclass.h"
 #include "rmethod.h"
+#include "rarray.h"
 #include "rexception.h"
 #include <errno.h>
+#include <dirent.h>
 
 RubyValue io_open(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue io_open_block(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
@@ -20,6 +23,9 @@ RubyValue io_sync_set(linked_ptr<Binding> &, RubyValue, const std::vector<RubyVa
 
 RubyValue file_initialize_file(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue file_initialize_file_mode(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+
+RubyValue dir_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue dir_glob(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
 void RubyIOEI::init(RubyEnvironment &_e)
 {
@@ -48,6 +54,11 @@ void RubyIOEI::init(RubyEnvironment &_e)
 
   _e.set_global_by_name("File", rb_cFile);
   _e.File = rb_cFile;
+
+  RubyClass *rb_cDir = new RubyClass(_e, "Dir");
+  rb_cDir->add_metaclass_method(_e, "[]", RubyMethod::Create(dir_index_op, 1));
+  rb_cDir->add_metaclass_method(_e, "glob", RubyMethod::Create(dir_glob, 1));
+  _e.set_global_by_name("Dir", rb_cDir);
 }
 
 RubyValue io_open(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -167,6 +178,36 @@ RubyValue file_initialize_file_mode(linked_ptr<Binding> &_b, RubyValue _self, co
     throw WorldException(_b, _b->environment.errno_exception(_b, s_er, s_ms));
   }
   return _b->environment.NIL;
+}
+
+RubyValue dir_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  std::vector<RubyValue> args;
+  args.push_back(_args[0]);
+  args.push_back(F2V(0));
+  return dir_glob(_b, _self, args);
+}
+
+// XXX very incomplete! Does not match **, etc. correctly!
+RubyValue dir_glob(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  const std::string &wildcard = _args[0].get_string();
+  int flags = _args[1].get_fixnum();
+  
+  std::vector<RubyValue> rv;
+
+  glob_t globbuf; globbuf.gl_offs = 0;
+  int r = glob(wildcard.c_str(), /* (flags&File::FNM_DOTMATCH)?GLOB_PERIOD | */ GLOB_BRACE, NULL, &globbuf);
+
+  if (r != 0)
+    return O2V(new RubyArray(_b->environment));
+
+  char **p = globbuf.gl_pathv;
+  while ((*p)) 
+    if (**p++)	// don't add empty entries
+      rv.push_back(_b->environment.get_string(*(p - 1)));	// `Clever.'
+
+  return O2V(new RubyArray(_b->environment, rv));
 }
 
 RubyIO::RubyIO(RubyEnvironment &_e): RubyObject(_e.IO), sync(false), file(NULL)
