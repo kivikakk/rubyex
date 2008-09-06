@@ -115,7 +115,7 @@ RubyValue array_inspect(linked_ptr<Binding> &_b, RubyValue _self)
     else
       start = false;
 
-    oss << it->call(_b, "inspect").get_string();
+    oss << it->inspect(_b);
   }
   oss << "]";
 
@@ -128,7 +128,7 @@ RubyValue array_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 
   std::ostringstream oss;
   for (std::vector<RubyValue>::const_iterator it = arr->data.begin(); it != arr->data.end(); ++it)
-      oss << it->call(_b, "to_s").get_string();
+      oss << it->to_s(_b);
 
   return _b->environment.get_string(oss.str());
 }

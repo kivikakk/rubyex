@@ -71,7 +71,7 @@ RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_n
   } catch (ClassHasNoSuchMethodException) {
     throw WorldException(_b, _b->environment.NoMethodError,
       "undefined method `" + _name + "' for " + 
-      this->call(_b, "inspect").get_string() + ":" +
+      this->inspect(_b) + ":" +
       this->get_class(_b->environment)->get_name());
   }
 }
@@ -117,6 +117,16 @@ long RubyValue::get_fixnum() const
   if (type != RubyValue::RV_FIXNUM)
     throw SevereInternalError("RubyValue::get_fixnum is called on not a fixnum");
   return fixnum;
+}
+
+std::string RubyValue::to_s(linked_ptr<Binding> &_b) const
+{
+  return call(_b, "to_s").get_string();
+}
+
+std::string RubyValue::inspect(linked_ptr<Binding> &_b) const
+{
+  return call(_b, "inspect").get_string();
 }
 
 const std::string &RubyValue::get_string() const

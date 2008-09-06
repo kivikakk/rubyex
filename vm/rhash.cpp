@@ -87,9 +87,9 @@ RubyValue hash_inspect(linked_ptr<Binding> &_b, RubyValue _self)
     else
       start = false;
 
-    oss << it->first.call(_b, "inspect").get_string();
+    oss << it->first.inspect(_b);
     oss << "=>";
-    oss << it->second.call(_b, "inspect").get_string();
+    oss << it->second.inspect(_b);
   }
   oss << "}";
 
@@ -103,8 +103,8 @@ RubyValue hash_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   std::ostringstream oss;
 
   for (RubyHash::internal_t::const_iterator it = hash->begin(); it != hash->end(); ++it) {
-    oss << it->first.call(_b, "to_s").get_string();
-    oss << it->second.call(_b, "to_s").get_string();
+    oss << it->first.to_s(_b);
+    oss << it->second.to_s(_b);
   }
 
   return _b->environment.get_string(oss.str());

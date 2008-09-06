@@ -40,6 +40,17 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
       case I_SCOPE_ROOT:
       case I_SCOPE_CONTEXT: {
+	RubyModule *search = e.Object;
+	if (in == I_SCOPE_CONTEXT) {
+	  RubyValue v = s.pop_value(context);
+	  search = v.get_special<RubyModule>();
+	  if (!search)
+	    throw WorldException(context->binding, e.TypeError, v.inspect(context->binding) + " is not a class/module");
+	}
+
+	std::string name = r.read_string();
+
+	std::cout << "Searching for " << name << " under " << O2V(search).inspect(context->binding) << std::endl;
 	break;
       }
 
@@ -136,7 +147,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	
 	std::string r;
 	for (std::vector<RubyValue>::iterator it = components.begin(); it != components.end(); ++it)
-	  r += it->call(context->binding, "to_s").get_string();
+	  r += it->to_s(context->binding);
 
 	last_value = e.get_string(r);
 	break;

@@ -34,6 +34,8 @@ class RubyValue
 
     bool truthy(RubyEnvironment &) const;
     long get_fixnum() const;
+    std::string to_s(linked_ptr<Binding> &) const;
+    std::string inspect(linked_ptr<Binding> &) const;
 
     const std::string &get_string() const;
     void set_string(const std::string &) const;

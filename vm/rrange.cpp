@@ -52,12 +52,12 @@ RubyValue range_each(linked_ptr<Binding> &_b, RubyValue _self, Block &_block) {
 
 RubyValue range_inspect(linked_ptr<Binding> &_b, RubyValue _self) {
   std::ostringstream oss;
-  oss << _self.get_instance("start").call(_b, "inspect").get_string();
+  oss << _self.get_instance("start").inspect(_b);
   if (_self.get_instance("exclusive").truthy(_b->environment))
     oss << "...";
   else
     oss << "..";
-  oss << _self.get_instance("end").call(_b, "inspect").get_string();
+  oss << _self.get_instance("end").inspect(_b);
   return _b->environment.get_string(oss.str());
 }
 

@@ -104,7 +104,7 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 
   std::ostringstream oss;
   oss << "#<"
-    << O2V(_self.get_class(_b->environment)).call(_b, "inspect").get_string()
+    << O2V(_self.get_class(_b->environment)).inspect(_b)
     << ":";
   oss << std::dec << _self.object;
   oss << ">";

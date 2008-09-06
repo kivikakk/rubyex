@@ -866,8 +866,8 @@ void ScopeExpr::p() const {
 void ScopeExpr::emit(std::ostream &o) const {
   if (context)
     context->push(o);
-  constant->push(o);
   emit_instruction(o, context ? I_SCOPE_CONTEXT : I_SCOPE_ROOT);
+  emit_string(o, constant);
 }
 
 void ScopeExpr::push(std::ostream &o) const {
