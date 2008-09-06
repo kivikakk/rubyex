@@ -60,6 +60,7 @@
 /* Note this implies EQ/NEQ, and lastly '=' get applied *after* everything else
  * is collapsed - our wanted behaviour. */
 
+%nonassoc TERN
 /* here: AND, OR */
 /* here: NOT */
 %right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
@@ -170,6 +171,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      |	'{' CONTEXT_FINISH '}'			{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      |	'{' '}'					{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("new"), NULL, NULL); }
 	      | conditional				{ $$ = $1; }
+	      |	expr '?' expr ':' expr %prec TERN	{ $$ = new ConditionalExpr($1, new Procedure($3), new Procedure($5)); }
 	      | begin_section				{ $$ = $1; }
 	      | while_loop				{ $$ = $1; }
 ;

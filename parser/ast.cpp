@@ -2,6 +2,13 @@
 
 // Procedure
 
+Procedure::Procedure()
+{ }
+
+Procedure::Procedure(Expr *_first) {
+  expressions.push_back(_first);
+}
+
 void Procedure::p() const {
   for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it) {
     if (it != expressions.begin()) std::cout << "; ";

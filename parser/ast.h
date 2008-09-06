@@ -18,6 +18,9 @@ class Expr : public PrettyPrint, public Emitter
 class Procedure : public PrettyPrint, public Emitter
 {
   public:
+    Procedure();
+    Procedure(Expr *);
+
     std::list<Expr *> expressions;
 
     void p() const;
