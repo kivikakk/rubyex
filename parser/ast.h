@@ -245,6 +245,7 @@ class ConditionalExpr : public Expr
 
     void p() const;
     void emit(std::ostream &) const;
+    void push(std::ostream &) const;
 };
 
 class WhileExpr : public Expr

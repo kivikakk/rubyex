@@ -630,6 +630,12 @@ void ConditionalExpr::emit(std::ostream &o) const
   }
 }
 
+void ConditionalExpr::push(std::ostream &o) const
+{
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
+}
+
 // WhileExpr
 
 WhileExpr::WhileExpr(Expr *_condition, Procedure *_action): condition(_condition), action(_action)
