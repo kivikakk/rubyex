@@ -59,6 +59,7 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   RubyClass *rb_cFloat = RubyClass::create_class(_e, "Float");
   rb_cFloat->include_module(rb_mComparable);
   _e.set_global_by_name("Float", rb_cFloat);
+  _e.Float = rb_cFloat;
 }
 
 /* it's probably fine to leave the default Object#== here? */
@@ -130,6 +131,6 @@ RubyValue fixnum_upto(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
   return _self;
 }
 
-RubyFloating::RubyFloating(RubyEnvironment &_e, double _floating_value): RubyObject(new NamedLazyClass(_e, "Float")), floating_value(_floating_value)
+RubyFloating::RubyFloating(RubyEnvironment &_e, double _floating_value): RubyObject(_e.Float), floating_value(_floating_value)
 { }
 

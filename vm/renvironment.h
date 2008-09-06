@@ -32,7 +32,7 @@ class RubyEnvironment
     RubySymbol *get_symbol(const std::string &);
 
     RubyClass *Object, *Module, *Class;
-    RubyClass *_Binding, *Symbol, *Fixnum, *String;
+    RubyClass *_Binding, *Symbol, *Fixnum, *Float, *String;
     RubyClass *Array, *Hash, *Range, *IO, *File;
 
     RubyClass *Exception;

@@ -3,28 +3,23 @@
 
 #include <exception>
 #include "rmodule.h"
-#include "lazyclass.h"
 #include "rei.h"
 
-// RubyClass implements LazyClass itself, so as to be compatible with the "LazyClass protocol"
-// per se. (i.e. it can be used to resolve itself without issue when a LazyClass is expected)
-// .. has that even been implemented yet?
-
-class RubyClass : public RubyModule, public LazyClass
+class RubyClass : public RubyModule
 {
   public:
     static RubyClass *create_class(RubyEnvironment &, const std::string &);
-    static RubyClass *create_class_with_super(RubyEnvironment &, const std::string &, LazyClass *);
+    static RubyClass *create_class_with_super(RubyEnvironment &, const std::string &, RubyClass *);
 
     RubyMethod *find_method(const std::string &) const;
     bool has_ancestor(RubyClass *) const;
 
     RubyObject *new_instance(RubyEnvironment &);
 
-    LazyClass *superklass;
+    RubyClass *superklass;
 
   protected:
-    explicit RubyClass(RubyEnvironment &, LazyClass *, const std::string &);
+    explicit RubyClass(RubyEnvironment &, RubyClass *, const std::string &);
 };
 
 class ClassHasNoSuchMethodException : public std::exception

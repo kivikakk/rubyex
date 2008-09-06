@@ -9,10 +9,10 @@
 
 RubyClass *RubyClass::create_class(RubyEnvironment &_e, const std::string &_name)
 {
-  return new RubyClass(_e, new NamedLazyClass(_e, "Object"), _name);
+  return new RubyClass(_e, _e.Object, _name);
 }
 
-RubyClass *RubyClass::create_class_with_super(RubyEnvironment &_e, const std::string &_name, LazyClass *_superklass)
+RubyClass *RubyClass::create_class_with_super(RubyEnvironment &_e, const std::string &_name, RubyClass *_superklass)
 {
   return new RubyClass(_e, _superklass, _name);
 }
@@ -33,11 +33,7 @@ RubyMethod *RubyClass::find_method(const std::string &_name) const
     for (std::list<RubyModule *>::const_iterator it = sagasu->includes.begin(); it != sagasu->includes.end(); ++it)
       if ((*it)->has_method(_name))
 	return (*it)->get_method(_name);
-
-    if (sagasu->superklass)
-      sagasu = sagasu->superklass->resolve();
-    else
-      sagasu = NULL;
+    sagasu = sagasu->superklass;
   }
 
   throw ClassHasNoSuchMethodException();
@@ -47,13 +43,13 @@ bool RubyClass::has_ancestor(RubyClass *_check) const {
   if (this == _check)
     return true;
 
-  RubyClass *ptr = superklass->resolve();
+  RubyClass *ptr = superklass;
 
   while (ptr)
     if (ptr == _check)
       return true;
     else
-      ptr = ptr->superklass ? ptr->superklass->resolve() : NULL;
+      ptr = ptr->superklass;
 
   return false;
 }
@@ -79,10 +75,8 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return new RubyObject(this);
 }
 
-RubyClass::RubyClass(RubyEnvironment &_e, LazyClass *_superklass, const std::string &_name): RubyModule(new NamedLazyClass(_e, "Class"), _name), superklass(_superklass)
-{
-  cache = this;
-}
+RubyClass::RubyClass(RubyEnvironment &_e, RubyClass *_superklass, const std::string &_name): RubyModule(_e.Class, _name), superklass(_superklass)
+{ }
     
 
 RubyValue class_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);

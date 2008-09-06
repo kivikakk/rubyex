@@ -5,10 +5,10 @@
 #include "rmethod.h"
 #include "rexception.h"
 
-RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(new NamedLazyClass(_e, "Module")), name(_name)
+RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(_e.Module), name(_name)
 { }
 
-RubyModule::RubyModule(LazyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name)
+RubyModule::RubyModule(RubyClass *_klass, const std::string &_name): RubyObject(_klass), name(_name)
 { }
 
 RubyModule::~RubyModule()

@@ -20,17 +20,20 @@ RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 RubyEnvironment::RubyEnvironment()
 {
   this->Object = RubyClass::create_class_with_super(*this, "Object", NULL);	// Object<nil, NOT Object<Object(!!)
-  this->set_global_by_name("Object", this->Object);
-
   this->Kernel = new RubyModule(*this, "Kernel");
-  this->set_global_by_name("Kernel", this->Kernel);
+  this->Module = RubyClass::create_class_with_super(*this, "Module", this->Object); 	// I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
+  this->Class = RubyClass::create_class_with_super(*this, "Class", this->Module);
+
+  // Since Module and Class didn't exist when Object and Kernel were made,
+  // they need to be reset explicitly.
+  this->Kernel->set_class(this->Module);
+  this->Object->set_class(this->Class);
+
   this->Object->include_module(this->Kernel);
 
-  // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
-  this->Module = RubyClass::create_class_with_super(*this, "Module", this->Object);
+  this->set_global_by_name("Object", this->Object);
+  this->set_global_by_name("Kernel", this->Kernel);
   this->set_global_by_name("Module", this->Module);
-
-  this->Class = RubyClass::create_class_with_super(*this, "Class", this->Module);
   this->set_global_by_name("Class", this->Class);
 
   // Let's bring this online.
@@ -53,7 +56,7 @@ RubyEnvironment::RubyEnvironment()
   RubyIOEI().init(*this);
   RubyExceptionEI().init(*this);
 
-  main = new RubyObject(new NamedLazyClass(*this, "Object"));
+  main = new RubyObject(this->Object);
   main->add_metaclass_method(*this, "to_s", RubyMethod::Create(main_to_s));
   main->add_metaclass_method(*this, "inspect", RubyMethod::Create(main_to_s));
 }

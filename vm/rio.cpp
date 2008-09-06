@@ -169,10 +169,10 @@ RubyValue file_initialize_file_mode(linked_ptr<Binding> &_b, RubyValue _self, co
   return _b->environment.NIL;
 }
 
-RubyIO::RubyIO(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "IO")), sync(false), file(NULL)
+RubyIO::RubyIO(RubyEnvironment &_e): RubyObject(_e.IO), sync(false), file(NULL)
 { }
 
-RubyIO::RubyIO(linked_ptr<Binding> &_b, int _fd, const char *_mode): RubyObject(new NamedLazyClass(_b->environment, "IO")), sync(false)
+RubyIO::RubyIO(linked_ptr<Binding> &_b, int _fd, const char *_mode): RubyObject(_b->environment.IO), sync(false)
 {
   init(_b, _fd, _mode);
 }

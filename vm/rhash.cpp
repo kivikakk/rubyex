@@ -110,13 +110,13 @@ RubyValue hash_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   return _b->environment.get_string(oss.str());
 }
 
-RubyHash::RubyHash(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "Hash")), default_value(_e.NIL)
+RubyHash::RubyHash(RubyEnvironment &_e): RubyObject(_e.Hash), default_value(_e.NIL)
 { }
 
-RubyHash::RubyHash(RubyEnvironment &_e, RubyValue _default_value): RubyObject(new NamedLazyClass(_e, "Hash")), default_value(_default_value)
+RubyHash::RubyHash(RubyEnvironment &_e, RubyValue _default_value): RubyObject(_e.Hash), default_value(_default_value)
 { }
 
-RubyHash::RubyHash(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_values): RubyObject(new NamedLazyClass(_b->environment, "Hash")), default_value(_b->environment.NIL)
+RubyHash::RubyHash(linked_ptr<Binding> &_b, const std::vector<RubyValue> &_values): RubyObject(_b->environment.Hash), default_value(_b->environment.NIL)
 {
   if (_values.size() % 2 == 1)
     throw WorldException(_b, _b->environment.ArgumentError, "odd number of arguments for Hash");

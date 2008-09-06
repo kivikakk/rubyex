@@ -133,14 +133,14 @@ RubyValue array_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   return _b->environment.get_string(oss.str());
 }
 
-RubyArray::RubyArray(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "Array"))
+RubyArray::RubyArray(RubyEnvironment &_e): RubyObject(_e.Array)
 { }
 
-RubyArray::RubyArray(RubyEnvironment &_e, long _length): RubyObject(new NamedLazyClass(_e, "Array")), data(_length)
+RubyArray::RubyArray(RubyEnvironment &_e, long _length): RubyObject(_e.Array), data(_length)
 { }
 
-RubyArray::RubyArray(RubyEnvironment &_e, long _length, RubyValue _obj): RubyObject(new NamedLazyClass(_e, "Array")), data(_length, _obj)
+RubyArray::RubyArray(RubyEnvironment &_e, long _length, RubyValue _obj): RubyObject(_e.Array), data(_length, _obj)
 { }
 
-RubyArray::RubyArray(RubyEnvironment &_e, const std::vector<RubyValue> &_copy): RubyObject(new NamedLazyClass(_e, "Array")), data(_copy)
+RubyArray::RubyArray(RubyEnvironment &_e, const std::vector<RubyValue> &_copy): RubyObject(_e.Array), data(_copy)
 { }

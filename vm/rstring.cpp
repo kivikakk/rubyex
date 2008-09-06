@@ -146,6 +146,6 @@ RubyValue string_to_sym(linked_ptr<Binding> &_b, RubyValue _self)
   return S2V(_b->environment.get_symbol(_self.get_string()));
 }
 
-RubyString::RubyString(RubyEnvironment &_e, const std::string &_string_value): RubyObject(new NamedLazyClass(_e, "String")), string_value(_string_value)
+RubyString::RubyString(RubyEnvironment &_e, const std::string &_string_value): RubyObject(_e.String), string_value(_string_value)
 { }
 

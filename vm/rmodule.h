@@ -12,7 +12,7 @@ class RubyModule : public RubyObject
 {
   public:
     RubyModule(RubyEnvironment &, const std::string &);
-    RubyModule(LazyClass *, const std::string &);
+    RubyModule(RubyClass *, const std::string &);
     virtual ~RubyModule();
 
     void add_method(const std::string &, RubyMethod *);

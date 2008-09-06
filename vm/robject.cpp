@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 
-RubyObject::RubyObject(LazyClass *_klass): klass(_klass), metaklass(NULL)
+RubyObject::RubyObject(RubyClass *_klass): klass(_klass), metaklass(NULL)
 { }
 
 RubyObject::~RubyObject()
@@ -18,14 +18,14 @@ void RubyObject::add_metaclass_method(RubyEnvironment &_e, const std::string &_n
   get_metaclass(_e)->add_method(_name, _method);
 }
 
-void RubyObject::set_class(LazyClass *_klass)
+void RubyObject::set_class(RubyClass *_klass)
 {
   klass = _klass;
 }
 
 RubyClass *RubyObject::get_class() const
 {
-  return klass->resolve();
+  return klass;
 }
 
 RubyClass *RubyObject::get_metaclass_read() const
@@ -34,7 +34,7 @@ RubyClass *RubyObject::get_metaclass_read() const
   if (!metaklass) {
     const RubyClass *this_class = dynamic_cast<const RubyClass *>(this);
     if (this_class && this_class->superklass)
-      return this_class->superklass->resolve()->get_metaclass_read();
+      return this_class->superklass->get_metaclass_read();
   }
   return metaklass;
 }
@@ -64,7 +64,7 @@ RubyClass *RubyObject::get_metaclass(RubyEnvironment &_e)
     // Metaclass land is scary.
     RubyClass *this_class = dynamic_cast<RubyClass *>(this);
     if (this_class && this_class->superklass)
-      metaklass = RubyClass::create_class_with_super(_e, "<some inheriting metaclass>", this_class->superklass->resolve()->get_metaclass(_e));
+      metaklass = RubyClass::create_class_with_super(_e, "<some inheriting metaclass>", this_class->superklass->get_metaclass(_e));
     else
       metaklass = RubyClass::create_class(_e, "<some metaclass>");
   }
