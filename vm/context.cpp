@@ -58,7 +58,7 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
       RubyClass *c = binding->context.get_class(binding->environment);
       if (c->has_class_variable(_identifier))
 	return c->get_class_variable(_identifier);
-      return binding->environment.NIL;
+      throw WorldException(binding, binding->environment.NameError, std::string("uninitialized class variable ") + _identifier + " in " + c->get_name());
     } else {
       // @var
       if (binding->context.has_instance(_identifier))
