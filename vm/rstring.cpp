@@ -47,7 +47,7 @@ RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
   if (_args.size() == 0)
     return _b->environment.get_string(std::string());
   else if (_args.size() == 1)
-    return _b->environment.get_string(_args[0].get_special<RubyString>()->string_value);
+    return _b->environment.get_string(_args[0].get_string());
   
   throw WorldException(_b, _b->environment.RuntimeError, "string_new: given invalid number of args -- big problem");
 }
@@ -63,9 +63,7 @@ RubyValue string_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<
 
 RubyValue string_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  RubyString *s1 = _self.get_special<RubyString>(),
-	     *s2 = _args[0].get_special<RubyString>();
-  return _b->environment.get_string(s1->string_value + s2->string_value);
+  return _b->environment.get_string(_self.get_string() + _args[0].get_string());
 }
 
 RubyValue string_reverse(linked_ptr<Binding> &_b, RubyValue _self)
@@ -76,7 +74,7 @@ RubyValue string_reverse(linked_ptr<Binding> &_b, RubyValue _self)
 
 RubyValue string_length(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return RubyValue::from_fixnum(_self.get_special<RubyString>()->string_value.length());
+  return F2V(_self.get_string().length());
 }
 
 RubyValue string_strip(linked_ptr<Binding> &_b, RubyValue _self)
@@ -98,23 +96,22 @@ RubyValue string_strip_bang(linked_ptr<Binding> &_b, RubyValue _self)
 
 RubyValue string_capitalize(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  RubyString *r = _self.get_special<RubyString>();
-  std::string s = r->string_value;
+  std::string s = _self.get_string();
   s[0] = toupper(s[0]);
   return _b->environment.get_string(s);
 }
 
 RubyValue string_index(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  unsigned int i = _self.get_special<RubyString>()->string_value.find(_args[0].get_special<RubyString>()->string_value);
+  unsigned int i = _self.get_string().find(_args[0].get_string());
   if (i == std::string::npos)
     return _b->environment.NIL;
-  return RubyValue::from_fixnum(i);
+  return F2V(i);
 }
 
 RubyValue string_inspect(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  std::string &v = _self.get_special<RubyString>()->string_value;
+  const std::string &v = _self.get_string();
   std::ostringstream o;
   o << '"';
   for (unsigned int i = 0; i < v.length(); ++i)
@@ -146,7 +143,7 @@ RubyValue string_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 
 RubyValue string_to_sym(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return RubyValue::from_symbol(_b->environment.get_symbol(_self.get_special<RubyString>()->string_value));
+  return S2V(_b->environment.get_symbol(_self.get_string()));
 }
 
 RubyString::RubyString(RubyEnvironment &_e, const std::string &_string_value): RubyObject(new NamedLazyClass(_e, "String")), string_value(_string_value)

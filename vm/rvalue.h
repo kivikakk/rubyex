@@ -34,7 +34,10 @@ class RubyValue
 
     bool truthy(RubyEnvironment &) const;
     long get_fixnum() const;
+
     const std::string &get_string() const;
+    void set_string(const std::string &) const;
+
     template <typename X> bool is_a() const {
       if (type != RV_OBJECT) return false;
       return dynamic_cast<X *>(object) != NULL;
@@ -71,7 +74,9 @@ class RubyValue
     explicit RubyValue(RubyObject *);
 };
 
-#define V2O(x) RubyValue::from_object((x))
+#define F2V(x) RubyValue::from_fixnum((x))
+#define S2V(x) RubyValue::from_symbol((x))
+#define O2V(x) RubyValue::from_object((x))
 
 #endif
 

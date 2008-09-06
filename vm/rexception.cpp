@@ -72,7 +72,7 @@ RubyValue systemcallerror_initialize(linked_ptr<Binding> &_b, RubyValue _self, c
 WorldException::WorldException(linked_ptr<Binding> &_b, RubyObject *_exception): exception(_exception)
 {
   if (dynamic_cast<RubyClass *>(exception))
-    exception = RubyValue::from_object(exception).call(_b, "new").get_special<RubyObject>();
+    exception = O2V(exception).call(_b, "new").get_special<RubyObject>();
 
   check_exception_object(_b);
 }
@@ -81,10 +81,10 @@ WorldException::WorldException(linked_ptr<Binding> &_b, RubyObject *_object, con
 {
   RubyClass *_class = dynamic_cast<RubyClass *>(_object);
   if (_class)
-    exception = RubyValue::from_object(_class).call(_b, "new", _b->environment.get_string(_message)).get_special<RubyObject>();
+    exception = O2V(_class).call(_b, "new", _b->environment.get_string(_message)).get_special<RubyObject>();
   else {
     exception = _object;
-    RubyValue::from_object(exception).call(_b, "message=", _b->environment.get_string(_message));
+    O2V(exception).call(_b, "message=", _b->environment.get_string(_message));
   }
 
   check_exception_object(_b);

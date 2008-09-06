@@ -104,15 +104,13 @@ void RubyObjectEI::init(RubyEnvironment &_e)
 RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   try {
-    return _b->environment.get_string(_b->environment.get_name_by_global(V2O(_self.object)));
+    return _b->environment.get_string(_b->environment.get_name_by_global(O2V(_self.object)));
   } catch (CannotFindGlobalError)
   { }
 
   std::ostringstream oss;
   oss << "#<"
-    << RubyValue::from_object(_self.get_class(_b->environment))
-      .call(_b, "inspect")
-      .get_special<RubyString>()->string_value
+    << O2V(_self.get_class(_b->environment)).call(_b, "inspect").get_string()
     << ":";
   oss << std::dec << _self.object;
   oss << ">";
@@ -131,7 +129,7 @@ RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
 }
 
 RubyValue object_class(linked_ptr<Binding> &_b, RubyValue _self)
-{ return RubyValue::from_object(_self.get_class(_b->environment)); }
+{ return O2V(_self.get_class(_b->environment)); }
 
 RubyValue object_eq_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {

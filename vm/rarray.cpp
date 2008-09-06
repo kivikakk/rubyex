@@ -56,7 +56,7 @@ RubyValue array_initialize_copies(linked_ptr<Binding> &_b, RubyValue _self, cons
 
 RubyValue array_new_idx(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  return RubyValue::from_object(_b->environment.gc.track(new RubyArray(_b->environment, _args)));
+  return O2V(_b->environment.gc.track(new RubyArray(_b->environment, _args)));
 }
 
 RubyValue array_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -115,11 +115,11 @@ RubyValue array_inspect(linked_ptr<Binding> &_b, RubyValue _self)
     else
       start = false;
 
-    oss << it->call(_b, "inspect").get_special<RubyString>()->string_value;
+    oss << it->call(_b, "inspect").get_string();
   }
   oss << "]";
 
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
+  return _b->environment.get_string(oss.str());
 }
 
 RubyValue array_to_s(linked_ptr<Binding> &_b, RubyValue _self)
@@ -128,9 +128,9 @@ RubyValue array_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 
   std::ostringstream oss;
   for (std::vector<RubyValue>::const_iterator it = arr->data.begin(); it != arr->data.end(); ++it)
-      oss << it->call(_b, "to_s").get_special<RubyString>()->string_value;
+      oss << it->call(_b, "to_s").get_string();
 
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
+  return _b->environment.get_string(oss.str());
 }
 
 RubyArray::RubyArray(RubyEnvironment &_e): RubyObject(new NamedLazyClass(_e, "Array"))

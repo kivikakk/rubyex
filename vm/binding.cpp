@@ -15,7 +15,7 @@ std::string Binding::get_representation(linked_ptr<Binding> &_b, const std::vect
   args << "[";
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     if (it != _args.begin()) args << ", ";
-    args << it->call(_b, "inspect").get_special<RubyString>()->string_value;
+    args << it->call(_b, "inspect").get_string();
   }
   args << "]";
 

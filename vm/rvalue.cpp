@@ -70,8 +70,8 @@ RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_n
     }
   } catch (ClassHasNoSuchMethodException) {
     throw WorldException(_b, _b->environment.NoMethodError,
-      std::string("undefined method `") + _name + "' for " + 
-      this->call(_b, "inspect").get_special<RubyString>()->string_value + ":" +
+      "undefined method `" + _name + "' for " + 
+      this->call(_b, "inspect").get_string() + ":" +
       this->get_class(_b->environment)->get_name());
   }
 }
@@ -122,9 +122,17 @@ long RubyValue::get_fixnum() const
 const std::string &RubyValue::get_string() const
 {
   if (!is_a<RubyString>())
-    throw SevereInternalError("RubyValue::get_fixnum is called on not a fixnum");
+    throw SevereInternalError("RubyValue::get_string is called on not a string");
   return get_special<RubyString>()->string_value;
 }
+
+void RubyValue::set_string(const std::string &_rhs) const
+{
+  if (!is_a<RubyString>())
+    throw SevereInternalError("RubyValue::set_string is called on not a string");
+  get_special<RubyString>()->string_value = _rhs;
+}
+
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name) const
 { return get_method(_b, _name)->call(_b, *this); }
 

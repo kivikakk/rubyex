@@ -38,9 +38,13 @@ void RubyTriEI::init(RubyEnvironment &_e)
 	     *rb_oFalse = rb_cFalseClass->new_instance(_e),
 	     *rb_oNil =   rb_cNilClass->new_instance(_e);
   
-  _e.TRUE = RubyValue::from_object(rb_oTrue);
-  _e.FALSE = RubyValue::from_object(rb_oFalse);
-  _e.NIL = RubyValue::from_object(rb_oNil);
+  _e.TRUE = O2V(rb_oTrue);
+  _e.FALSE = O2V(rb_oFalse);
+  _e.NIL = O2V(rb_oNil);
+
+  _e.Kernel->set_constant("TRUE", _e.TRUE);
+  _e.Kernel->set_constant("FALSE", _e.FALSE);
+  _e.Kernel->set_constant("NIL", _e.NIL);
 }
 
 RubyValue tfn_eql(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

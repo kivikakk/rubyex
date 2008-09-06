@@ -29,9 +29,14 @@ class RubyModule : public RubyObject
     RubyValue get_class_variable(const std::string &) const;
     void set_class_variable(const std::string &, RubyValue);
 
+    bool has_constant(const std::string &) const;
+    RubyValue get_constant(const std::string &) const;
+    void set_constant(const std::string &, RubyValue);
+
   protected:
     std::string name;
     std::map<std::string, RubyValue> class_variables;
+    std::map<std::string, RubyValue> constants;
     std::map<std::string, RubyMethod *> methods;
     std::list<RubyModule *> includes;
 };

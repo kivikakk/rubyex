@@ -6,6 +6,7 @@
 #include "eval_hook.h"
 #include "rbinding.h"
 #include "rexception.h"
+#include "global.h"
 
 RubyValue kernel_binding(linked_ptr<Binding> &, RubyValue);
 RubyValue kernel_eval(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -28,13 +29,17 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   rb_mKernel->add_module_method(_e, "p", RubyMethod::Create(kernel_p, ARGS_ARBITRARY));
   rb_mKernel->add_module_method(_e, "gets", RubyMethod::Create(kernel_gets));
 
+  rb_mKernel->set_constant("VERSION", _e.get_string(RX_VERSION));
+  rb_mKernel->set_constant("RUBY_PLATFORM", _e.get_string(RX_PLATFORM));
+  rb_mKernel->set_constant("RUBY_RELEASE_DATE", _e.get_string(RX_RELEASE_DATE));
+
   _e.set_global_by_name("Kernel", rb_mKernel);
   _e.Kernel = rb_mKernel;
 }
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
 {
-  return RubyValue::from_object(new RubyBinding(_b));
+  return O2V(new RubyBinding(_b));
 }
 
 RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -55,7 +60,7 @@ RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
     use_binding = second.get_special<RubyBinding>()->binding;
   }
 
-  return eval_hook(use_binding, _self, first.get_special<RubyString>()->string_value);
+  return eval_hook(use_binding, _self, first.get_string());
 }
 
 RubyValue kernel_raise(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
@@ -68,7 +73,7 @@ RubyValue kernel_raise(linked_ptr<Binding> &_b, RubyValue _self, const std::vect
       throw WorldException(_b, _b->environment.RuntimeError, s->string_value);
     throw WorldException(_b, _args[0].get_special<RubyObject>());
   } else if (_args.size() == 2)
-    throw WorldException(_b, _args[0].get_special<RubyObject>(), _args[1].get_special<RubyString>()->string_value);
+    throw WorldException(_b, _args[0].get_special<RubyObject>(), _args[1].get_string());
   else
     throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments");
 }
@@ -77,7 +82,7 @@ RubyValue kernel_print(linked_ptr<Binding> &_b, RubyValue _self, const std::vect
 {
   for (std::vector<RubyValue>::const_iterator it = _args.begin(); it != _args.end(); ++it) {
     if (it->object->get_class() == _b->environment.String)	// PlaysForSure
-      std::cout << it->get_special<RubyString>()->string_value;
+      std::cout << it->get_string();
   }
 
   return _b->environment.NIL;

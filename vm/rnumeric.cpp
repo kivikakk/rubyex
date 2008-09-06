@@ -89,35 +89,35 @@ RubyValue comparable_ge(linked_ptr<Binding> &_b, RubyValue _self, const std::vec
 // XXX bignum
 RubyValue fixnum_spaceship(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand) {
   int l = _self.get_fixnum(), r = _operand[0].get_fixnum();
-  return RubyValue::from_fixnum((l < r) ? -1 : ((l > r) ? 1 : 0));
+  return F2V((l < r) ? -1 : ((l > r) ? 1 : 0));
 }
 
 RubyValue fixnum_negate(linked_ptr<Binding> &_b, RubyValue _self)
-{ return RubyValue::from_fixnum(-_self.get_fixnum()); }
+{ return F2V(-_self.get_fixnum()); }
 
 RubyValue fixnum_add(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return RubyValue::from_fixnum(_self.get_fixnum() + _operand[0].get_fixnum()); }
+{ return F2V(_self.get_fixnum() + _operand[0].get_fixnum()); }
 
 RubyValue fixnum_multiply(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return RubyValue::from_fixnum(_self.get_fixnum() * _operand[0].get_fixnum()); }
+{ return F2V(_self.get_fixnum() * _operand[0].get_fixnum()); }
 
 RubyValue fixnum_subtract(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return RubyValue::from_fixnum(_self.get_fixnum() - _operand[0].get_fixnum()); }
+{ return F2V(_self.get_fixnum() - _operand[0].get_fixnum()); }
 
 RubyValue fixnum_divide(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_operand)
-{ return RubyValue::from_fixnum(_self.get_fixnum() / _operand[0].get_fixnum()); }
+{ return F2V(_self.get_fixnum() / _operand[0].get_fixnum()); }
 
 RubyValue fixnum_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
 {
   std::ostringstream oss;
   oss << _self.get_fixnum();
-  return RubyValue::from_object(_b->environment.gc.track(new RubyString(_b->environment, oss.str())));
+  return _b->environment.get_string(oss.str());
 }
 
 RubyValue fixnum_times(linked_ptr<Binding> &_b, RubyValue _self, Block &_block)
 {
   for (long i = 0; i < _self.get_fixnum(); ++i)
-    _block.call(_b, RubyValue::from_fixnum(i));
+    _block.call(_b, F2V(i));
   return _self;
 }
 
@@ -126,7 +126,7 @@ RubyValue fixnum_upto(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
   long top = _top[0].get_fixnum();
 
   for (long i = _self.get_fixnum(); i <= top; ++i)
-    _block.call(_b, RubyValue::from_fixnum(i));
+    _block.call(_b, F2V(i));
   return _self;
 }
 

@@ -18,6 +18,7 @@
 class Context
 {
   public:
+    Context(RubyEnvironment &);
     Context(RubyEnvironment &, RubyValue, RubyModule *, Context *);
     Context(linked_ptr<Binding> &);
 

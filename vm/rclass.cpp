@@ -102,7 +102,7 @@ RubyValue class_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<
   RubyObject *i = s->new_instance(_b->environment);
   i->set_class(s);	// Explicitly, in the case of derived classes - their root ones would assign themselves as the class in the ctor init'r.
 
-  RubyValue v = RubyValue::from_object(i);
+  RubyValue v = O2V(i);
   try {
     s->find_method("initialize");
     v.call(_b, "initialize", _args);

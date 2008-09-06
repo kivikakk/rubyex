@@ -89,6 +89,21 @@ void RubyModule::set_class_variable(const std::string &_name, RubyValue _value) 
   class_variables[_name] = _value;
 }
 
+bool RubyModule::has_constant(const std::string &_name) const {
+  return (constants.find(_name) != constants.end());
+}
+
+RubyValue RubyModule::get_constant(const std::string &_name) const {
+  std::map<std::string, RubyValue>::const_iterator it = constants.find(_name);
+  if (it == constants.end())
+    throw SevereInternalError(this->name + " missing requested constant `" + _name + "'");
+  return it->second;
+}
+
+void RubyModule::set_constant(const std::string &_name, RubyValue _value) {
+  constants[_name] = _value;
+}
+
 void RubyModuleEI::init(RubyEnvironment &_e)
 {
   // I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil

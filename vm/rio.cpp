@@ -90,10 +90,7 @@ RubyValue io_initialize_fd_mode(linked_ptr<Binding> &_b, RubyValue _self, const 
 
 RubyValue io_write(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  RubyIO *self = _self.get_special<RubyIO>();
-  std::string &s = _args[0].get_special<RubyString>()->string_value;
-
-  return RubyValue::from_fixnum(self->write(_b, s));
+  return F2V(_self.get_special<RubyIO>()->write(_b, _args[0].get_string()));
 }
 
 RubyValue io_read(linked_ptr<Binding> &_b, RubyValue _self)
@@ -118,7 +115,7 @@ RubyValue io_read_len(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
 
   std::string r = self->read(_b, to_read);
   if (_args.size() == 2) {
-    _args[1].get_special<RubyString>()->string_value = r;
+    _args[1].set_string(r);
     return _args[1];
   }
   return _b->environment.get_string(r);
@@ -149,7 +146,7 @@ RubyValue io_sync_set(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
 RubyValue file_initialize_file(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyIO *self = _self.get_special<RubyIO>();
-  self->file = fopen(_args[0].get_special<RubyString>()->string_value.c_str(), "r");
+  self->file = fopen(_args[0].get_string().c_str(), "r");
   if (!self->file) {
     int s_er = errno;
     char *s_ms = strerror(s_er);
@@ -163,7 +160,7 @@ RubyValue file_initialize_file_mode(linked_ptr<Binding> &_b, RubyValue _self, co
   RubyIO *self = _self.get_special<RubyIO>();
   std::string mode = RubyIO::rv_to_mode(_b, _args[1]);
 
-  self->file = fopen(_args[0].get_special<RubyString>()->string_value.c_str(), mode.c_str());
+  self->file = fopen(_args[0].get_string().c_str(), mode.c_str());
   if (!self->file) {
     int s_er = errno;
     char *s_ms = strerror(s_er);

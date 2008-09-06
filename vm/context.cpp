@@ -4,6 +4,9 @@
 #include "rmethod.h"
 #include "rexception.h"
 
+Context::Context(RubyEnvironment &_environment): binding(linked_ptr<Binding>(new Binding(_environment, O2V(_environment.main), _environment.Object))), outer_context(NULL)
+{ }
+
 Context::Context(RubyEnvironment &_environment, RubyValue _context, RubyModule *_def_target, Context *_outer_context): binding(linked_ptr<Binding>(new Binding(_environment, _context, _def_target))), outer_context(_outer_context)
 { }
 
@@ -24,11 +27,11 @@ RubyValue Context::entry_to_value(const Stack::StackEntry &_entry)
     case Stack::SE_SYMBOL: {
       std::string symbol = *_entry.symbol;
       delete _entry.symbol;
-      return RubyValue::from_symbol(binding->environment.get_symbol(symbol));
+      return S2V(binding->environment.get_symbol(symbol));
     }
 
-    case Stack::SE_INTEGER: return RubyValue::from_fixnum(_entry.integer);
-    case Stack::SE_OBJECT: return RubyValue::from_object(_entry.object);
+    case Stack::SE_INTEGER: return F2V(_entry.integer);
+    case Stack::SE_OBJECT: return O2V(_entry.object);
     default:
       throw WorldException(binding, binding->environment.RuntimeError, "Context: trying to convert non-id/sym/int to RValue");
   }
@@ -65,6 +68,9 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
 	return binding->context.get_instance(_identifier);
       return binding->environment.NIL;
     }
+  } else if (isupper(_identifier[0])) {
+    // Constant.
+    std::cerr << "binding is " << binding->context.call(binding, "inspect").get_string() << std::endl;
   }
 
   if (_identifier == "self")

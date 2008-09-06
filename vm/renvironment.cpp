@@ -69,7 +69,7 @@ void RubyEnvironment::set_global_by_name(const std::string &_name, RubyValue _va
 
 void RubyEnvironment::set_global_by_name(const std::string &_name, RubyObject *_val)
 {
-  globals[_name] = V2O(_val);
+  globals[_name] = O2V(_val);
 }
 
 const std::string &RubyEnvironment::get_name_by_global(RubyValue _global) const
@@ -93,6 +93,6 @@ RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
 
 RubyObject *RubyEnvironment::errno_exception(linked_ptr<Binding> &_b, int _no, const char *_msg)
 {
-  return V2O(SystemCallError).call(_b, "new", RubyValue::from_fixnum(_no), get_string(_msg)).object;
+  return O2V(SystemCallError).call(_b, "new", F2V(_no), get_string(_msg)).object;
 }
 

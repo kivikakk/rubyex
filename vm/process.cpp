@@ -28,11 +28,11 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	type_t t = r.read_type();
 	switch (t) {
 	  case T_IDENTIFIER: last_value = context->resolve_identifier(r.read_string()); break;
-	  case T_SYMBOL: last_value = RubyValue::from_symbol(e.get_symbol(r.read_string())); break;
-	  case T_INTEGER_LITERAL: last_value = RubyValue::from_fixnum(r.read_int32()); break;
-	  case T_FLOATING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
+	  case T_SYMBOL: last_value = S2V(e.get_symbol(r.read_string())); break;
+	  case T_INTEGER_LITERAL: last_value = F2V(r.read_int32()); break;
+	  case T_FLOATING_LITERAL: last_value = O2V(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: last_value = r.read_bool() ? e.TRUE : e.FALSE; break;
-	  case T_STRING_LITERAL: last_value = RubyValue::from_object(e.gc.track(new RubyString(e, r.read_text()))); break;
+	  case T_STRING_LITERAL: last_value = e.get_string(r.read_text()); break;
 	  case T_NIL_LITERAL: last_value = e.NIL; break;
 	  default: throw WorldException(context->binding, e.RuntimeError, "process(): unknown type");
 	}
@@ -136,7 +136,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	
 	std::string r;
 	for (std::vector<RubyValue>::iterator it = components.begin(); it != components.end(); ++it)
-	  r += it->call(context->binding, "to_s").get_special<RubyString>()->string_value;
+	  r += it->call(context->binding, "to_s").get_string();
 
 	last_value = e.get_string(r);
 	break;
@@ -158,12 +158,15 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  throw WorldException(context->binding, e.TypeError, name + " is not a class");
 
 	// Specify a new context, with a new def_target, etc.
-	Context *class_def_ctx = new Context(e, RubyValue::from_object(c), c, context);
+	Context *class_def_ctx = new Context(e, O2V(c), c, context);
 
 	try {
 	  code.call(class_def_ctx);
 	} catch(WorldException &) {
-	  delete c; delete class_def_ctx; throw;
+	  if (!already_exists)
+	    delete c;
+	  delete class_def_ctx;
+	  throw;
 	}
 
 	delete class_def_ctx;
@@ -182,12 +185,15 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  throw WorldException(context->binding, e.TypeError, name + " is not a module");
 
 	// Specify a new context, with a new def_target, etc.
-	Context *module_def_ctx = new Context(e, RubyValue::from_object(m), m, context);
+	Context *module_def_ctx = new Context(e, O2V(m), m, context);
 
 	try {
 	  code.call(module_def_ctx);
 	} catch(WorldException &) {
-	  delete m; delete module_def_ctx; throw;
+	  if (!already_exists)
+	    delete m;
+	  delete module_def_ctx;
+	  throw;
 	}
 
 	delete module_def_ctx;
@@ -205,7 +211,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  case T_INTEGER_LITERAL: s.push_integer(r.read_int32()); break;
 	  case T_FLOATING_LITERAL: s.push_object(e.gc.track(new RubyFloating(e, r.read_floating()))); break;
 	  case T_BOOLEAN_LITERAL: s.push_object(r.read_bool() ? e.TRUE.object : e.FALSE.object); break;
-	  case T_STRING_LITERAL: s.push_object(e.gc.track(new RubyString(e, r.read_text()))); break;
+	  case T_STRING_LITERAL: s.push_object(e.get_string(r.read_text()).object); break;
 	  case T_NIL_LITERAL: s.push_object(e.NIL.object); break;
 	  case T_BLOCK: throw WorldException(context->binding, e.RuntimeError, "process(): trying to push a block");
 	  default: throw WorldException(context->binding, e.RuntimeError, "process(): trying to push something we're not sure of");
@@ -276,7 +282,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	      // The rescue block handles this.
 	      // If we had no rescue block, we'd never get here since there'd be no catches.
 	      std::vector<RubyValue> args;
-	      args.push_back(RubyValue::from_object(w.exception));
+	      args.push_back(O2V(w.exception));
 
 	      last_value = rescue_clause.call(context, args);
 	      handled = true;

@@ -24,7 +24,7 @@ class RubyEnvironment
     inline RubyValue get_truth(bool _t) const { return _t ? TRUE : FALSE; }
     inline RubyValue get_string(const std::string &_s) {
       /* String interning here. Maybe. Or in RubyString's ctor. */
-      return RubyValue::from_object(gc.track(new RubyString(*this, _s)));
+      return O2V(gc.track(new RubyString(*this, _s)));
     }
 
     RubyObject *errno_exception(linked_ptr<Binding> &, int, const char *);
