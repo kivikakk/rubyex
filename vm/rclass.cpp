@@ -10,7 +10,7 @@
 RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name): RubyModule(_e, _e.Class, _name), superklass(_e.Object)
 { }
 
-RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name, RubyClass *_superklass): RubyModule(_e, _superklass, _name), superklass(_superklass)
+RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name, RubyClass *_superklass): RubyModule(_e, _e.Class, _name), superklass(_superklass)
 { }
 
 RubyMethod *RubyClass::find_method(const std::string &_name) const
