@@ -1,3 +1,4 @@
+#!../ruby/ruby
 
 Dir["test_*.rb"].each do |test|
   test_name = test[5...-3]
