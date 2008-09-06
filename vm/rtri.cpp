@@ -25,7 +25,9 @@ void RubyTriEI::init(RubyEnvironment &_e)
   rb_cNilClass->add_method("==", RubyMethod::Create(tfn_eql, 1));
 
   rb_cTrueClass->add_method("inspect", RubyMethod::Create(true_inspect));
+  rb_cTrueClass->add_method("to_s", RubyMethod::Create(true_inspect));
   rb_cFalseClass->add_method("inspect", RubyMethod::Create(false_inspect));
+  rb_cFalseClass->add_method("to_s", RubyMethod::Create(false_inspect));
   rb_cNilClass->add_method("inspect", RubyMethod::Create(nil_inspect));
   rb_cNilClass->add_method("to_s", RubyMethod::Create(nil_to_s));
   rb_cNilClass->add_method("nil?", RubyMethod::Create(nil_nil));
