@@ -9,6 +9,7 @@
 #include "rexception.h"
 
 RubyValue string_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue string_idx(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_eq(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_add(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue string_reverse(linked_ptr<Binding> &, RubyValue);
@@ -26,6 +27,7 @@ void RubyStringEI::init(RubyEnvironment &_e)
   RubyClass *rb_cString = new RubyClass(_e, "String");
   rb_cString->add_metaclass_method(_e, "new", RubyMethod::Create(string_new, ARGS_ARBITRARY));
 
+  rb_cString->add_method("[]", RubyMethod::Create(string_idx, 1));
   rb_cString->add_method("==", RubyMethod::Create(string_eq, 1));
   rb_cString->add_method("+", RubyMethod::Create(string_add, 1));
   rb_cString->add_method("reverse", RubyMethod::Create(string_reverse));
@@ -50,6 +52,34 @@ RubyValue string_new(linked_ptr<Binding> &_b, RubyValue _self, const std::vector
     return _b->environment.get_string(_args[0].get_string());
   
   throw WorldException(_b, _b->environment.RuntimeError, "string_new: given invalid number of args -- big problem");
+}
+
+RubyValue string_idx(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
+{
+  const std::string &s = _self.get_string();
+  RubyClass *a0c = _args[0].get_class(_b->environment);
+
+  if (a0c->has_ancestor(_b->environment.Range)) {
+    int begin = _args[0].get_instance("start").get_fixnum();
+    int len = _args[0].get_instance("end").get_fixnum();
+
+    if (begin < 0) begin += s.length();
+    if (len < 0) len += s.length();
+    len -= begin;
+
+    if (!_args[0].get_instance("exclusive").truthy(_b->environment))
+      len += 1;
+    return _b->environment.get_string(s.substr(begin, len));
+  } else if (a0c->has_ancestor(_b->environment.Fixnum)) {
+    // Note this is MRI1.9 behaviour.
+    int idx = _args[0].get_fixnum();
+    if (idx < 0) idx += s.length();
+
+    return _b->environment.get_string(s.substr(idx, 1));
+  }
+  // TODO: String/Regex.
+
+  throw WorldException(_b, _b->environment.TypeError, "don't know what to do with argument");
 }
 
 RubyValue string_eq(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
