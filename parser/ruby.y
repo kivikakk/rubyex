@@ -50,7 +50,7 @@
 %type <identifier> opt_rescue_target
 %type <interpolated_expr> interpolated_string interpolated_backtick_string
 
-%type <identifier> function_name sigiled_variable
+%type <identifier> function_name function_name_identifier sigiled_variable
 
 %type <procedure> sub_content sub_line otherwise
 %type <block> opt_rescue_else opt_rescue_ensure
@@ -174,10 +174,15 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | while_loop				{ $$ = $1; }
 ;
 
-function_name:	IDENTIFIER		{ $$ = $1; }
+function_name_identifier:
+		IDENTIFIER		{ $$ = $1; }
 	      |	CLASS			{ $$ = new IdentifierExpr("class"); }
 	      | MODULE			{ $$ = new IdentifierExpr("module"); }
 	      | DEF			{ $$ = new IdentifierExpr("def"); }
+;
+
+function_name:	function_name_identifier	{ $$ = $1; }
+	      | '`'			{ $$ = new IdentifierExpr("`"); }
 	      | '+'			{ $$ = new IdentifierExpr("+"); }
 	      | '-'			{ $$ = new IdentifierExpr("-"); }
 	      | '*'			{ $$ = new IdentifierExpr("*"); }
@@ -204,9 +209,9 @@ function_name:	IDENTIFIER		{ $$ = $1; }
 ;
 
 sigiled_variable:
-		'@' function_name	{ $2->id.insert(0, "@"); $$ = $2; }
-	      | '@' '@' function_name	{ $3->id.insert(0, "@@"); $$ = $3; }
-	      |	'$' function_name	{ $2->id.insert(0, "$"); $$ = $2; }
+		'@' function_name_identifier	{ $2->id.insert(0, "@"); $$ = $2; }
+	      | '@' '@' function_name_identifier	{ $3->id.insert(0, "@@"); $$ = $3; }
+	      |	'$' function_name_identifier	{ $2->id.insert(0, "$"); $$ = $2; }
 ;
 
 compiled_expr:	expr
@@ -275,7 +280,7 @@ block_argument_contents:
 
 funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END				{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
 	      |	DEF function_name funcdef_args line_separator sub_content END 		{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
-	      |	DEF function_name '=' funcdef_args line_separator sub_content END 	{ $2->id += '='; $$ = new FuncDefExpr(NULL, $2, $4, $6); }
+	      |	DEF function_name_identifier '=' funcdef_args line_separator sub_content END 	{ $2->id += '='; $$ = new FuncDefExpr(NULL, $2, $4, $6); }
 ;
 
 funcdef_args:	/* empty */		{ $$ = NULL; }

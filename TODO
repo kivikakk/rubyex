@@ -15,3 +15,4 @@ Not as important right now:
  * all RubyValues need instance variables.
  * sometimes flex encounters a push-back overflow due to braces (blocks)
  * Kernel::method() needs to work
+ * even though '`' is in the function_name rule, it'll never be sent to the parser. (lexer starts interpreting already.)
