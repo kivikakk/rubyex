@@ -1,9 +1,12 @@
-#include "rmodule.h"
 #include <iostream>
+#include <algorithm>
+#include <functional>
+#include "rmodule.h"
 #include "rclass.h"
 #include "renvironment.h"
 #include "rmethod.h"
 #include "rexception.h"
+#include "stlext.h"
 
 RubyModule::RubyModule(RubyEnvironment &_e, const std::string &_name): RubyObject(_e.Module), name(_name), parent(_e.Object)
 { }
@@ -114,6 +117,15 @@ RubyValue RubyModule::get_constant(const std::string &_name) const {
   if (it == constants.end())
     throw SevereInternalError(this->name + " missing requested constant `" + _name + "'");
   return it->second;
+}
+
+const std::string &RubyModule::get_name_by_constant(RubyValue _constant) const {
+  std::map<std::string, RubyValue>::const_iterator obj =
+    std::find_if(constants.begin(), constants.end(), second_equal_to<std::map<std::string, RubyValue>::value_type>(_constant));
+  if (obj != constants.end())
+    return obj->first;
+
+  throw CannotFindGlobalError();
 }
 
 void RubyModule::set_constant(const std::string &_name, RubyValue _value) {

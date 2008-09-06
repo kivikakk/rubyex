@@ -79,11 +79,12 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
   } catch (CannotFindLocalError)
   { }
 
-  // how about environment globals? (<< XXX seems conceptually incorrect - should they be exposed any other way, logically?)
-  try {
-    return binding->environment.get_global_by_name(_identifier);
-  } catch (CannotFindGlobalError)
-  { }
+  // how about globals?
+  if (isalpha(_identifier[0]) && isupper(_identifier[0]))
+    try {
+      return binding->environment.get_global_by_name(_identifier);
+    } catch (CannotFindGlobalError)
+    { }
 
   // methods
   try {
@@ -96,10 +97,15 @@ RubyValue Context::resolve_identifier(const std::string &_identifier)
 
 RubyValue Context::resolve_constant(const std::string &_identifier)
 {
-  // RubyModule *search = binding->context.get_class();
-  //do { 
-    // search = search
-  //} while (search != binding->environment.Object);
+  RubyModule *search = binding->context.get_class(binding->environment), *last = NULL;
+
+  while (last != binding->environment.Object) {
+    if (search->has_constant(_identifier))
+      return search->get_constant(_identifier);
+
+    last = search;
+    search = search->get_parent();
+  }
 
   throw WorldException(binding, binding->environment.NameError, "unininitialized constant " + _identifier);
 }

@@ -1,6 +1,4 @@
 #include <iostream>
-#include <algorithm>
-#include <functional>
 #include "renvironment.h"
 #include "rmethod.h"
 #include "rstring.h"
@@ -13,7 +11,6 @@
 #include "rrange.h"
 #include "rexception.h"
 #include "rio.h"
-#include "stlext.h"
 
 RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
@@ -23,6 +20,9 @@ RubyEnvironment::RubyEnvironment()
   this->Kernel = new RubyModule(*this, "Kernel");
   this->Module = new RubyClass(*this, "Module", this->Object); 	// I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
   this->Class = new RubyClass(*this, "Class", this->Module);
+
+  // Object's parent is itself, technically.
+  this->Object->set_parent(this->Object);
 
   // Since Module and Class didn't exist when Object and Kernel were made,
   // they need to be reset explicitly.
@@ -100,12 +100,15 @@ void RubyEnvironment::set_global_by_name(const std::string &_name, RubyObject *_
 
 const std::string &RubyEnvironment::get_name_by_global(RubyValue _global) const
 {
+  return this->Object->get_name_by_constant(_global);
+  /*
   std::map<std::string, RubyValue>::const_iterator obj =
     std::find_if(globals.begin(), globals.end(), second_equal_to<std::map<std::string, RubyValue>::value_type>(_global));
   if (obj != globals.end())
     return obj->first;
 
   throw CannotFindGlobalError();
+  */
 }
 
 RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
