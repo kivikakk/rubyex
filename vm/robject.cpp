@@ -76,17 +76,20 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &, RubyValue);
 RubyValue object_send(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue object_class(linked_ptr<Binding> &, RubyValue);
 RubyValue object_eq_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue object_logical_and_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue object_logical_or_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue object_eql(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue object_neql(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue object_nil(linked_ptr<Binding> &, RubyValue);
 
-void RubyObjectEI::init(RubyEnvironment &_e)
-{
+void RubyObjectEI::init(RubyEnvironment &_e) {
   _e.Object->add_method("inspect", RubyMethod::Create(object_inspect_to_s));
   _e.Object->add_method("to_s", RubyMethod::Create(object_inspect_to_s));
   _e.Object->add_method("send", RubyMethod::Create(object_send, ARGS_ARBITRARY));
 
   _e.Object->add_method("==", RubyMethod::Create(object_eq_op, 1));
+  _e.Object->add_method("&&", RubyMethod::Create(object_logical_and_op, 1));
+  _e.Object->add_method("||", RubyMethod::Create(object_logical_or_op, 1));
   _e.Object->add_method("eql?", RubyMethod::Create(object_eql, 1));
   _e.Object->add_method("!=", RubyMethod::Create(object_neql, 1));
 
@@ -95,8 +98,7 @@ void RubyObjectEI::init(RubyEnvironment &_e)
   _e.Object->add_method("class", RubyMethod::Create(object_class));
 }
 
-RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
-{
+RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self) {
   try {
     return _b->environment.get_string(_b->environment.get_name_by_global(O2V(_self.object)));
   } catch (CannotFindGlobalError)
@@ -112,8 +114,7 @@ RubyValue object_inspect_to_s(linked_ptr<Binding> &_b, RubyValue _self)
   return _b->environment.get_string(oss.str());
 }
 
-RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
-{
+RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
   RubyValue a = _args[0];
   a = a.call(_b, "to_sym");
 
@@ -125,12 +126,19 @@ RubyValue object_send(linked_ptr<Binding> &_b, RubyValue _self, const std::vecto
 RubyValue object_class(linked_ptr<Binding> &_b, RubyValue _self)
 { return O2V(_self.get_class(_b->environment)); }
 
-RubyValue object_eq_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
-{
+RubyValue object_eq_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
   RubyValue comp = _args[0];
   if (_self.type != comp.type)
     return _b->environment.FALSE;
   return _b->environment.get_truth(_self.fixnum == comp.fixnum);
+}
+
+RubyValue object_logical_and_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  return _b->environment.get_truth(_self.truthy(_b->environment) && _args[0].truthy(_b->environment));
+}
+
+RubyValue object_logical_or_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  return _b->environment.get_truth(_self.truthy(_b->environment) || _args[0].truthy(_b->environment));
 }
 
 RubyValue object_eql(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
