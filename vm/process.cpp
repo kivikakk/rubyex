@@ -172,7 +172,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	Context *class_def_ctx = new Context(e, O2V(c), c, context);
 
 	try {
-	  code.call(class_def_ctx);
+	  last_value = code.call(class_def_ctx);
 	} catch(WorldException &) {
 	  if (!already_exists)
 	    delete c;
@@ -200,7 +200,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	Context *module_def_ctx = new Context(e, O2V(m), m, context);
 
 	try {
-	  code.call(module_def_ctx);
+	  last_value = code.call(module_def_ctx);
 	} catch(WorldException &) {
 	  if (!already_exists)
 	    delete m;
