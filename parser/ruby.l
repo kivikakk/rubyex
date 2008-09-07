@@ -30,10 +30,7 @@
     { "end", END },
 
     { "def", DEF },
-    { "if", IF },
-    { "else", ELSE },
-    { "elsif", ELSIF },
-    { "unless", UNLESS },
+    { "if", IF }, { "then", THEN }, { "else", ELSE }, { "elsif", ELSIF }, { "unless", UNLESS },
     { "yield", YIELD },
 
     { "and", LOGICAL_AND_WORD }, { "or", LOGICAL_OR_WORD },

@@ -20,7 +20,7 @@
 %token END_OF_FILE 0 "$end"
 %token <symbol> SYMBOL
 
-%token DEF IF ELSE ELSIF UNLESS
+%token DEF IF ELSE ELSIF UNLESS THEN
 %token BEGIN_SECTION
 %token RESCUE ENSURE
 %token WHILE
@@ -52,7 +52,7 @@
 
 %type <identifier> function_name function_name_identifier sigiled_variable
 
-%type <procedure> sub_content sub_line otherwise
+%type <procedure> sub_content sub_line if_otherwise unless_otherwise
 %type <block> opt_rescue_else opt_rescue_ensure
 
 %nonassoc INTERPOLATION_START
@@ -281,8 +281,8 @@ block_argument_contents:
 	      | deflist		{ $$ = $1; }
 ;
 
-funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END				{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
-	      |	DEF function_name funcdef_args line_separator sub_content END 		{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
+funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END					{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
+	      |	DEF function_name funcdef_args line_separator sub_content END 			{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
 	      |	DEF function_name_identifier '=' funcdef_args line_separator sub_content END 	{ $2->id += '='; $$ = new FuncDefExpr(NULL, $2, $4, $6); }
 ;
 
@@ -292,12 +292,23 @@ funcdef_args:	/* empty */		{ $$ = NULL; }
 	      | deflist			{ $$ = $1; }
 ;
 
-conditional:	IF expr line_separator sub_content otherwise END 	{ $$ = new ConditionalExpr($2, $4, $5); }
+conditional:	IF expr then_or_separator sub_content if_otherwise END 		{ $$ = new ConditionalExpr($2, $4, $5); }
+	      |	UNLESS expr then_or_separator sub_content unless_otherwise END 	{ $$ = new ConditionalExpr(new FalsityExpr($2), $4, $5); }
 ;
 
-otherwise:	/* empty */					{ $$ = NULL; }
-	      | ELSE sub_content				{ $$ = $2; }
-	      | ELSIF expr line_separator sub_content otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
+if_otherwise:	/* empty */							{ $$ = NULL; }
+	      | ELSE sub_content						{ $$ = $2; }
+	      | ELSIF expr then_or_separator sub_content if_otherwise	{ $$ = new Procedure(); $$->expressions.push_back(new ConditionalExpr($2, $4, $5)); }
+;
+
+unless_otherwise:
+		/* empty */		{ $$ = NULL; }
+	      |	ELSE sub_content	{ $$ = $2; }
+;
+
+then_or_separator:
+		line_separator
+	      |	THEN
 ;
 
 while_loop:	WHILE expr line_separator sub_content END		{ $$ = new WhileExpr($2, $4); }

@@ -408,7 +408,7 @@ void _block()
   $(IdentifierExpr, one_nl_boo, *one->block->proc->expressions.begin());
   ASSERT(one_nl_boo->id == "boo");
 
-  BEGIN(p_nested, "call do nesting { well_this {}; that {}; the_other {\nthat\nthen};; }; done end", 1);
+  BEGIN(p_nested, "call do nesting { well_this {}; that {}; the_other {\nthat\nchocolate};; }; done end", 1);
   // what a joke to test. Just watch this:
   $(FuncCallExpr, nested, p_nested[0]);
   ASSERT(nested->target == NULL);
@@ -457,7 +457,7 @@ void _block()
       ++tsit;
       {
 	$(IdentifierExpr, then, *tsit);
-	ASSERT(then->id == "then");
+	ASSERT(then->id == "chocolate");
       }
     }
   }
