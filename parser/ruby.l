@@ -36,6 +36,9 @@
     { "unless", UNLESS },
     { "yield", YIELD },
 
+    { "and", LOGICAL_AND_WORD }, { "or", LOGICAL_OR_WORD },
+    { "not", LOGICAL_NOT_WORD },
+
     { "while", WHILE },
 
     { "class", CLASS }, { "module", MODULE },

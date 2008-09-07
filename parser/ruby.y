@@ -59,8 +59,8 @@
 
 /* Note this implies '=', RANGE, etc. get applied *after* everything else is in groups delimited by them. */
 %nonassoc TERN '?' ':'
-/* here: AND, OR */
-/* here: NOT */
+%left LOGICAL_AND_WORD LOGICAL_OR_WORD
+%left LOGICAL_NOT_WORD
 %right '=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 %nonassoc RANGE_TWO RANGE_THREE
 %left LOGICAL_OR
@@ -143,6 +143,7 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | '-' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
 	      | '~' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("~"), NULL, NULL); }
 	      | '!' expr %prec NEG			{ $$ = new FalsityExpr($2); }
+	      | LOGICAL_NOT_WORD expr			{ $$ = new FalsityExpr($2); }
 	      | expr '^' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("^"), new ExprList($3), NULL); }
 	      | expr SPACESHIP expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("<=>"), new ExprList($3), NULL); }
 	      | expr EQ expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("=="), new ExprList($3), NULL); }
@@ -158,6 +159,8 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr '%' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("%"), new ExprList($3), NULL); }
 	      | expr LOGICAL_AND expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("&&"), new ExprList($3), NULL); }
 	      | expr LOGICAL_OR expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("||"), new ExprList($3), NULL); }
+	      | expr LOGICAL_AND_WORD expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("&&"), new ExprList($3), NULL); }
+	      | expr LOGICAL_OR_WORD expr		{ $$ = new FuncCallExpr($1, new IdentifierExpr("||"), new ExprList($3), NULL); }
 	      | expr RANGE_TWO expr			{ $$ = new FuncCallExpr(new IdentifierExpr("Range"), new IdentifierExpr("new"), new ExprList($1, $3), NULL); }
 	      | expr RANGE_THREE expr			{ $$ = new FuncCallExpr(new IdentifierExpr("Range"), new IdentifierExpr("new"), new ExprList($1, $3, new BooleanLiteralExpr(true)), NULL); }
 	      | expr LEFT_SHIFT expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("<<"), new ExprList($3), NULL); }
