@@ -134,11 +134,11 @@ RubyValue object_eq_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vect
 }
 
 RubyValue object_logical_and_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
-  return _b->environment.get_truth(_self.truthy(_b->environment) && _args[0].truthy(_b->environment));
+  return (_self.truthy(_b->environment) && _args[0].truthy(_b->environment)) ? _args[0] : _b->environment.FALSE;
 }
 
 RubyValue object_logical_or_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
-  return _b->environment.get_truth(_self.truthy(_b->environment) || _args[0].truthy(_b->environment));
+  return _self.truthy(_b->environment) ? _self : _args[0];
 }
 
 RubyValue object_eql(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)

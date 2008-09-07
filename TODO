@@ -17,3 +17,5 @@ Not as important right now:
  * Kernel::method() needs to work
  * even though '`' is in the function_name rule, it'll never be sent to the parser. (lexer starts interpreting already.)
  * Dir::glob only works with glob(3)'s syntax, not MRI's (e.g. `**', flags.)
+ * and/&& needs to not evaulate the second condition if the first fails
+ * or/|| needs to not evaulate the second condition if the first succeeds
