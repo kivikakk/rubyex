@@ -27,6 +27,7 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
 
   // ScriptErrors
   DEF_EXCEPTION(ScriptError, Exception)
+    DEF_EXCEPTION(LoadError, ScriptError)
     DEF_EXCEPTION(NotImplementedError, ScriptError)
     DEF_EXCEPTION(SyntaxError, ScriptError)
 

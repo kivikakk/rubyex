@@ -19,6 +19,9 @@ class RubyArray : public RubyObject
     RubyArray(RubyEnvironment &, long, RubyValue);
     RubyArray(RubyEnvironment &, const std::vector<RubyValue> &);
 
+    RubyValue index(linked_ptr<Binding> &, RubyValue) const;
+    bool include(linked_ptr<Binding> &, RubyValue) const;
+
     std::vector<RubyValue> data;
 };
 

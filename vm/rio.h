@@ -12,6 +12,8 @@ class RubyIOEI : public RubyEnvironmentInitializer
     void init(RubyEnvironment &);
 };
 
+extern const char SEPARATOR;
+
 class RubyIO : public RubyObject
 {
   public:
@@ -30,6 +32,8 @@ class RubyIO : public RubyObject
 
     bool sync;
     FILE *file;
+
+    static std::string filename_join(const std::string &, const std::string &);
 
   protected:
     void _check(linked_ptr<Binding> &);

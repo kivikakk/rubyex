@@ -27,6 +27,8 @@ RubyValue file_initialize_file_mode(linked_ptr<Binding> &, RubyValue, const std:
 RubyValue dir_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue dir_glob(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 
+const char SEPARATOR = '/';		// TODO: cross-platform?
+
 void RubyIOEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cIO = new RubyClass(_e, "IO");
@@ -51,7 +53,7 @@ void RubyIOEI::init(RubyEnvironment &_e)
 
   RubyClass *rb_cFile = new RubyClass(_e, "File", rb_cIO);
   rb_cFile->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(file_initialize_file, 1), new RubyCMethod(file_initialize_file_mode, 2)));
-
+  rb_cFile->set_constant("SEPARATOR", _e.get_string(std::string() + SEPARATOR));
   _e.set_global_by_name("File", rb_cFile);
   _e.File = rb_cFile;
 
@@ -213,19 +215,16 @@ RubyValue dir_glob(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<R
 RubyIO::RubyIO(RubyEnvironment &_e): RubyObject(_e.IO), sync(false), file(NULL)
 { }
 
-RubyIO::RubyIO(linked_ptr<Binding> &_b, int _fd, const char *_mode): RubyObject(_b->environment.IO), sync(false)
-{
+RubyIO::RubyIO(linked_ptr<Binding> &_b, int _fd, const char *_mode): RubyObject(_b->environment.IO), sync(false) {
   init(_b, _fd, _mode);
 }
 
-RubyIO::~RubyIO()
-{
+RubyIO::~RubyIO() {
   if (this->file)
     fclose(this->file);
 }
 
-std::string RubyIO::rv_to_mode(linked_ptr<Binding> &_b, RubyValue _val)
-{
+std::string RubyIO::rv_to_mode(linked_ptr<Binding> &_b, RubyValue _val) {
   char mode[10]; mode[0] = 0;
 
   if (_val.type == RubyValue::RV_OBJECT) {
@@ -256,8 +255,7 @@ std::string RubyIO::rv_to_mode(linked_ptr<Binding> &_b, RubyValue _val)
   return mode;
 }
 
-void RubyIO::init(linked_ptr<Binding> &_b, int _fd, const char *_mode)
-{
+void RubyIO::init(linked_ptr<Binding> &_b, int _fd, const char *_mode) {
   this->file = fdopen(_fd, _mode);
   if (!this->file) {
     int s_er = errno;
@@ -266,8 +264,7 @@ void RubyIO::init(linked_ptr<Binding> &_b, int _fd, const char *_mode)
   }
 }
 
-std::string RubyIO::read(linked_ptr<Binding> &_b)
-{
+std::string RubyIO::read(linked_ptr<Binding> &_b) {
   _check(_b);
 
   if (feof(this->file))
@@ -284,8 +281,7 @@ std::string RubyIO::read(linked_ptr<Binding> &_b)
   return s;
 }
 
-std::string RubyIO::read(linked_ptr<Binding> &_b, int _length)
-{
+std::string RubyIO::read(linked_ptr<Binding> &_b, int _length) {
   if (_length == -1)
     return this->read(_b);
 
@@ -302,8 +298,7 @@ std::string RubyIO::read(linked_ptr<Binding> &_b, int _length)
   throw IOEOFError();
 }
 
-int RubyIO::write(linked_ptr<Binding> &_b, const std::string &_data)
-{
+int RubyIO::write(linked_ptr<Binding> &_b, const std::string &_data) {
   _check(_b);
   int wr = fwrite(_data.c_str(), sizeof(char), _data.length(), this->file);
   if (sync)
@@ -311,22 +306,23 @@ int RubyIO::write(linked_ptr<Binding> &_b, const std::string &_data)
   return wr;
 }
 
-void RubyIO::flush(linked_ptr<Binding> &_b)
-{
+void RubyIO::flush(linked_ptr<Binding> &_b) {
   _check(_b);
   fflush(this->file);
 }
 
-void RubyIO::close(linked_ptr<Binding> &_b)
-{
+void RubyIO::close(linked_ptr<Binding> &_b) {
   _check(_b);
   fclose(this->file);
   this->file = NULL;
 }
 
-void RubyIO::_check(linked_ptr<Binding> &_b)
-{
+void RubyIO::_check(linked_ptr<Binding> &_b) {
   if (!this->file)
     throw WorldException(_b, _b->environment.IOError, "closed stream");
+}
+
+std::string RubyIO::filename_join(const std::string &_a, const std::string &_b) {
+  return (_a.length() > 0 && _a[_a.length() - 1] == SEPARATOR) ? (_a + _b) : (_a + SEPARATOR + _b);
 }
 

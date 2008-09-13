@@ -143,3 +143,16 @@ RubyArray::RubyArray(RubyEnvironment &_e, long _length, RubyValue _obj): RubyObj
 
 RubyArray::RubyArray(RubyEnvironment &_e, const std::vector<RubyValue> &_copy): RubyObject(_e.Array), data(_copy)
 { }
+
+RubyValue RubyArray::index(linked_ptr<Binding> &_b, RubyValue _find) const {
+  int i = 0;
+  for (std::vector<RubyValue>::const_iterator it = data.begin(); it != data.end(); ++it, ++i)
+    if (it->ruby_eq_op(_b, _find))
+      return F2V(i);
+  return _b->environment.NIL;
+}
+
+bool RubyArray::include(linked_ptr<Binding> &_b, RubyValue _find) const {
+  return index(_b, _find) != _b->environment.NIL;
+}
+

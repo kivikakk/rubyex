@@ -7,16 +7,18 @@
 RubyValue::RubyValue(): type(RV_NOTHING)
 { }
 
-bool RubyValue::operator <(const RubyValue &_rhs) const
-{
+bool RubyValue::operator <(const RubyValue &_rhs) const {
   if (type != _rhs.type)
     return type < _rhs.type;
   return fixnum < _rhs.fixnum;
 }
 
-bool RubyValue::operator ==(const RubyValue &_rhs) const
-{
+bool RubyValue::operator ==(const RubyValue &_rhs) const {
   return (type == _rhs.type) && (fixnum == _rhs.fixnum);
+}
+
+bool RubyValue::operator !=(const RubyValue &_rhs) const {
+  return (type != _rhs.type) || (fixnum != _rhs.fixnum);
 }
 
 RubyValue RubyValue::from_fixnum(long _value)
@@ -92,6 +94,11 @@ void RubyValue::set_instance(const std::string &_name, RubyValue _value) {
   if (type != RV_OBJECT)
     throw SevereInternalError("RubyValue::get_instance(): not implemented for non-objects yet.");
   object->set_instance(_name, _value);
+}
+
+bool RubyValue::ruby_eq_op(linked_ptr<Binding> &_b, RubyValue _rhs) const {
+  // what if == doesn't return a boolean?
+  return call(_b, "==", _rhs).truthy(_b->environment);
 }
 
 bool RubyValue::truthy(RubyEnvironment &_e) const

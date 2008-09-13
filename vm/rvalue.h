@@ -19,7 +19,8 @@ class RubyValue
     RubyValue();
 
     bool operator <(const RubyValue &) const;	// needed to use RV as a STL map key
-    bool operator ==(const RubyValue &) const;
+    bool operator ==(const RubyValue &) const;	// bit for bit
+    bool operator !=(const RubyValue &) const;	// " " "
 
     static RubyValue from_fixnum(long);
     static RubyValue from_symbol(RubySymbol *);
@@ -31,6 +32,8 @@ class RubyValue
     bool has_instance(const std::string &) const;
     RubyValue get_instance(const std::string &) const;
     void set_instance(const std::string &, RubyValue);
+
+    bool ruby_eq_op(linked_ptr<Binding> &, RubyValue) const;
 
     bool truthy(RubyEnvironment &) const;
     long get_fixnum() const;

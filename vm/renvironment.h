@@ -40,6 +40,7 @@ class RubyEnvironment
 
     RubyClass *Exception;
       RubyClass *ScriptError;
+	RubyClass *LoadError;
 	RubyClass *NotImplementedError;
 	RubyClass *SyntaxError;
       RubyClass *StandardError;

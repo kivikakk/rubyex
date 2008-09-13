@@ -1,12 +1,15 @@
 #include "rkernel.h"
 #include "rmethod.h"
 #include <vector>
+#include <algorithm>
 #include <iostream>
+#include <sys/stat.h>
 #include "rstring.h"
 #include "eval_hook.h"
 #include "rbinding.h"
 #include "rexception.h"
 #include "global.h"
+#include "rio.h"
 
 RubyValue kernel_require(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_load_file(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -41,17 +44,69 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel->add_module_method(_e, "`", RubyMethod::Create(kernel_backtick, 1));
 }
 
+const char *REQUIRE_EXTENSIONS[] = {
+  ".rb", NULL
+};
+
+RubyValue kernel_require_found(linked_ptr<Binding> &_b, RubyValue _self, const std::string &_filename) {
+  RubyValue fns = _b->environment.get_string(_filename);
+  if (_b->environment.RubyLoaded->include(_b, fns))
+    return _b->environment.FALSE;
+
+  _b->environment.RubyLoaded->data.push_back(fns);
+  return _b->environment.get_truth(kernel_load(_b, _filename));
+}
+
 RubyValue kernel_require(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  std::string filename = _args[0].get_string();
+  // XXX: path separators may differ
+  bool has_extension = false;
+  if (filename.find('/') == std::string::npos)
+    has_extension = filename.find('.') != std::string::npos;
+  else
+    has_extension = filename.find('.', filename.find('/')) != std::string::npos;
+
+  struct stat stat_buf;
+  std::string compose;
+
+  for (std::vector<RubyValue>::const_iterator it = _b->environment.RubyPath->data.begin(); it != _b->environment.RubyPath->data.end(); ++it) {
+    if (has_extension) {
+      if (stat(RubyIO::filename_join(it->get_string(), filename).c_str(), &stat_buf) == 0)
+	return kernel_require_found(_b, _self, filename);
+    } else {
+      const char *itp = *REQUIRE_EXTENSIONS;
+      while (itp) {
+	compose = filename + itp;
+	if (stat(RubyIO::filename_join(it->get_string(), compose).c_str(), &stat_buf) == 0)
+	  return kernel_require_found(_b, _self, compose);
+	++itp;
+      }
+    }
+  }
+
+  throw WorldException(_b, _b->environment.LoadError, "no such file to load -- " + filename);
 }
 
 RubyValue kernel_load_file(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  return _b->environment.get_truth(kernel_load(_b, _args[0].get_string()));
 }
 
 RubyValue kernel_load_file_wrap(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  return _b->environment.get_truth(kernel_load(_b, _args[0].get_string(), _args[1].truthy(_b->environment)));
+  // XXX should not be _args[1].truthy, need to ascertain it's bool
+}
+
+bool kernel_load(linked_ptr<Binding> &_b, const std::string &_filename) {
+  return kernel_load(_b, _filename, false);
+}
+
+bool kernel_load(linked_ptr<Binding> &_b, const std::string &_filename, bool _wrap) {
+  std::cerr << "kernel loading " << _filename << " (wrap:" << _wrap << ")" << std::endl;
+  return false;
 }
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self) {
-  return O2V(new RubyBinding(_b));
+  return O2V(_b->environment.gc.track(new RubyBinding(_b)));
 }
 
 RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
