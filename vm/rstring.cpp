@@ -24,7 +24,7 @@ RubyValue string_to_sym(linked_ptr<Binding> &, RubyValue);
 
 void RubyStringEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cString = new RubyClass(_e, "String");
+  RubyClass *rb_cString = _e.gc.track(new RubyClass(_e, "String"));
   rb_cString->add_metaclass_method(_e, "new", RubyMethod::Create(string_new, ARGS_ARBITRARY));
 
   rb_cString->add_method("[]", RubyMethod::Create(string_idx, 1));

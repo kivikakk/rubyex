@@ -16,7 +16,7 @@ RubyValue hash_to_s(linked_ptr<Binding> &, RubyValue);
 
 void RubyHashEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cHash = new RubyClass(_e, "Hash");
+  RubyClass *rb_cHash = _e.gc.track(new RubyClass(_e, "Hash"));
   rb_cHash->add_metaclass_method(_e, "[]", RubyMethod::Create(hash_new_idx, ARGS_ARBITRARY));
 
   rb_cHash->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(hash_initialize), new RubyCMethod(hash_initialize_default, ARGS_ARBITRARY)));

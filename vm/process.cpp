@@ -164,7 +164,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	
 	// XXX don't use def_target here, but something else?
 	bool already_exists = context->binding->def_target->has_constant(name);
-	RubyClass *c = already_exists ? context->binding->def_target->get_constant(name).get_special<RubyClass>() : new RubyClass(e, name, super, context->binding->def_target);
+	RubyClass *c = already_exists ? context->binding->def_target->get_constant(name).get_special<RubyClass>() : e.gc.track<RubyClass>(new RubyClass(e, name, super, context->binding->def_target));
 	if (!c || c->get_class() != e.Class)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a class");
 
@@ -192,7 +192,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	// XXX don't use def_target here, but something else?
 	bool already_exists = context->binding->def_target->has_constant(name);
-	RubyModule *m = already_exists ? context->binding->def_target->get_constant(name).get_special<RubyModule>() : new RubyModule(e, name, context->binding->def_target);
+	RubyModule *m = already_exists ? context->binding->def_target->get_constant(name).get_special<RubyModule>() : e.gc.track<RubyModule>(new RubyModule(e, name, context->binding->def_target));
 	if (!m || m->get_class() != e.Module)
 	  throw WorldException(context->binding, e.TypeError, name + " is not a module");
 

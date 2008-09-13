@@ -17,10 +17,10 @@ RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
 RubyEnvironment::RubyEnvironment()
 {
-  this->Object = new RubyClass(*this, "Object", NULL);	// Object<nil, NOT Object<Object(!!)
-  this->Kernel = new RubyModule(*this, "Kernel");
-  this->Module = new RubyClass(*this, "Module", this->Object); 	// I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
-  this->Class = new RubyClass(*this, "Class", this->Module);
+  this->Object = gc.track(new RubyClass(*this, "Object", NULL));	// Object<nil, NOT Object<Object(!!)
+  this->Kernel = gc.track(new RubyModule(*this, "Kernel"));
+  this->Module = gc.track(new RubyClass(*this, "Module", this->Object)); 	// I'm just explicitly mentioning Module < Object.. so Class<Module<Object<nil
+  this->Class = gc.track(new RubyClass(*this, "Class", this->Module));
 
   // Object's parent is itself, technically.
   this->Object->set_parent(this->Object);
@@ -57,16 +57,16 @@ RubyEnvironment::RubyEnvironment()
   RubyIOEI().init(*this);
   RubyExceptionEI().init(*this);
 
-  this->RubyPath = new RubyArray(*this);
+  this->RubyPath = gc.track(new RubyArray(*this));
   this->RubyPath->data.push_back(get_string("."));
   this->set_readonly_global_by_name("$:", this->RubyPath);
-  this->set_readonly_global_by_name("$\"", (this->RubyLoaded = new RubyArray(*this)));
+  this->set_readonly_global_by_name("$\"", (this->RubyLoaded = gc.track(new RubyArray(*this))));
 
   this->set_global_by_name("VERSION", this->get_string(RX_VERSION));
   this->set_global_by_name("RUBY_PLATFORM", this->get_string(RX_PLATFORM));
   this->set_global_by_name("RUBY_RELEASE_DATE", this->get_string(RX_RELEASE_DATE));
 
-  main = new RubyObject(this->Object);
+  main = gc.track(new RubyObject(this->Object));
   main->add_metaclass_method(*this, "to_s", RubyMethod::Create(main_to_s));
   main->add_metaclass_method(*this, "inspect", RubyMethod::Create(main_to_s));
 }

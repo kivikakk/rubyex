@@ -31,7 +31,7 @@ const char SEPARATOR = '/';		// TODO: cross-platform?
 
 void RubyIOEI::init(RubyEnvironment &_e)
 {
-  RubyClass *rb_cIO = new RubyClass(_e, "IO");
+  RubyClass *rb_cIO = _e.gc.track(new RubyClass(_e, "IO"));
   rb_cIO->add_metaclass_method(_e, "open",
     new RubyMultiCMethod(
       new RubyCMethod(io_open, ARGS_MINIMAL(1)),
@@ -51,13 +51,13 @@ void RubyIOEI::init(RubyEnvironment &_e)
   _e.set_global_by_name("IO", rb_cIO);
   _e.IO = rb_cIO;
 
-  RubyClass *rb_cFile = new RubyClass(_e, "File", rb_cIO);
+  RubyClass *rb_cFile = _e.gc.track(new RubyClass(_e, "File", rb_cIO));
   rb_cFile->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(file_initialize_file, 1), new RubyCMethod(file_initialize_file_mode, 2)));
   rb_cFile->set_constant("SEPARATOR", _e.get_string(std::string() + SEPARATOR));
   _e.set_global_by_name("File", rb_cFile);
   _e.File = rb_cFile;
 
-  RubyClass *rb_cDir = new RubyClass(_e, "Dir");
+  RubyClass *rb_cDir = _e.gc.track(new RubyClass(_e, "Dir"));
   rb_cDir->add_metaclass_method(_e, "[]", RubyMethod::Create(dir_index_op, 1));
   rb_cDir->add_metaclass_method(_e, "glob", RubyMethod::Create(dir_glob, 1));
   _e.set_global_by_name("Dir", rb_cDir);
@@ -202,14 +202,14 @@ RubyValue dir_glob(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<R
   int r = glob(wildcard.c_str(), /* (flags&File::FNM_DOTMATCH)?GLOB_PERIOD | */ GLOB_BRACE, NULL, &globbuf);
 
   if (r != 0)
-    return O2V(new RubyArray(_b->environment));
+    return O2V(_b->environment.gc.track(new RubyArray(_b->environment)));
 
   char **p = globbuf.gl_pathv;
   while ((*p)) 
     if (**p++)	// don't add empty entries
       rv.push_back(_b->environment.get_string(*(p - 1)));	// `Clever.'
 
-  return O2V(new RubyArray(_b->environment, rv));
+  return O2V(_b->environment.gc.track(new RubyArray(_b->environment, rv)));
 }
 
 RubyIO::RubyIO(RubyEnvironment &_e): RubyObject(_e.IO), sync(false), file(NULL)

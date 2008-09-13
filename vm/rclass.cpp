@@ -59,9 +59,9 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
   // XXX: this whole thing is so fishy.
   //
   if (has_ancestor(_e.Class))
-    return new RubyClass(_e, "" /* XXX */);
+    return _e.gc.track(new RubyClass(_e, "" /* XXX */));
   else if (has_ancestor(_e.Module))
-    return new RubyModule(_e, "" /* XXX */);
+    return _e.gc.track(new RubyModule(_e, "" /* XXX */));
   else if (has_ancestor(_e.String))
     return _e.gc.track(new RubyString(_e, "" /* XXX */));
   else if (has_ancestor(_e.Array))
@@ -71,7 +71,7 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
   else if (has_ancestor(_e.IO))
     return _e.gc.track(new RubyIO(_e));
   else
-    return new RubyObject(this);
+    return _e.gc.track(new RubyObject(this));
 } 
 
 RubyValue class_new(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);

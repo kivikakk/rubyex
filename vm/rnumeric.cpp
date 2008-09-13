@@ -27,7 +27,7 @@ RubyValue fixnum_upto(linked_ptr<Binding> &, RubyValue, const std::vector<RubyVa
 
 void RubyNumericEI::init(RubyEnvironment &_e)
 {
-  RubyModule *rb_mComparable = new RubyModule(_e, "Comparable");
+  RubyModule *rb_mComparable = _e.gc.track(new RubyModule(_e, "Comparable"));
   rb_mComparable->add_method("!=", RubyMethod::Create(comparable_neq, 1));
   rb_mComparable->add_method("==", RubyMethod::Create(comparable_eq, 1));
   rb_mComparable->add_method("<", RubyMethod::Create(comparable_lt, 1));
@@ -39,7 +39,8 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   _e.Comparable = rb_mComparable;
 
   // TODO: undefine Fixnum's `new'? or just redefine Numeric#new to throw a method not found error?
-  RubyClass *rb_cFixnum = new RubyClass(_e, "Fixnum");
+  // XXX: it's called `undef'
+  RubyClass *rb_cFixnum = _e.gc.track(new RubyClass(_e, "Fixnum"));
   rb_cFixnum->include_module(rb_mComparable);
   rb_cFixnum->add_method("<=>", RubyMethod::Create(fixnum_spaceship, 1));
   rb_cFixnum->add_method("-@", RubyMethod::Create(fixnum_negate));
@@ -56,7 +57,7 @@ void RubyNumericEI::init(RubyEnvironment &_e)
   _e.set_global_by_name("Fixnum", rb_cFixnum);
   _e.Fixnum = rb_cFixnum;
 
-  RubyClass *rb_cFloat = new RubyClass(_e, "Float");
+  RubyClass *rb_cFloat = _e.gc.track(new RubyClass(_e, "Float"));
   rb_cFloat->include_module(rb_mComparable);
   _e.set_global_by_name("Float", rb_cFloat);
   _e.Float = rb_cFloat;
