@@ -10,7 +10,8 @@ class RubyKernelEI : public RubyEnvironmentInitializer
     void init(RubyEnvironment &);
 };
 
-extern const char *REQUIRE_EXTENSIONS[];
+extern const char *RUBY_REQUIRE_EXTENSIONS[];
+extern const char *SHARED_REQUIRE_EXTENSIONS[];
 bool kernel_load(linked_ptr<Binding> &, const std::string &);
 bool kernel_load(linked_ptr<Binding> &, const std::string &, bool);
 

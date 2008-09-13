@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
 #include <sys/stat.h>
 #include "rstring.h"
 #include "eval_hook.h"
@@ -44,9 +45,8 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel->add_module_method(_e, "`", RubyMethod::Create(kernel_backtick, 1));
 }
 
-const char *REQUIRE_EXTENSIONS[] = {
-  ".rb", NULL
-};
+const char *RUBY_REQUIRE_EXTENSIONS[] = { ".rb", NULL };
+const char *SHARED_REQUIRE_EXTENSIONS[] = { ".so", NULL };
 
 RubyValue kernel_require_found(linked_ptr<Binding> &_b, RubyValue _self, const std::string &_filename) {
   RubyValue fns = _b->environment.get_string(_filename);
@@ -74,11 +74,18 @@ RubyValue kernel_require(linked_ptr<Binding> &_b, RubyValue _self, const std::ve
       if (stat(RubyIO::filename_join(it->get_string(), filename).c_str(), &stat_buf) == 0)
 	return kernel_require_found(_b, _self, filename);
     } else {
-      const char *itp = *REQUIRE_EXTENSIONS;
-      while (itp) {
-	compose = filename + itp;
+      const char **itp = RUBY_REQUIRE_EXTENSIONS;
+      while (*itp) {
+	compose = filename + *itp;
 	if (stat(RubyIO::filename_join(it->get_string(), compose).c_str(), &stat_buf) == 0)
 	  return kernel_require_found(_b, _self, compose);
+	++itp;
+      }
+      itp = SHARED_REQUIRE_EXTENSIONS;
+      while (*itp) {
+	compose = filename + *itp;
+	if (stat(RubyIO::filename_join(it->get_string(), compose).c_str(), &stat_buf) == 0)
+	  throw WorldException(_b, _b->environment.NotImplementedError, "cannot load shared libraries yet");		// XXX TODO
 	++itp;
       }
     }
@@ -101,8 +108,28 @@ bool kernel_load(linked_ptr<Binding> &_b, const std::string &_filename) {
 }
 
 bool kernel_load(linked_ptr<Binding> &_b, const std::string &_filename, bool _wrap) {
-  std::cerr << "kernel loading " << _filename << " (wrap:" << _wrap << ")" << std::endl;
-  return false;
+  if (_wrap)
+    throw WorldException(_b, _b->environment.NotImplementedError, "Kernel::load: yet to implement _wrap");		// XXX TODO
+
+  std::string code;
+  {
+    std::ifstream ip(_filename.c_str());
+    if (!ip.is_open() || !ip.good())
+      return false;
+    char buffer[4096];
+    while (!ip.eof()) {
+      ip.read(buffer, 4096);
+      int no_read = ip.gcount();
+      if (!no_read) break;
+      code.insert(code.length(), buffer, no_read);
+    }
+    ip.close();
+  }
+
+  linked_ptr<Binding> binding = linked_ptr<Binding>(new Binding(_b->environment, _b->context, _b->def_target));
+  eval_hook(binding, _b->context, code);
+
+  return true;
 }
 
 RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self) {

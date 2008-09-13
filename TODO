@@ -1,5 +1,4 @@
 Game plan:
- * require
  * optional arguments
  * IO
  * regexps -- oniguruma
@@ -19,3 +18,4 @@ Shorter term problems:
  * Dir::glob needs to work to MRI's wildcard syntax
  * and/&&, or/|| need to not evaulate second condition if first fails/succeeds
  * `p 1 and 2' should parse to `(p 1) and 2'
+ * if we `def a(b); end', then just `a' should raise an ArgumentError of not enough arguments
