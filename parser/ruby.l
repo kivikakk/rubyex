@@ -8,6 +8,7 @@
 %option yywrap stack
 
 %x context_finish starting_block_args arglist_begins index_begins
+%x next_literally
 %s could_be_starting_block_args
 %s block_args
 
@@ -238,6 +239,9 @@ end			{
 		  yy_pop_state();
 		  return '}';
 		}
+
+\$/[":]		{ yy_push_state(next_literally); return '$'; }
+<next_literally>.	{ yy_pop_state(); return yytext[0]; }
 
 \<=>		{ return SPACESHIP; }
 ==		{ return EQ; }

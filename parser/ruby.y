@@ -50,7 +50,7 @@
 %type <identifier> opt_rescue_target
 %type <interpolated_expr> interpolated_string interpolated_backtick_string
 
-%type <identifier> function_name function_name_identifier sigiled_variable
+%type <identifier> function_name function_name_identifier sigiled_variable global_variable
 
 %type <procedure> sub_content sub_line if_otherwise unless_otherwise
 %type <block> opt_rescue_else opt_rescue_ensure
@@ -212,9 +212,15 @@ function_name:	function_name_identifier	{ $$ = $1; }
 ;
 
 sigiled_variable:
-		'@' function_name_identifier	{ $2->id.insert(0, "@"); $$ = $2; }
+		'@' function_name_identifier		{ $2->id.insert(0, "@"); $$ = $2; }
 	      | '@' '@' function_name_identifier	{ $3->id.insert(0, "@@"); $$ = $3; }
-	      |	'$' function_name_identifier	{ $2->id.insert(0, "$"); $$ = $2; }
+	      |	'$' function_name_identifier		{ $2->id.insert(0, "$"); $$ = $2; }
+	      | '$' global_variable			{ $2->id.insert(0, "$"); $$ = $2; }
+;
+
+global_variable:
+		':'	{ $$ = new IdentifierExpr(":"); }
+	      |	'"'	{ $$ = new IdentifierExpr("\""); }
 ;
 
 compiled_expr:	expr
