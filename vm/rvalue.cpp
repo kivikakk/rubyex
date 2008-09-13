@@ -30,8 +30,7 @@ RubyValue RubyValue::from_symbol(RubySymbol *_value)
 RubyValue RubyValue::from_object(RubyObject *_value)
 { return RubyValue(_value); }
 
-RubyClass *RubyValue::get_class(RubyEnvironment &_e) const
-{
+RubyClass *RubyValue::get_class(RubyEnvironment &_e) const {
   switch (type) {
     case RubyValue::RV_FIXNUM: return _e.Fixnum;
     case RubyValue::RV_SYMBOL: return _e.Symbol;
@@ -41,8 +40,7 @@ RubyClass *RubyValue::get_class(RubyEnvironment &_e) const
 }
 
 // the inclusion of `environment' here as a parameter seems a cop-out
-RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_name) const
-{
+RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_name) const {
   // We need to find a method by this name in our context. We go through the class's ::ancestors.
   // Tradition has it:
   // 	[MyMetaClass, [XXX more MetaClass related?],
@@ -101,8 +99,7 @@ bool RubyValue::ruby_eq_op(linked_ptr<Binding> &_b, RubyValue _rhs) const {
   return call(_b, "==", _rhs).truthy(_b->environment);
 }
 
-bool RubyValue::truthy(RubyEnvironment &_e) const
-{
+bool RubyValue::truthy(RubyEnvironment &_e) const {
   switch (type) {
     case RubyValue::RV_FIXNUM: return true;
     case RubyValue::RV_SYMBOL: return true;
@@ -119,32 +116,27 @@ bool RubyValue::truthy(RubyEnvironment &_e) const
   }
 }
 
-long RubyValue::get_fixnum() const
-{
+long RubyValue::get_fixnum() const {
   if (type != RubyValue::RV_FIXNUM)
     throw SevereInternalError("RubyValue::get_fixnum is called on not a fixnum");
   return fixnum;
 }
 
-std::string RubyValue::to_s(linked_ptr<Binding> &_b) const
-{
+std::string RubyValue::to_s(linked_ptr<Binding> &_b) const {
   return call(_b, "to_s").get_string();
 }
 
-std::string RubyValue::inspect(linked_ptr<Binding> &_b) const
-{
+std::string RubyValue::inspect(linked_ptr<Binding> &_b) const {
   return call(_b, "inspect").get_string();
 }
 
-const std::string &RubyValue::get_string() const
-{
+const std::string &RubyValue::get_string() const {
   if (!is_a<RubyString>())
     throw SevereInternalError("RubyValue::get_string is called on not a string");
   return get_special<RubyString>()->string_value;
 }
 
-void RubyValue::set_string(const std::string &_rhs) const
-{
+void RubyValue::set_string(const std::string &_rhs) const {
   if (!is_a<RubyString>())
     throw SevereInternalError("RubyValue::set_string is called on not a string");
   get_special<RubyString>()->string_value = _rhs;
@@ -153,22 +145,20 @@ void RubyValue::set_string(const std::string &_rhs) const
 RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name) const
 { return get_method(_b, _name)->call(_b, *this); }
 
-RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0) const
-{
+RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0) const {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
   return get_method(_b, _name)->call(_b, *this, args);
 }
-RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1) const
-{
+
+RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1) const {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
   args.push_back(_arg1);
   return get_method(_b, _name)->call(_b, *this, args);
 }
 
-RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1, RubyValue _arg2) const
-{
+RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, RubyValue _arg0, RubyValue _arg1, RubyValue _arg2) const {
   std::vector<RubyValue> args;
   args.push_back(_arg0);
   args.push_back(_arg1);
@@ -176,8 +166,7 @@ RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, Rub
   return get_method(_b, _name)->call(_b, *this, args);
 }
 
-RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, const std::vector<RubyValue> &_args) const
-{
+RubyValue RubyValue::call(linked_ptr<Binding> &_b, const std::string &_name, const std::vector<RubyValue> &_args) const {
   return get_method(_b, _name)->call(_b, *this, _args);
 }
 
