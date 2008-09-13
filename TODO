@@ -5,6 +5,7 @@ Game plan:
  * attr_*
  * *_eval
  * MRI compatibility layer
+ * working GC
 
 Shorter term problems:
  * catch/throw
