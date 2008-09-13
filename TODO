@@ -1,22 +1,21 @@
 Game plan:
+ * require
  * optional arguments
  * IO
- * require
- * catch/throw (not keywords)
+ * regexps -- oniguruma
  * attr_*
  * *_eval
- * regexps -- oniguruma
+ * MRI compatibility layer
 
-Not as important right now:
- * our float range sucks (double). Fix.
- * better solution for new_instance() in rclass
- * methods ending in `=' should always return the RHS
- * all RubyValues need instance variables.
- * sometimes flex encounters a push-back overflow due to braces (blocks)
- * SomeModule::some_method() syntax needs to work
- * even though '`' is in the function_name rule, it'll never be sent to the parser. (lexer starts interpreting already.)
- * Dir::glob only works with glob(3)'s syntax, not MRI's (e.g. `**', flags.)
- * Bytecode change:
-   * and/&& needs to not evaulate the second condition if the first fails
-   * or/|| needs to not evaulate the second condition if the first succeeds
- * p 1 and 2 should parse to (p 1) and 2, according to MRI
+Shorter term problems:
+ * catch/throw
+ * Float range is small
+ * RubyClass::new_instance(): these should not be centralised
+ * assignments should always return rvalue
+ * Fixnum, Symbol don't have instance variables
+ * flex encounters push-black overflows due to brace nesting occasionally
+ * Module::method syntax
+ * '`' method impossible to declare due to lexer switching modes
+ * Dir::glob needs to work to MRI's wildcard syntax
+ * and/&&, or/|| need to not evaulate second condition if first fails/succeeds
+ * `p 1 and 2' should parse to `(p 1) and 2'
