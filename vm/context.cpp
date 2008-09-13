@@ -110,7 +110,11 @@ RubyMethod *Context::get_method(const std::string &_name)
 void Context::assign(const std::string &_name, RubyValue _value)
 {
   if (_name[0] == '$')
-    return binding->environment.set_global_by_name(_name, _value);
+    try {
+      return binding->environment.set_global_by_name(_name, _value);
+    } catch (CannotChangeReadonlyError) {
+      throw WorldException(binding, binding->environment.NameError, _name + " is a read-only variable");
+    }
   else if (_name[0] == '@') {
     if (_name[1] == '@')
       binding->context.get_class(binding->environment)->set_class_variable(_name, _value);

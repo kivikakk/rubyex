@@ -5,6 +5,7 @@
 #include <map>
 #include <exception>
 #include "rclass.h"
+#include "rarray.h"
 #include "rmodule.h"
 #include "rstring.h"
 #include "rexception.h"
@@ -19,6 +20,8 @@ class RubyEnvironment
     RubyValue get_global_by_name(const std::string &) const;
     void set_global_by_name(const std::string &, RubyValue);
     void set_global_by_name(const std::string &, RubyObject *);
+    void set_readonly_global_by_name(const std::string &, RubyValue);
+    void set_readonly_global_by_name(const std::string &, RubyObject *);
 
     const std::string &get_name_by_global(RubyValue) const;
     inline RubyValue get_truth(bool _t) const { return _t ? TRUE : FALSE; }
@@ -52,17 +55,31 @@ class RubyEnvironment
 
     RubyModule *Kernel, *Comparable;
 
+    RubyArray *RubyPath, *RubyLoaded;
+
     RubyObject *main;
     RubyValue TRUE, FALSE, NIL;
 
     GarbageCollector gc;
 
   protected:
+    class _GlobalSettings {
+      public:
+	_GlobalSettings();
+	_GlobalSettings(bool);
+
+	bool readonly;
+    };
+
     std::map<std::string, RubyValue> globals;
+    std::map<std::string, _GlobalSettings> global_settings;
     std::map<std::string, RubySymbol *> symbols;
 };
 
 class CannotFindGlobalError : public std::exception
+{ };
+
+class CannotChangeReadonlyError : public std::exception
 { };
 
 #endif

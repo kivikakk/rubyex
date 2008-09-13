@@ -8,6 +8,11 @@
 #include "rexception.h"
 #include "global.h"
 
+RubyValue kernel_require(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_load_file(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue kernel_load_file_wrap(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+
+RubyValue kernel_eval(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_binding(linked_ptr<Binding> &, RubyValue);
 RubyValue kernel_eval(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue kernel_raise(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
@@ -21,6 +26,9 @@ RubyValue kernel_backtick(linked_ptr<Binding> &, RubyValue, const std::vector<Ru
 
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
+  _e.Kernel->add_module_method(_e, "require", RubyMethod::Create(kernel_require, 1));
+  _e.Kernel->add_module_method(_e, "load", new RubyMultiCMethod(new RubyCMethod(kernel_load_file, 1), new RubyCMethod(kernel_load_file_wrap, 2)));
+
   _e.Kernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
   _e.Kernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
   _e.Kernel->add_module_method(_e, "raise", RubyMethod::Create(kernel_raise, ARGS_ARBITRARY));
@@ -33,13 +41,20 @@ void RubyKernelEI::init(RubyEnvironment &_e)
   _e.Kernel->add_module_method(_e, "`", RubyMethod::Create(kernel_backtick, 1));
 }
 
-RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self)
-{
+RubyValue kernel_require(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+}
+
+RubyValue kernel_load_file(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+}
+
+RubyValue kernel_load_file_wrap(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+}
+
+RubyValue kernel_binding(linked_ptr<Binding> &_b, RubyValue _self) {
   return O2V(new RubyBinding(_b));
 }
 
-RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
-{
+RubyValue kernel_eval(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
   RubyValue first = _args[0];
   if (first.object->get_class() != _b->environment.String)
     throw WorldException(_b, _b->environment.TypeError, "tried to eval non-String");

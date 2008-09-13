@@ -57,6 +57,11 @@ RubyEnvironment::RubyEnvironment()
   RubyIOEI().init(*this);
   RubyExceptionEI().init(*this);
 
+  this->RubyPath = new RubyArray(*this);
+  this->RubyPath->data.push_back(get_string("."));
+  this->set_readonly_global_by_name("$:", this->RubyPath);
+  this->set_readonly_global_by_name("$\"", (this->RubyLoaded = new RubyArray(*this)));
+
   this->set_global_by_name("VERSION", this->get_string(RX_VERSION));
   this->set_global_by_name("RUBY_PLATFORM", this->get_string(RX_PLATFORM));
   this->set_global_by_name("RUBY_RELEASE_DATE", this->get_string(RX_RELEASE_DATE));
@@ -70,16 +75,14 @@ RubyValue main_to_s(linked_ptr<Binding> &_b, RubyValue _self) {
   return _b->environment.get_string("main");
 }
 
-bool RubyEnvironment::global_exists(const std::string &_name) const
-{
+bool RubyEnvironment::global_exists(const std::string &_name) const {
   if (_name[0] != '$')
     return this->Object->has_constant(_name);
 
   return (globals.find(_name) != globals.end());
 }
 
-RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
-{
+RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const {
   if (_name[0] != '$')
     return this->Object->get_constant(_name);
 
@@ -89,35 +92,39 @@ RubyValue RubyEnvironment::get_global_by_name(const std::string &_name) const
   return globals.find(_name)->second;
 }
 
-void RubyEnvironment::set_global_by_name(const std::string &_name, RubyValue _val)
-{
+void RubyEnvironment::set_global_by_name(const std::string &_name, RubyValue _val) {
   if (_name[0] != '$')
     return this->Object->set_constant(_name, _val);
+
+  if (global_exists(_name)) {
+    if (global_settings[_name].readonly)
+      throw CannotChangeReadonlyError();
+  } else
+    global_settings[_name] = _GlobalSettings();
 
   // XXX GC concerns of overwriting?
   globals[_name] = _val;
 }
 
-void RubyEnvironment::set_global_by_name(const std::string &_name, RubyObject *_val)
-{
-  return set_global_by_name(_name, O2V(_val));
+void RubyEnvironment::set_global_by_name(const std::string &_name, RubyObject *_val) {
+  set_global_by_name(_name, O2V(_val));
 }
 
-const std::string &RubyEnvironment::get_name_by_global(RubyValue _global) const
-{
+void RubyEnvironment::set_readonly_global_by_name(const std::string &_name, RubyValue _val) {
+  set_global_by_name(_name, _val);
+  global_settings[_name].readonly = true;
+}
+
+void RubyEnvironment::set_readonly_global_by_name(const std::string &_name, RubyObject *_val) {
+  set_global_by_name(_name, O2V(_val));
+  global_settings[_name].readonly = true;
+}
+
+const std::string &RubyEnvironment::get_name_by_global(RubyValue _global) const {
   return this->Object->get_name_by_constant(_global);
-  /*
-  std::map<std::string, RubyValue>::const_iterator obj =
-    std::find_if(globals.begin(), globals.end(), second_equal_to<std::map<std::string, RubyValue>::value_type>(_global));
-  if (obj != globals.end())
-    return obj->first;
-
-  throw CannotFindGlobalError();
-  */
 }
 
-RubySymbol *RubyEnvironment::get_symbol(const std::string &_name)
-{
+RubySymbol *RubyEnvironment::get_symbol(const std::string &_name) {
   std::map<std::string, RubySymbol *>::iterator si = symbols.find(_name);
   if (si != symbols.end())
     return si->second;
@@ -130,3 +137,8 @@ RubyObject *RubyEnvironment::errno_exception(linked_ptr<Binding> &_b, int _no, c
   return O2V(SystemCallError).call(_b, "new", F2V(_no), get_string(_msg)).object;
 }
 
+RubyEnvironment::_GlobalSettings::_GlobalSettings(): readonly(false)
+{ }
+RubyEnvironment::_GlobalSettings::_GlobalSettings(bool _readonly): readonly(_readonly)
+
+{ }
