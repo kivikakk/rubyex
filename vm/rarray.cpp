@@ -41,16 +41,15 @@ RubyValue array_initialize(linked_ptr<Binding> &_b, RubyValue _self)
 
 RubyValue array_initialize_length(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  // XXX We probably need to override new here to actually do what this method is for.
   RubyArray *a = _self.get_special<RubyArray>();
-  a->data = std::vector<RubyValue>(_args[0].get_fixnum());
+  a->data.insert(a->data.begin(), _args[0].get_fixnum(), _b->environment.NIL);
   return _b->environment.NIL;
 }
 
 RubyValue array_initialize_copies(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
   RubyArray *a = _self.get_special<RubyArray>();
-  a->data = std::vector<RubyValue>(_args[0].get_fixnum(), _args[1]);
+  a->data.insert(a->data.begin(), _args[0].get_fixnum(), _args[1]);
   return _b->environment.NIL;
 }
 

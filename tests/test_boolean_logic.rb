@@ -9,5 +9,5 @@ p false || nil
 p false && 1
 p nil && 9
 p 9 && nil
-p false or nil
-p nil or false
+p (false or nil)
+p (nil or false)
