@@ -101,15 +101,24 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	break;
       }
-      // I_TARGET_DEF
+      // XXX/TODO: I_TARGET_DEF
       case I_DEF: {
 	std::string name = r.read_string();
-	uint32 arg_count = r.read_uint32();
+	bool has_args = r.read_bool();
 
 	RubyBytecodeMethod *method = new RubyBytecodeMethod(context->binding->def_target);		// no target, runs in same context as here
 
-	while (arg_count--)
-	  method->code.args.push_back(r.read_string());
+	if (has_args) {
+	  int normal_args = r.read_uint32();
+	  int opt_args = r.read_uint32();
+	  bool has_splat_arg = r.read_bool();
+
+	  while (normal_args--)
+	    method->code.args.push_back(r.read_string());
+
+	  //while (arg_count--)
+	    //method->code.args.push_back(r.read_string());
+	}
 	
 	uint32 byte_count = r.read_uint32();
 	method->code.code = r.read_bytes(byte_count);

@@ -118,12 +118,15 @@ class FuncDefListEntity : public Expr
 {
   public:
     FuncDefListEntity(IdentifierExpr *);
+    FuncDefListEntity(IdentifierExpr *, bool);
     FuncDefListEntity(IdentifierExpr *, Procedure *);
     ~FuncDefListEntity();
 
     void p() const;
+    void emit(std::ostream &) const;
 
-    IdentifierExpr *id;
+    std::string id;
+    bool is_catch_all;
     Procedure *default_value;
 };
 
@@ -134,6 +137,10 @@ class FuncDefList : public Expr
     virtual ~FuncDefList();
 
     void add(FuncDefListEntity *);
+    bool valid_syntax() const;
+    int normal_args() const;
+    int opt_args() const;
+    bool has_splat_arg() const;
 
     void p() const;
     void emit(std::ostream &) const;

@@ -21,3 +21,4 @@ Shorter term problems:
  * `p 1 and 2' should parse to `(p 1) and 2'
  * if we `def a(b); end', then just `a' should raise an ArgumentError of not enough arguments
  * expand hash-style on end to hash last argument
+ * optional argument def a(b=(anything; can(); go = here)) syntax needs to work

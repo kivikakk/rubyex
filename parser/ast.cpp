@@ -238,21 +238,38 @@ ExprList::~ExprList() {
 
 // FuncDefListEntity
 
-FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id): id(_id), default_value(NULL)
-{ }
+FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id): id(_id->id), is_catch_all(false), default_value(NULL) {
+  delete _id;
+}
 
-FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id, Procedure *_default_value): id(_id), default_value(_default_value)
-{ }
+FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id, bool _is_catch_all): id(_id->id), is_catch_all(_is_catch_all), default_value(NULL) {
+  delete _id;
+}
+
+FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id, Procedure *_default_value): id(_id->id), default_value(_default_value) {
+  delete _id;
+}
 
 FuncDefListEntity::~FuncDefListEntity() {
-  delete id;
+  delete default_value;
 }
 
 void FuncDefListEntity::p() const {
-  id->p();
+  if (is_catch_all)
+    std::cout << "*";
+
+  std::cout << id;
   if (default_value) {
     std::cout << "=";
     default_value->p();
+  }
+}
+
+void FuncDefListEntity::emit(std::ostream &o) const {
+  emit_string(o, id);
+  if (default_value) {
+    emit_uint32(o, default_value->length());
+    default_value->emit(o);
   }
 }
 
@@ -271,6 +288,45 @@ void FuncDefList::add(FuncDefListEntity *_entity) {
   args.push_back(_entity);
 }
 
+bool FuncDefList::valid_syntax() const {
+  for (std::list<FuncDefListEntity *>::const_reverse_iterator it = args.rbegin(); it != args.rend(); ++it)
+    if ((*it)->is_catch_all && it != args.rbegin())
+      return false;
+  bool switched = false;
+  for (std::list<FuncDefListEntity *>::const_iterator it = args.begin(); it != args.end(); ++it) {
+    if ((*it)->default_value)
+      switched = true;
+    else if (!(*it)->default_value && !(*it)->is_catch_all && switched)
+      return false;
+  }
+  return true;
+}
+
+int FuncDefList::normal_args() const {
+  int c = 0;
+  for (std::list<FuncDefListEntity *>::const_iterator it = args.begin(); it != args.end(); ++it)
+    if (!(*it)->default_value && !(*it)->is_catch_all)
+      c++;
+  return c;
+}
+
+int FuncDefList::opt_args() const {
+  int c = 0;
+  for (std::list<FuncDefListEntity *>::const_iterator it = args.begin(); it != args.end(); ++it)
+    if ((*it)->default_value)
+      c++;
+  return c;
+}
+
+bool FuncDefList::has_splat_arg() const {
+  for (std::list<FuncDefListEntity *>::const_reverse_iterator it = args.rbegin(); it != args.rend(); ++it)
+    if ((*it)->default_value)
+      return true;
+    else
+      return false;
+  return false;
+}
+
 void FuncDefList::p() const {
   std::cout << "(";
   for (std::list<FuncDefListEntity *>::const_iterator it = args.begin(); it != args.end(); ++it) {
@@ -281,9 +337,16 @@ void FuncDefList::p() const {
 }
 
 void FuncDefList::emit(std::ostream &o) const {
+  emit_uint32(o, normal_args());
+  emit_uint32(o, opt_args());
+  emit_bool(o, has_splat_arg());
+  for (std::list<FuncDefListEntity *>::const_iterator it = args.begin(); it != args.end(); ++it)
+    (*it)->emit(o);
 }
 
 void FuncDefList::push(std::ostream &o) const {
+  emit(o);
+  emit_instruction(o, I_PUSH_LAST);
 }
 
 // DefListExpr
@@ -592,10 +655,11 @@ void FuncDefExpr::emit(std::ostream &o) const
 
   emit_instruction(o, target ? I_TARGET_DEF : I_DEF);
   emit_string(o, name->id);
-  if (args)
+  if (args) {
+    emit_bool(o, true);
     args->emit(o);
-  else
-    emit_uint32(o, 0);
+  } else
+    emit_bool(o, false);
 
   emit_uint32(o, proc->length());
   proc->emit(o);

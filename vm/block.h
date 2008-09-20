@@ -25,7 +25,7 @@ class Block
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
     std::string code;
-    std::vector<std::string> args;
+    std::vector<std::string> args;			// TODO RESUME - extend here. - need an extra var for optionals/splat? or what?
     RubyModule *def_target;
     Context *caller_context;
     Block *caller_block;

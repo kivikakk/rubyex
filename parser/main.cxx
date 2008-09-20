@@ -42,6 +42,7 @@ int main(int argc, char **argv)
   if (invoked_as.find('/') != std::string::npos)
     invoked_as = invoked_as.substr(invoked_as.find('/') + 1);
 
+  omit_errors = true;
   if (invoked_as == "test")
     return main_test(arguments);
   
@@ -53,8 +54,10 @@ int main_parser(std::list<std::string> &arguments)
   Program p;
 
   int r = yyparse(&p);
-  if (r != 0)
+  if (r != 0) {
+    std::cout << syntax_error << std::endl;
     return r;
+  }
 
   if (find_remove_string(arguments, "-b")) {
     // emit bytecode

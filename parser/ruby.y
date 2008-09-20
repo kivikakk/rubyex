@@ -33,7 +33,7 @@
 %token <nil_literal> NIL_LITERAL
 %token <yield> YIELD
 
-%type <expr> line expr compiled_expr
+%type <expr> line expr compiled_expr expr_nob
 %type <block> block opt_block
 %type <exprlist> exprlist opt_exprlist hashlist
 %type <idlist> idlist opt_idlist
@@ -103,7 +103,11 @@ line: 		line_separator		{ $$ = NULL; }
 	      | expr END_OF_FILE 	{ $$ = $1; }
 ;
 
-expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
+expr:		expr_nob				{ $$ = $1; }
+	      | '(' expr ')'				{ $$ = $2; }
+;
+
+expr_nob:      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | YIELD exprlist				{ $$ = new YieldExpr($2); }
 	      | YIELD '(' opt_exprlist ')'		{ $$ = new YieldExpr($3); }
 	      | classdef				{ $$ = $1; }
@@ -167,7 +171,6 @@ expr:	      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr RANGE_THREE expr			{ $$ = new FuncCallExpr(new IdentifierExpr("Range"), new IdentifierExpr("new"), new ExprList($1, $3, new BooleanLiteralExpr(true)), NULL); }
 	      | expr LEFT_SHIFT expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr("<<"), new ExprList($3), NULL); }
 	      | expr RIGHT_SHIFT expr			{ $$ = new FuncCallExpr($1, new IdentifierExpr(">>"), new ExprList($3), NULL); }
-	      | '(' expr ')'				{ $$ = $2; }
 	      | '[' opt_exprlist ']'			{ $$ = new FuncCallExpr(new IdentifierExpr("Array"), new IdentifierExpr("[]"), $2, NULL); }
 	      | '{' hashlist CONTEXT_FINISH '}'		{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
 	      | '{' hashlist '}'			{ $$ = new FuncCallExpr(new IdentifierExpr("Hash"), new IdentifierExpr("[]"), $2, NULL); }
@@ -250,12 +253,13 @@ opt_exprlist:	/* empty */			{ $$ = NULL; }
 ;
 
 funcdeflist:	funcdeflistentity			{ $$ = new FuncDefList($1); }
-	      |	funcdeflist ',' funcdeflistentity	{ $$ = $1; $$->add($3); }
+	      |	funcdeflist ',' funcdeflistentity	{ $$ = $1; $$->add($3); if (!$$->valid_syntax()) { yyerror(program, "syntax error, invalid argument list"); YYERROR; } }
 ;
 
 funcdeflistentity:
-		IDENTIFIER			{ $$ = new FuncDefListEntity($1); }
-	      |	IDENTIFIER '=' sub_content	{ $$ = new FuncDefListEntity($1, $3); }
+		IDENTIFIER				{ $$ = new FuncDefListEntity($1); }
+	      |	IDENTIFIER '=' expr			{ $$ = new FuncDefListEntity($1, new Procedure($3)); }
+	      |	'*' IDENTIFIER				{ $$ = new FuncDefListEntity($2, true); }
 ;
 
 /* deflist is for block argument definitions. one or more. */
