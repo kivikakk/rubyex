@@ -236,6 +236,56 @@ ExprList::~ExprList() {
   // see ExprList(ExprList*, Expr*) above.
 }
 
+// FuncDefListEntity
+
+FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id): id(_id), default_value(NULL)
+{ }
+
+FuncDefListEntity::FuncDefListEntity(IdentifierExpr *_id, Procedure *_default_value): id(_id), default_value(_default_value)
+{ }
+
+FuncDefListEntity::~FuncDefListEntity() {
+  delete id;
+}
+
+void FuncDefListEntity::p() const {
+  id->p();
+  if (default_value) {
+    std::cout << "=";
+    default_value->p();
+  }
+}
+
+// FuncDefList
+
+FuncDefList::FuncDefList(FuncDefListEntity *_entity) {
+  args.push_back(_entity);
+}
+
+FuncDefList::~FuncDefList() {
+  for (std::list<FuncDefListEntity *>::iterator it = args.begin(); it != args.end(); ++it)
+    delete *it;
+}
+
+void FuncDefList::add(FuncDefListEntity *_entity) {
+  args.push_back(_entity);
+}
+
+void FuncDefList::p() const {
+  std::cout << "(";
+  for (std::list<FuncDefListEntity *>::const_iterator it = args.begin(); it != args.end(); ++it) {
+    if (it != args.begin()) std::cout << ", ";
+    (*it)->p();
+  }
+  std::cout << ")";
+}
+
+void FuncDefList::emit(std::ostream &o) const {
+}
+
+void FuncDefList::push(std::ostream &o) const {
+}
+
 // DefListExpr
 
 DefListExpr::DefListExpr(IdentifierExpr *first) {
@@ -508,20 +558,14 @@ void AssignmentExpr::push(std::ostream &o) const {
 
 // FuncDefExpr
 
-FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, DefListExpr *_args, Procedure *_proc): target(_target), name(_name), proc(_proc)
-{
-  if (_args) {
-    this->args = _args->args;
-    delete _args;		// responsibility.
-  }
-}
+FuncDefExpr::FuncDefExpr(Expr *_target, IdentifierExpr *_name, FuncDefList *_args, Procedure *_proc): target(_target), name(_name), args(_args), proc(_proc)
+{ }
 
 FuncDefExpr::~FuncDefExpr()
 {
-  for (std::list<IdentifierExpr *>::iterator it = args.begin(); it != args.end(); ++it)
-    delete *it;
   delete target;
   delete name;
+  delete args;
   delete proc;
 }
   
@@ -534,14 +578,8 @@ void FuncDefExpr::p() const
     std::cout << ").";
   }
   name->p();
-  if (args.size() > 0) {
-    std::cout << "(";
-    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it) {
-      if (it != args.begin()) std::cout << ", ";
-      (*it)->p();
-    }
-    std::cout << ")";
-  }
+  if (args)
+    args->p();
   std::cout << std::endl;
   proc->p();
   std::cout << std::endl << "end" << std::endl;
@@ -554,12 +592,9 @@ void FuncDefExpr::emit(std::ostream &o) const
 
   emit_instruction(o, target ? I_TARGET_DEF : I_DEF);
   emit_string(o, name->id);
-  // if these change from identifiers, might we need to push them instead? I'm not sure what's semantically more correct.
-  if (args.size() > 0) {
-    emit_uint32(o, args.size());
-    for (std::list<IdentifierExpr *>::const_iterator it = args.begin(); it != args.end(); ++it)
-      emit_string(o, (*it)->id);
-  } else
+  if (args)
+    args->emit(o);
+  else
     emit_uint32(o, 0);
 
   emit_uint32(o, proc->length());

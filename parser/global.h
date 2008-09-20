@@ -35,6 +35,8 @@ typedef union {
   ModuleDefExpr *moduledef;
   FuncCallExpr *funccall;
   FuncDefExpr *funcdef;
+  FuncDefListEntity *funcdeflistentity;
+  FuncDefList *funcdeflist;
   ConditionalExpr *conditional;
   WhileExpr *while_loop;
   BeginSectionExpr *begin_section;

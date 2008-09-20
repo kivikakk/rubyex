@@ -37,12 +37,14 @@
 %type <block> block opt_block
 %type <exprlist> exprlist opt_exprlist hashlist
 %type <idlist> idlist opt_idlist
-%type <deflist> deflist block_arguments opt_block_arguments block_argument_contents funcdef_args
+%type <deflist> deflist block_arguments opt_block_arguments block_argument_contents
 %type <literal> literal
 %type <classdef> classdef
 %type <moduledef> moduledef
 %type <funccall> funccall
+%type <funcdeflist> funcdef_args funcdeflist
 %type <funcdef> funcdef
+%type <funcdeflistentity> funcdeflistentity
 %type <conditional> conditional
 %type <while_loop> while_loop
 %type <begin_section> begin_section
@@ -247,7 +249,16 @@ opt_exprlist:	/* empty */			{ $$ = NULL; }
 	      | exprlist			{ $$ = $1; }
 ;
 
-/* deflist is for function/block argument definitions. one or more. */
+funcdeflist:	funcdeflistentity			{ $$ = new FuncDefList($1); }
+	      |	funcdeflist ',' funcdeflistentity	{ $$ = $1; $$->add($3); }
+;
+
+funcdeflistentity:
+		IDENTIFIER			{ $$ = new FuncDefListEntity($1); }
+	      |	IDENTIFIER '=' sub_content	{ $$ = new FuncDefListEntity($1, $3); }
+;
+
+/* deflist is for block argument definitions. one or more. */
 deflist:	IDENTIFIER		{ $$ = new DefListExpr($1); }
 	      | deflist ',' IDENTIFIER	{ $$ = new DefListExpr($1, $3); }
 ;
@@ -287,15 +298,15 @@ block_argument_contents:
 	      | deflist		{ $$ = $1; }
 ;
 
-funcdef:	DEF FUNCTION_CALL funcdef_args sub_content END					{ $$ = new FuncDefExpr(NULL, $2, $3, $4); }
+funcdef:	DEF FUNCTION_CALL funcdef_args line_separator sub_content END			{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
 	      |	DEF function_name funcdef_args line_separator sub_content END 			{ $$ = new FuncDefExpr(NULL, $2, $3, $5); }
 	      |	DEF function_name_identifier '=' funcdef_args line_separator sub_content END 	{ $2->id += '='; $$ = new FuncDefExpr(NULL, $2, $4, $6); }
 ;
 
 funcdef_args:	/* empty */		{ $$ = NULL; }
 	      | ARG_BRACKET ')'		{ $$ = NULL; }
-	      | ARG_BRACKET deflist ')'	{ $$ = $2; }
-	      | deflist			{ $$ = $1; }
+	      | ARG_BRACKET funcdeflist ')'	{ $$ = $2; }
+	      | funcdeflist			{ $$ = $1; }
 ;
 
 conditional:	IF expr then_or_separator sub_content if_otherwise END 		{ $$ = new ConditionalExpr($2, $4, $5); }

@@ -114,6 +114,34 @@ class ExprList
     std::list<Expr *> args;
 };
 
+class FuncDefListEntity : public Expr
+{
+  public:
+    FuncDefListEntity(IdentifierExpr *);
+    FuncDefListEntity(IdentifierExpr *, Procedure *);
+    ~FuncDefListEntity();
+
+    void p() const;
+
+    IdentifierExpr *id;
+    Procedure *default_value;
+};
+
+class FuncDefList : public Expr
+{
+  public:
+    FuncDefList(FuncDefListEntity *);
+    virtual ~FuncDefList();
+
+    void add(FuncDefListEntity *);
+
+    void p() const;
+    void emit(std::ostream &) const;
+    void push(std::ostream &) const;
+
+    std::list<FuncDefListEntity *> args;
+};
+
 class DefListExpr
 {
   public:
@@ -222,7 +250,7 @@ class AssignmentExpr : public Expr
 class FuncDefExpr : public Expr
 {
   public:
-    FuncDefExpr(Expr *, IdentifierExpr *, DefListExpr *, Procedure *);
+    FuncDefExpr(Expr *, IdentifierExpr *, FuncDefList *, Procedure *);
     virtual ~FuncDefExpr();
 
     void p() const;
@@ -230,7 +258,7 @@ class FuncDefExpr : public Expr
 
     Expr *target;
     IdentifierExpr *name;
-    std::list<IdentifierExpr *> args;
+    FuncDefList *args;
     Procedure *proc;
 };
 
