@@ -49,6 +49,7 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
 }
 
 RubyValue exception_initialize(linked_ptr<Binding> &_b, RubyValue _self) {
+  _self.call(_b, "message=", _b->environment.get_string("no message"));
   return _b->environment.NIL;
 }
 
