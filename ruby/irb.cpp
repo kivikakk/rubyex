@@ -35,7 +35,7 @@ int irb(int, char **)
     std::getline(std::cin, input);
     if (std::cin.eof()) {
       std::cout << std::endl;
-      return 0;
+      break;
     }
 
     input += "\n";
@@ -69,6 +69,8 @@ int irb(int, char **)
 	std::cerr << cname << std::endl;
     }
   }
+
+  delete c;
 
   return 0;
 }

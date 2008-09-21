@@ -35,11 +35,13 @@ int twophase(int argc, char **argv)
     return r;
   }
 
+  Context *c = NULL;
+
   try {
     std::istringstream iss(oss.str());
     RubyEnvironment e;
     Reader reader(iss);
-    Context *c = new Context(e, RubyValue::from_object(e.main), e.Object, NULL);
+    c = new Context(e, RubyValue::from_object(e.main), e.Object, NULL);
 
     process(e, reader, c, NULL);
   } catch (WorldException &w) {
@@ -54,6 +56,8 @@ int twophase(int argc, char **argv)
   } catch (SevereInternalError &s) {
     std::cerr << "Severe internal error: " << s.message << std::endl;
   }
+
+  delete c;
 
   return 0;
 }

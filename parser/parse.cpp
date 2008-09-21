@@ -2,6 +2,7 @@
 #include "main.h"
 #include "global.h"
 #include "tests.h"
+#include "tests.h"
 
 std::string syntax_error;
 
@@ -14,8 +15,13 @@ Program parse_code(const char *code, int line, int length)
 {
   Program p;
 
+  destroy_old_buffer();
   yy_scan_string(code);
+  assign_new_buffer();
+
   int r = yyparse(&p);
+  destroy_old_buffer();
+
   if (r != 0)
     throw ParseFailureException(code);
 

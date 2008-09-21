@@ -28,6 +28,9 @@ RubyValue eval_hook(linked_ptr<Binding> &_b, RubyValue _self, const std::string 
   Reader reader(iss);
 
   Context *c = new Context(_b);
-  return process(_b->environment, reader, c, NULL);
+  RubyValue ret = process(_b->environment, reader, c, NULL);
+  delete c;
+
+  return ret;
 }
 
