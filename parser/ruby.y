@@ -86,6 +86,11 @@
 %left '{' '}'
 %left '[' ']'
 
+// Collected these by seeing what things are allocated with `new' in ruby.l and finding the symbols they return.
+%destructor { delete $$; } IDENTIFIER FUNCTION_CALL INTEGER_LITERAL STRING_LITERAL BACKTICK_LITERAL FLOATING_LITERAL BOOLEAN_LITERAL NIL_LITERAL SYMBOL INDEX_CALL /*
+    */ expr funccall exprlist funcdeflist funcdeflistentity deflist idlist hashlist block funcdef conditional if_otherwise while_loop sub_line interpolated_string /*
+    */ interpolated_backtick_string begin_section opt_rescue opt_rescue_else opt_rescue_ensure classdef moduledef
+
 %%
 
 input:  	/* empty */
@@ -253,7 +258,7 @@ opt_exprlist:	/* empty */			{ $$ = NULL; }
 ;
 
 funcdeflist:	funcdeflistentity			{ $$ = new FuncDefList($1); }
-	      |	funcdeflist ',' funcdeflistentity	{ $$ = $1; $$->add($3); if (!$$->valid_syntax()) { yyerror(program, "syntax error, invalid argument list"); YYERROR; } }
+	      |	funcdeflist ',' funcdeflistentity	{ $$ = $1; $$->add($3); if (!$$->valid_syntax()) { delete $$;  yyerror(program, "syntax error, invalid argument list"); YYERROR; } }
 ;
 
 funcdeflistentity:

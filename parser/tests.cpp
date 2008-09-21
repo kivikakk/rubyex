@@ -2,19 +2,20 @@
 #include "global.h"
 #include "tests.h"
 
-Test::Test(const std::string &_name, const test_pointer &_test): name(_name), test(_test) { }
+Test::Test(): end_marker(true) { }
+Test::Test(const std::string &_name, const test_pointer &_test): end_marker(false), name(_name), test(_test) { }
 
 int assertions, assertion_successes;
 bool test_succeeding;
 
 int tests_all()
 {
-  Test **ptr = tests;
+  Test *ptr = tests;
   int tests_run = 0, tests_succeed = 0;
   assertions = 0; assertion_successes = 0;
 
-  while (*ptr) {
-    Test test = **ptr;
+  while (!ptr->end_marker) {
+    Test test = *ptr;
     test_succeeding = true;
 
     std::cout << "test: \"" << test.name << "\"" << std::endl;
@@ -34,6 +35,8 @@ int tests_all()
 
     ptr++, tests_run++;
   }
+
+  yylex_destroy();
 
   std::cerr << tests_run << " test(s) run, " << tests_succeed << " test(s) succeeded." << std::endl;
   std::cerr << assertions << " assertion(s), " << assertion_successes << " assertion(s) succeeded." << std::endl;
@@ -569,7 +572,7 @@ void _multi_call()
   ASSERT(m->args.size() == 0);
 }
 
-Test *tests[] = {
+Test tests[] = {
   TEST(literals),
   TEST(identifier),
   TEST(symbol),
@@ -581,5 +584,6 @@ Test *tests[] = {
   TEST(block),
   TEST(block_args),
   TEST(multi_call),
-  NULL
+  TEST_END()
 };
+

@@ -3,6 +3,8 @@
 
   #include "ruby.tab.h"
   #include <string>
+
+  YY_BUFFER_STATE current_buffer = NULL;
 %}
 
 %option yywrap stack
@@ -374,4 +376,21 @@ end			{
 [\t ]+		{ }
 .		{ return yytext[0]; }
 \n		{ return NL; }
+
+%%
+
+void destroy_current_buffer() {
+  yy_delete_buffer(YY_CURRENT_BUFFER);
+}
+
+void destroy_old_buffer() {
+  if (current_buffer) {
+    yy_delete_buffer(current_buffer);
+    current_buffer = NULL;
+  }
+}
+
+void assign_new_buffer() {
+  current_buffer = YY_CURRENT_BUFFER;
+}
 

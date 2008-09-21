@@ -9,6 +9,11 @@ Procedure::Procedure(Expr *_first) {
   expressions.push_back(_first);
 }
 
+Procedure::~Procedure() {
+  for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it)
+    delete *it;
+}
+
 void Procedure::p() const {
   for (std::list<Expr *>::const_iterator it = expressions.begin(); it != expressions.end(); ++it) {
     if (it != expressions.begin()) std::cout << "; ";
@@ -391,8 +396,9 @@ BlockExpr::BlockExpr(): proc(NULL)
 BlockExpr::BlockExpr(Procedure *_proc): proc(_proc)
 { }
 
-BlockExpr::~BlockExpr()
-{
+BlockExpr::~BlockExpr() {
+  for (std::list<IdentifierExpr *>::iterator it = args.begin(); it != args.end(); ++it)
+    delete *it;
   delete proc;
 }
 

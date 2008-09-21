@@ -4,7 +4,8 @@
 #include <sstream>
 #include <string>
 #include <exception>
-#define TEST(name) new Test (#name, _##name)
+#define TEST_END() Test()
+#define TEST(name) Test(#name, _##name)
 #define BEGIN(name, code, length) Program name = parse_code(code, __LINE__, length)
 #define ASSERT(exp) do { if (!assert_throw(__LINE__, #exp, (exp))) return; } while(false)
 #define ASSERT_LEN(program, line, lines) do { if (!assert_throw((line), #program " expression count match", (program).expressions.size() == (lines))) return; } while (false)
@@ -26,8 +27,10 @@ bool assert_throw(int, const char *, bool);
 class Test
 {
   public:
+    Test();
     Test(const std::string &, const test_pointer &);
 
+    bool end_marker;
     std::string name;
     test_pointer test;
 };
@@ -53,7 +56,7 @@ class AssertionFailureException : public std::exception
     std::string message;
 };
 
-extern Test *tests[];
+extern Test tests[];
 
 #endif
 

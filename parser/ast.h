@@ -20,6 +20,7 @@ class Procedure : public PrettyPrint, public Emitter
   public:
     Procedure();
     Procedure(Expr *);
+    virtual ~Procedure();
 
     std::list<Expr *> expressions;
 

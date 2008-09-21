@@ -58,6 +58,12 @@ void enter_context(); void enter_context_line();
 void exit_context(); void exit_context_line();
 bool in_context();
 
+// in ruby.l
+void destroy_current_buffer();
+void destroy_old_buffer();
+void assign_new_buffer();
+int yylex_destroy();
+
 std::string filter_underscores(const std::string &);
 
 #endif

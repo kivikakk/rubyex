@@ -54,6 +54,8 @@ int main_parser(std::list<std::string> &arguments)
   Program p;
 
   int r = yyparse(&p);
+  yylex_destroy();
+
   if (r != 0) {
     std::cout << syntax_error << std::endl;
     return r;
