@@ -68,14 +68,14 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	Block block(NULL, NULL, NULL);	// purposefully temporary.
 
 	if (is_target) target = s.pop_value(context);
-	if (is_block) block = s.pop_block();
+	if (is_block) Block::tfr_ptr(s.pop_block(), block);
 
 	std::vector<RubyValue> arguments;
 	while (arg_count--)
 	  arguments.push_back(s.pop_value(context));
 
 	// if we have a target, we need to be more direct
-	RubyMethod *method = is_target ? target.get_method(context->binding, name) : context->get_method(name);
+	const linked_ptr<RubyMethod> &method = is_target ? target.get_method(context->binding, name) : context->get_method(name);
 
 	last_value = is_block ? 
 	  method->call(context->binding, is_target ? target : context->binding->context, arguments, block) :
@@ -88,14 +88,14 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
 
       case I_CONSTRUCT_BLOCK: {
-	Block block(context->binding->def_target, context, yield_block);	// takes def_target of surroundings.
+	Block *block = new Block(context->binding->def_target, context, yield_block);	// takes def_target of surroundings.
 
 	uint32 arg_count = r.read_uint32();
 	while (arg_count--)
-	  block.args.push_back(new BlockArg(r.read_string()));
+	  block->args.push_back(new BlockArg(r.read_string()));
 
 	uint32 byte_count = r.read_uint32();
-	block.code = r.read_bytes(byte_count);
+	block->code = r.read_bytes(byte_count);
 
 	s.push_block(block);
 
@@ -173,7 +173,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	std::string name = s.pop_identifier();
 	RubyClass *super = inherits ? s.pop_value(context).get_special<RubyClass>() : e.Object;
-	Block code = s.pop_block();
+	Block code(NULL, NULL, NULL);
+	Block::tfr_ptr(s.pop_block(), code);
 
 	if (!super)
 	  throw WorldException(context->binding, e.TypeError, "superclass must be a Class (XXX given)");	// XXX minor fix.
@@ -204,7 +205,8 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
       }
       case I_MODULE: {
 	std::string name = s.pop_identifier();
-	Block code = s.pop_block();
+	Block code(NULL, NULL, NULL);
+	Block::tfr_ptr(s.pop_block(), code);
 
 	// XXX don't use def_target here, but something else?
 	bool already_exists = context->binding->def_target->has_constant(name);
@@ -280,10 +282,11 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	std::vector<RubyClass *> catches;
 	// I've heard the catches could even be Modules, but how?
 
-	Block main_clause = s.pop_block(), rescue_clause(NULL, NULL, NULL), else_clause(NULL, NULL, NULL), ensure_clause(NULL, NULL, NULL);
+	Block main_clause(NULL, NULL, NULL), rescue_clause(NULL, NULL, NULL), else_clause(NULL, NULL, NULL), ensure_clause(NULL, NULL, NULL);
+	Block::tfr_ptr(s.pop_block(), main_clause);
 
 	if (flags & E_RESCUE) {
-	  rescue_clause = s.pop_block();
+	  Block::tfr_ptr(s.pop_block(), rescue_clause);
 	  while (no_of_catches--) {
 	    RubyValue v = s.pop_value(context);
 	    RubyClass *c = v.get_special<RubyClass>();
@@ -296,10 +299,10 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	}
 
 	if (flags & E_ELSE)
-	  else_clause = s.pop_block();
+	  Block::tfr_ptr(s.pop_block(), else_clause);
 
 	if (flags & E_ENSURE)
-	  ensure_clause = s.pop_block();
+	  Block::tfr_ptr(s.pop_block(), ensure_clause);
 
 	bool handled = false;
 	try {

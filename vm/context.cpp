@@ -102,7 +102,7 @@ RubyValue Context::resolve_constant(const std::string &_identifier)
   return binding->def_target->resolve_constant(binding, _identifier, true);
 }
 
-RubyMethod *Context::get_method(const std::string &_name)
+const linked_ptr<RubyMethod> &Context::get_method(const std::string &_name)
 {
   return binding->context.get_method(binding, _name);
 }

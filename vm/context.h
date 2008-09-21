@@ -22,7 +22,7 @@ class Context
     Context(RubyEnvironment &, RubyValue, RubyModule *, Context *);
     Context(linked_ptr<Binding> &);
 
-    RubyMethod *get_method(const std::string &);
+    const linked_ptr<RubyMethod> &get_method(const std::string &);
 
     RubyValue entry_to_value(const Stack::StackEntry &);
     RubyValue resolve_local(const std::string &);

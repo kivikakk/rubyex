@@ -25,6 +25,15 @@ class Block
     Block(RubyModule *, Context *, Block *);
     ~Block();
 
+    // We have to use this ugly function since otherwise the assignment
+    // operator ends up with it killing off its own args.
+    // More idiomatic way exists, yes, but I'm a bit dim-witted tonight. TODO
+    static inline void tfr_ptr(Block *_block, Block &_dest) {
+      _dest = *_block;
+      _block->args.clear();
+      delete _block;
+    }
+
     RubyValue call(linked_ptr<Binding> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue);
     RubyValue call(Context *);

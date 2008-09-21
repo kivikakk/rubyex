@@ -29,11 +29,11 @@ void Stack::push_integer(int _integer)
   push(e);
 }
 
-void Stack::push_block(const Block &_block)
+void Stack::push_block(Block *_block)
 {
   StackEntry e;
   e.type = SE_BLOCK;
-  e.block = new Block(_block);
+  e.block = _block;
   push(e);
 }
 
@@ -78,12 +78,10 @@ int Stack::pop_integer()
   return pop_variant().integer;
 }
 
-Block Stack::pop_block()
+Block *Stack::pop_block()
 {
   StackEntry top = pop_variant();
-  Block block = *top.block;
-  delete top.block;
-  return block;
+  return top.block;
 }
 
 RubyObject *Stack::pop_object()

@@ -40,7 +40,7 @@ class Stack
     void push_identifier(const std::string &);
     void push_symbol(const std::string &);
     void push_integer(int);
-    void push_block(const Block &);
+    void push_block(Block *);
     void push_object(RubyObject *);
     void push(const StackEntry &);
 
@@ -48,7 +48,7 @@ class Stack
     std::string pop_identifier();
     std::string pop_symbol();
     int pop_integer();
-    Block pop_block();
+    Block *pop_block();
     RubyObject *pop_object();
 
     RubyValue pop_value(Context *);
