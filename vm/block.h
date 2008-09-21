@@ -34,6 +34,11 @@ class Block
       delete _block;
     }
 
+    bool can_take_args(int) const;
+
+    int normal_args() const;
+    int opt_args() const;
+
     RubyValue call(linked_ptr<Binding> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue);
     RubyValue call(Context *);

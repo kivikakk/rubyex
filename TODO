@@ -1,5 +1,4 @@
 Game plan:
- * optional arguments
  * IO
  * regexps -- oniguruma
  * attr_*
@@ -22,3 +21,4 @@ Shorter term problems:
  * if we `def a(b); end', then just `a' should raise an ArgumentError of not enough arguments
  * expand hash-style on end to hash last argument
  * optional argument def a(b=(anything; can(); go = here)) syntax needs to work
+ * finish fixing the edge cases when parser encounters syntax error causes memory leak (valgrind)

@@ -125,16 +125,18 @@ RubyBytecodeMethod::RubyBytecodeMethod(RubyModule *_def_target): code(_def_targe
 
 RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  if (!verify_args(code.args.size(), (int)_args.size()))
-    throw WorldException(_b, _b->environment.ArgumentError, args_error_message(code.args.size(), (int)_args.size()));
+  if (!code.can_take_args((int)_args.size()))
+    // This error message will be wrong. XXX
+    throw WorldException(_b, _b->environment.ArgumentError, "XXX: " + args_error_message(code.args.size(), (int)_args.size()));
   // _self is passed as the new context.
   return code.call(_b, _self, _args);
 }
 
 RubyValue RubyBytecodeMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block)
 {
-  if (!verify_args(code.args.size(), (int)_args.size()))
-    throw WorldException(_b, _b->environment.ArgumentError, "wrong number of arguments (XXX for XXX)");
+  if (!code.can_take_args((int)_args.size()))
+    // This error message will be wrong. XXX
+    throw WorldException(_b, _b->environment.ArgumentError, "XXX: " + args_error_message(code.args.size(), (int)_args.size()));
   return code.call(_b, _self, _args, _block);
 }
 

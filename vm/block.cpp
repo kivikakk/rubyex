@@ -13,6 +13,29 @@ Block::~Block() {
     delete *it;
 }
 
+bool Block::can_take_args(int _no) const {
+  _no -= normal_args();
+  if (_no < 0 || (_no > opt_args() && !has_splat))
+    return false;
+  return true;
+}
+
+int Block::normal_args() const {
+  int count = 0;
+  for (std::vector<BlockArg *>::const_iterator it = args.begin(); it != args.end(); ++it)
+    if (!(*it)->default_code)
+      ++count;
+  return count;
+}
+
+int Block::opt_args() const {
+  int count = 0;
+  for (std::vector<BlockArg *>::const_iterator it = args.begin(); it != args.end(); ++it)
+    if ((*it)->default_code)
+      ++count;
+  return count;
+}
+
 RubyValue Block::call(linked_ptr<Binding> &_b)
 { return call(_b, std::vector<RubyValue>()); }
 
@@ -107,12 +130,19 @@ void Block::assign_args(linked_ptr<Binding> &_b, Context *_c, const std::vector<
   if (given_args_to_add < this->args.size())
     for (unsigned int i = given_args_to_add; i < this->args.size(); ++i)
       _c->assign(this->args[i]->name, this->args[i]->default_code ? this->args[i]->default_code->call(_c, _b) : _b->environment.NIL);
+
+  if (has_splat) {
+    std::vector<RubyValue> splat;
+    for (unsigned int i = this->args.size(); i < _args.size(); ++i)
+      splat.push_back(_args[i]);
+    _c->assign(splat_name, O2V(_b->environment.gc.track(new RubyArray(_b->environment, splat))));
+  }
 }
 
 BlockArg::BlockArg(const std::string &_name): name(_name), default_code(NULL)
 { }
 
-BlockArg::BlockArg(Block *_parent, const std::string &_name, const std::string &_code) {
+BlockArg::BlockArg(Block *_parent, const std::string &_name, const std::string &_code): name(_name) {
   default_code = new Block(_parent->def_target, NULL /* taken at runtime */, NULL);
   default_code->code = _code;
 }
