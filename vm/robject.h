@@ -14,7 +14,7 @@ class RubyObject
     RubyObject(RubyClass *);
     virtual ~RubyObject();
 
-    void add_metaclass_method(RubyEnvironment &, const std::string &, RubyMethod *);
+    void add_metaclass_method(RubyEnvironment &, const std::string &, const linked_ptr<RubyMethod> &);
 
     void set_class(RubyClass *);
 

@@ -10,9 +10,9 @@ RubyValue range_inspect(linked_ptr<Binding> &, RubyValue);
 
 void RubyRangeEI::init(RubyEnvironment &_e) {
   RubyClass *rb_cRange = _e.gc.track(new RubyClass(_e, "Range"));
-  rb_cRange->add_method("initialize", new RubyMultiCMethod(
-    new RubyCMethod(range_initialize, 2),
-    new RubyCMethod(range_initialize_excl, 3)));
+  rb_cRange->add_method("initialize", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(range_initialize, 2)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(range_initialize_excl, 3)))));
   rb_cRange->add_method("each", RubyMethod::Create(range_each));
   rb_cRange->add_method("inspect", RubyMethod::Create(range_inspect));
   rb_cRange->add_method("to_s", RubyMethod::Create(range_inspect));

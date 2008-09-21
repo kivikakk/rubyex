@@ -32,17 +32,18 @@ const char SEPARATOR = '/';		// TODO: cross-platform?
 void RubyIOEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cIO = _e.gc.track(new RubyClass(_e, "IO"));
-  rb_cIO->add_metaclass_method(_e, "open",
-    new RubyMultiCMethod(
-      new RubyCMethod(io_open, ARGS_MINIMAL(1)),
-      new RubyCMethod(io_open_block, ARGS_MINIMAL(1))
-      ) );
+  rb_cIO->add_metaclass_method(_e, "open", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(io_open, ARGS_MINIMAL(1))),
+    linked_ptr<RubyCMethod>(new RubyCMethod(io_open_block, ARGS_MINIMAL(1))))));
 
-  rb_cIO->add_method("initialize", new RubyMultiCMethod(
-    new RubyCMethod(io_initialize_fd, 1), new RubyCMethod(io_initialize_fd_mode, 2)));
+  rb_cIO->add_method("initialize", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(io_initialize_fd, 1)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(io_initialize_fd_mode, 2)))));
 
   rb_cIO->add_method("write", RubyMethod::Create(io_write, 1));
-  rb_cIO->add_method("read", new RubyMultiCMethod(new RubyCMethod(io_read), new RubyCMethod(io_read_len, ARGS_MINIMAL(1))));
+  rb_cIO->add_method("read", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(io_read)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(io_read_len, ARGS_MINIMAL(1))))));
   rb_cIO->add_method("flush", RubyMethod::Create(io_flush));
   rb_cIO->add_method("close", RubyMethod::Create(io_close));
   rb_cIO->add_method("sync", RubyMethod::Create(io_sync));
@@ -52,7 +53,9 @@ void RubyIOEI::init(RubyEnvironment &_e)
   _e.IO = rb_cIO;
 
   RubyClass *rb_cFile = _e.gc.track(new RubyClass(_e, "File", rb_cIO));
-  rb_cFile->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(file_initialize_file, 1), new RubyCMethod(file_initialize_file_mode, 2)));
+  rb_cFile->add_method("initialize", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(file_initialize_file, 1)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(file_initialize_file_mode, 2)))));
   rb_cFile->set_constant("SEPARATOR", _e.get_string(std::string() + SEPARATOR));
   _e.set_global_by_name("File", rb_cFile);
   _e.File = rb_cFile;

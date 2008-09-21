@@ -20,8 +20,10 @@ void RubyArrayEI::init(RubyEnvironment &_e)
   RubyClass *rb_cArray = _e.gc.track<RubyClass>(new RubyClass(_e, "Array"));
   rb_cArray->add_metaclass_method(_e, "[]", RubyMethod::Create(array_new_idx, ARGS_ARBITRARY));
 
-  rb_cArray->add_method("initialize", new RubyMultiCMethod(
-    new RubyCMethod(array_initialize), new RubyCMethod(array_initialize_length, 1), new RubyCMethod(array_initialize_copies, 2)));
+  rb_cArray->add_method("initialize", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(array_initialize)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(array_initialize_length, 1)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(array_initialize_copies, 2)))));
 
   rb_cArray->add_method("[]", RubyMethod::Create(array_index_op, 1));
   rb_cArray->add_method("[]=", RubyMethod::Create(array_index_assign_op, 2));

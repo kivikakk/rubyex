@@ -10,6 +10,8 @@ class GarbageCollector
   public:
     GarbageCollector();
 
+    void empty();		// Warning?
+
     template <typename T> T *track(T *_object) {
       objects.push_back(_object);
       return _object;

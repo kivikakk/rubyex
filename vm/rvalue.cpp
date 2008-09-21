@@ -40,7 +40,7 @@ RubyClass *RubyValue::get_class(RubyEnvironment &_e) const {
 }
 
 // the inclusion of `environment' here as a parameter seems a cop-out
-RubyMethod *RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_name) const {
+const linked_ptr<RubyMethod> &RubyValue::get_method(linked_ptr<Binding> &_b, const std::string &_name) const {
   // We need to find a method by this name in our context. We go through the class's ::ancestors.
   // Tradition has it:
   // 	[MyMetaClass, [XXX more MetaClass related?],

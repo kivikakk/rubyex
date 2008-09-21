@@ -8,6 +8,8 @@ int main(int argc, char **argv)
 
   process(e, r, c, NULL);
 
+  delete c;
+
   return 0;
 }
 

@@ -19,7 +19,9 @@ RubyValue systemcallerror_initialize(linked_ptr<Binding> &, RubyValue, const std
 void RubyExceptionEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cException = _e.gc.track(new RubyClass(_e, "Exception"));
-  rb_cException->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(exception_initialize), new RubyCMethod(exception_initialize_message, 1)));
+  rb_cException->add_method("initialize", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(exception_initialize)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(exception_initialize_message, 1)))));
   rb_cException->add_method("message", RubyMethod::Create(exception_message));
   rb_cException->add_method("message=", RubyMethod::Create(exception_message_assign, 1));
   _e.set_global_by_name("Exception", rb_cException);
@@ -43,7 +45,7 @@ void RubyExceptionEI::init(RubyEnvironment &_e)
     DEF_EXCEPTION(SystemCallError, StandardError)
     DEF_EXCEPTION(TypeError, StandardError)
 
-  rb_cSystemCallError->add_method("initialize", new RubyCMethod(systemcallerror_initialize, 2));
+  rb_cSystemCallError->add_method("initialize", RubyMethod::Create(systemcallerror_initialize, 2));
 }
 
 RubyValue exception_initialize(linked_ptr<Binding> &_b, RubyValue _self) {

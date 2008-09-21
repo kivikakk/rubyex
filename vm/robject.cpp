@@ -13,7 +13,7 @@ RubyObject::RubyObject(RubyClass *_klass): klass(_klass), metaklass(NULL)
 RubyObject::~RubyObject()
 { }
 
-void RubyObject::add_metaclass_method(RubyEnvironment &_e, const std::string &_name, RubyMethod *_method)
+void RubyObject::add_metaclass_method(RubyEnvironment &_e, const std::string &_name, const linked_ptr<RubyMethod> &_method)
 {
   get_metaclass(_e)->add_method(_name, _method);
 }

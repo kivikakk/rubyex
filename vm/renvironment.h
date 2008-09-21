@@ -15,6 +15,7 @@ class RubyEnvironment
 {
   public:
     RubyEnvironment();
+    ~RubyEnvironment();
 
     bool global_exists(const std::string &) const;
     RubyValue get_global_by_name(const std::string &) const;

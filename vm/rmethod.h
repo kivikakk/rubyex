@@ -17,10 +17,10 @@ class RubyMethod
   public:
     virtual ~RubyMethod();
 
-    static RubyMethod *Create(RCMethodBlockNoArgs);
-    static RubyMethod *Create(RCMethodNoArgs);
-    static RubyMethod *Create(RCMethodBlockArgs, int);
-    static RubyMethod *Create(RCMethodArgs, int);
+    static linked_ptr<RubyMethod> Create(RCMethodBlockNoArgs);
+    static linked_ptr<RubyMethod> Create(RCMethodNoArgs);
+    static linked_ptr<RubyMethod> Create(RCMethodBlockArgs, int);
+    static linked_ptr<RubyMethod> Create(RCMethodArgs, int);
 
     static bool verify_args(int, int);
     static std::string args_error_message(int, int);
@@ -50,13 +50,13 @@ class RubyCMethod : public RubyMethod
 class RubyMultiCMethod : public RubyMethod
 {
   public:
-    RubyMultiCMethod(RubyCMethod *, RubyCMethod *);
-    RubyMultiCMethod(RubyCMethod *, RubyCMethod *, RubyCMethod *);
+    RubyMultiCMethod(const linked_ptr<RubyCMethod> &, const linked_ptr<RubyCMethod> &);
+    RubyMultiCMethod(const linked_ptr<RubyCMethod> &, const linked_ptr<RubyCMethod> &, const linked_ptr<RubyCMethod> &);
 
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
     RubyValue call(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &, Block &);
 
-    std::vector<RubyCMethod *> methods;
+    std::vector< linked_ptr<RubyCMethod> > methods;
 };
 
 class RubyBytecodeMethod : public RubyMethod

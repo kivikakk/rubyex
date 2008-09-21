@@ -12,7 +12,7 @@ class RubyClass : public RubyModule
     RubyClass(RubyEnvironment &, const std::string &, RubyClass *);
     RubyClass(RubyEnvironment &, const std::string &, RubyClass *, RubyModule *);
 
-    RubyMethod *find_method(const std::string &) const;
+    const linked_ptr<RubyMethod> &find_method(const std::string &) const;
     bool has_ancestor(RubyClass *) const;
 
     RubyObject *new_instance(RubyEnvironment &);

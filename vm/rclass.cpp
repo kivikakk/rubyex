@@ -16,7 +16,7 @@ RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name, RubyClass *_
 RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name, RubyClass *_superklass, RubyModule *_parent): RubyModule(_e.Class, _name, _parent), superklass(_superklass)
 { }
 
-RubyMethod *RubyClass::find_method(const std::string &_name) const
+const linked_ptr<RubyMethod> &RubyClass::find_method(const std::string &_name) const
 {
   // This function locates a method `_name' as when looking for
   // a method to run on an instance of this class. We use the following search path:

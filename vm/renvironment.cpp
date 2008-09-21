@@ -15,7 +15,10 @@
 
 RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 
-RubyEnvironment::RubyEnvironment()
+RubyEnvironment::RubyEnvironment():
+  Object(NULL), Module(NULL), Class(NULL),
+  _Binding(NULL), Symbol(NULL), Fixnum(NULL), Float(NULL), String(NULL),
+  Array(NULL), Hash(NULL), Range(NULL), IO(NULL), File(NULL)
 {
   this->Object = gc.track(new RubyClass(*this, "Object", NULL));	// Object<nil, NOT Object<Object(!!)
   this->Kernel = gc.track(new RubyModule(*this, "Kernel"));
@@ -69,6 +72,10 @@ RubyEnvironment::RubyEnvironment()
   main = gc.track(new RubyObject(this->Object));
   main->add_metaclass_method(*this, "to_s", RubyMethod::Create(main_to_s));
   main->add_metaclass_method(*this, "inspect", RubyMethod::Create(main_to_s));
+}
+
+RubyEnvironment::~RubyEnvironment() {
+  gc.empty();
 }
 
 RubyValue main_to_s(linked_ptr<Binding> &_b, RubyValue _self) {

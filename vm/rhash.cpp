@@ -19,7 +19,9 @@ void RubyHashEI::init(RubyEnvironment &_e)
   RubyClass *rb_cHash = _e.gc.track(new RubyClass(_e, "Hash"));
   rb_cHash->add_metaclass_method(_e, "[]", RubyMethod::Create(hash_new_idx, ARGS_ARBITRARY));
 
-  rb_cHash->add_method("initialize", new RubyMultiCMethod(new RubyCMethod(hash_initialize), new RubyCMethod(hash_initialize_default, ARGS_ARBITRARY)));
+  rb_cHash->add_method("initialize", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(hash_initialize)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(hash_initialize_default, ARGS_ARBITRARY)))));
   rb_cHash->add_method("[]", RubyMethod::Create(hash_index_op, 1));
   rb_cHash->add_method("[]=", RubyMethod::Create(hash_index_assign_op, 2));
   rb_cHash->add_method("each", RubyMethod::Create(hash_each));

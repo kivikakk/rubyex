@@ -6,17 +6,17 @@
 RubyMethod::~RubyMethod()
 { }
 
-RubyMethod *RubyMethod::Create(RCMethodBlockNoArgs _function)
-{ return new RubyCMethod(_function); }
+linked_ptr<RubyMethod> RubyMethod::Create(RCMethodBlockNoArgs _function)
+{ return linked_ptr<RubyMethod>(new RubyCMethod(_function)); }
 
-RubyMethod *RubyMethod::Create(RCMethodNoArgs _function)
-{ return new RubyCMethod(_function); }
+linked_ptr<RubyMethod> RubyMethod::Create(RCMethodNoArgs _function)
+{ return linked_ptr<RubyMethod>(new RubyCMethod(_function)); }
 
-RubyMethod *RubyMethod::Create(RCMethodBlockArgs _function, int _args)
-{ return new RubyCMethod(_function, _args); }
+linked_ptr<RubyMethod> RubyMethod::Create(RCMethodBlockArgs _function, int _args)
+{ return linked_ptr<RubyMethod>(new RubyCMethod(_function, _args)); }
 
-RubyMethod *RubyMethod::Create(RCMethodArgs _function, int _args)
-{ return new RubyCMethod(_function, _args); }
+linked_ptr<RubyMethod> RubyMethod::Create(RCMethodArgs _function, int _args)
+{ return linked_ptr<RubyMethod>(new RubyCMethod(_function, _args)); }
 
 bool RubyMethod::verify_args(int _base, int _their) {
   if (_base >= 0)
@@ -87,20 +87,20 @@ RubyValue RubyCMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std:
 
 // MultiCMethod
 
-RubyMultiCMethod::RubyMultiCMethod(RubyCMethod *_0, RubyCMethod *_1) {
+RubyMultiCMethod::RubyMultiCMethod(const linked_ptr<RubyCMethod> &_0, const linked_ptr<RubyCMethod> &_1) {
   methods.push_back(_0);
   methods.push_back(_1);
 }
 
-RubyMultiCMethod::RubyMultiCMethod(RubyCMethod *_0, RubyCMethod *_1, RubyCMethod *_2) {
+RubyMultiCMethod::RubyMultiCMethod(const linked_ptr<RubyCMethod> &_0, const linked_ptr<RubyCMethod> &_1, const linked_ptr<RubyCMethod> &_2) {
   methods.push_back(_0);
   methods.push_back(_1);
   methods.push_back(_2);
 }
 
 RubyValue RubyMultiCMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
-  for (std::vector<RubyCMethod *>::iterator it = methods.begin(); it != methods.end(); ++it) {
-    RubyCMethod *cm = *it;
+  for (std::vector< linked_ptr<RubyCMethod> >::iterator it = methods.begin(); it != methods.end(); ++it) {
+    linked_ptr<RubyCMethod> &cm = *it;
     if (verify_args(cm->no_of_args, _args.size()) && !cm->has_block)
       return cm->call(_b, _self, _args);
   }
@@ -109,8 +109,8 @@ RubyValue RubyMultiCMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const
 }
 
 RubyValue RubyMultiCMethod::call(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args, Block &_block) {
-  for (std::vector<RubyCMethod *>::iterator it = methods.begin(); it != methods.end(); ++it) {
-    RubyCMethod *cm = *it;
+  for (std::vector< linked_ptr<RubyCMethod> >::iterator it = methods.begin(); it != methods.end(); ++it) {
+    linked_ptr<RubyCMethod> &cm = *it;
     if (verify_args(cm->no_of_args, _args.size()) && cm->has_block)
       return cm->call(_b, _self, _args, _block);
   }

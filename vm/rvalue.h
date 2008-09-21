@@ -27,7 +27,7 @@ class RubyValue
     static RubyValue from_object(RubyObject *);
 
     RubyClass *get_class(RubyEnvironment &) const;
-    RubyMethod *get_method(linked_ptr<Binding> &, const std::string &) const;
+    const linked_ptr<RubyMethod> &get_method(linked_ptr<Binding> &, const std::string &) const;
 
     bool has_instance(const std::string &) const;
     RubyValue get_instance(const std::string &) const;

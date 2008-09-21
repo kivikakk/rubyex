@@ -13,7 +13,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
   while (true) {
     instruction_t in = r.read_instruction();
-    if (!in || r.eof())
+    if (r.eof() || !in)
       break;
 
     switch (in) {
@@ -92,7 +92,7 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 
 	uint32 arg_count = r.read_uint32();
 	while (arg_count--)
-	  block.args.push_back(r.read_string());
+	  block.args.push_back(new BlockArg(r.read_string()));
 
 	uint32 byte_count = r.read_uint32();
 	block.code = r.read_bytes(byte_count);
@@ -114,16 +114,23 @@ RubyValue process(RubyEnvironment &e, Reader &r, Context *context, Block *yield_
 	  bool has_splat_arg = r.read_bool();
 
 	  while (normal_args--)
-	    method->code.args.push_back(r.read_string());
+	    method->code.args.push_back(new BlockArg(r.read_string()));
 
-	  //while (arg_count--)
-	    //method->code.args.push_back(r.read_string());
+	  while (opt_args--) {
+	    std::string varname = r.read_string();
+	    method->code.args.push_back(new BlockArg(&method->code, varname, r.read_bytes(r.read_uint32())));
+	  }
+
+	  if (has_splat_arg) {
+	    method->code.has_splat = true;
+	    method->code.splat_name = r.read_string();
+	  }
 	}
 	
 	uint32 byte_count = r.read_uint32();
 	method->code.code = r.read_bytes(byte_count);
 
-	context->binding->def_target->def_method(name, method);
+	context->binding->def_target->def_method(name, linked_ptr<RubyMethod>(method));
 	break;
       }
       case I_YIELD: {

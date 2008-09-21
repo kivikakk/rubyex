@@ -31,7 +31,9 @@ RubyValue kernel_backtick(linked_ptr<Binding> &, RubyValue, const std::vector<Ru
 void RubyKernelEI::init(RubyEnvironment &_e)
 {
   _e.Kernel->add_module_method(_e, "require", RubyMethod::Create(kernel_require, 1));
-  _e.Kernel->add_module_method(_e, "load", new RubyMultiCMethod(new RubyCMethod(kernel_load_file, 1), new RubyCMethod(kernel_load_file_wrap, 2)));
+  _e.Kernel->add_module_method(_e, "load", linked_ptr<RubyMethod>(new RubyMultiCMethod(
+    linked_ptr<RubyCMethod>(new RubyCMethod(kernel_load_file, 1)),
+    linked_ptr<RubyCMethod>(new RubyCMethod(kernel_load_file_wrap, 2)))));
 
   _e.Kernel->add_module_method(_e, "binding", RubyMethod::Create(kernel_binding));
   _e.Kernel->add_module_method(_e, "eval", RubyMethod::Create(kernel_eval, ARGS_ARBITRARY));
