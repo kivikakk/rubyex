@@ -325,7 +325,7 @@ int FuncDefList::opt_args() const {
 
 bool FuncDefList::has_splat_arg() const {
   for (std::list<FuncDefListEntity *>::const_reverse_iterator it = args.rbegin(); it != args.rend(); ++it)
-    if ((*it)->default_value)
+    if ((*it)->is_catch_all)
       return true;
     else
       return false;
