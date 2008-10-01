@@ -84,7 +84,7 @@
 
 <regex>[^\\/]+	{ string_buf += yytext; }
 <regex>\\\/	{ string_buf += '/'; }
-<regex>\\[^/]	{ string_buf += yytext[1]; }
+<regex>\\[^/]	{ string_buf += yytext; /* This should only add \ for things which need it, like `.', etc. */ }
 
 \"			{
 		  string_buf = "";
