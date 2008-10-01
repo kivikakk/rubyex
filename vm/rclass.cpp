@@ -6,6 +6,7 @@
 #include "rarray.h"
 #include "rhash.h"
 #include "rio.h"
+#include "rregexp.h"
 
 RubyClass::RubyClass(RubyEnvironment &_e, const std::string &_name): RubyModule(_e, _e.Class, _name), superklass(_e.Object)
 { }
@@ -70,6 +71,8 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return _e.gc.track(new RubyHash(_e));
   else if (has_ancestor(_e.IO))
     return _e.gc.track(new RubyIO(_e));
+  else if (has_ancestor(_e.Regexp))
+    return _e.gc.track(new RubyRegexp(_e));
   else
     return _e.gc.track(new RubyObject(this));
 } 

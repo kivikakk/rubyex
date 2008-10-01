@@ -16,10 +16,14 @@ class RubyRegexpEI : public RubyEnvironmentInitializer
 class RubyRegexp : public RubyObject
 {
   public:
-    RubyRegexp(RubyEnvironment &, const std::string &);
+    RubyRegexp(RubyEnvironment &);
+    RubyRegexp(linked_ptr<Binding> &, const std::string &);
     virtual ~RubyRegexp();
+
+    void initialize(linked_ptr<Binding> &, const std::string &);
     
     regex_t *reg;
+    std::string phrase;
 };
 
 #endif
