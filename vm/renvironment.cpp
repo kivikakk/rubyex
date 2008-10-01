@@ -9,6 +9,7 @@
 #include "rarray.h"
 #include "rhash.h"
 #include "rrange.h"
+#include "rregexp.h"
 #include "rexception.h"
 #include "rio.h"
 #include "global.h"
@@ -18,7 +19,8 @@ RubyValue main_to_s(linked_ptr<Binding> &, RubyValue);
 RubyEnvironment::RubyEnvironment():
   Object(NULL), Module(NULL), Class(NULL),
   _Binding(NULL), Symbol(NULL), Fixnum(NULL), Float(NULL), String(NULL),
-  Array(NULL), Hash(NULL), Range(NULL), IO(NULL), File(NULL)
+  Array(NULL), Hash(NULL), Range(NULL), IO(NULL), File(NULL),
+  Regexp(NULL)
 {
   this->Object = gc.track(new RubyClass(*this, "Object", NULL));	// Object<nil, NOT Object<Object(!!)
   this->Kernel = gc.track(new RubyModule(*this, "Kernel"));
@@ -56,6 +58,7 @@ RubyEnvironment::RubyEnvironment():
   RubyArrayEI().init(*this);
   RubyHashEI().init(*this);
   RubyRangeEI().init(*this);
+  RubyRegexpEI().init(*this);
 
   RubyIOEI().init(*this);
   RubyExceptionEI().init(*this);

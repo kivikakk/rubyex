@@ -1,5 +1,5 @@
 CXXFLAGS := -I. -I../include -g -Wall -DNO_MEMBER_TEMPLATES
-LDFLAGS := 
+LDFLAGS := -lonig
 
 CPPS := $(wildcard *.cpp)
 CXXS := $(wildcard *.cxx)
