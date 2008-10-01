@@ -4,6 +4,7 @@
 int context_depths = 0, context_lines = 0;
 
 bool string_lit_rs = false, backtick_lit_rs = false;
+bool regex_lexing = false;
 
 void restart_string_literal() {
   string_lit_rs = true;
@@ -11,6 +12,10 @@ void restart_string_literal() {
 
 void restart_backtick_literal() {
   backtick_lit_rs = true;
+}
+
+void begin_regex_lexing() {
+  regex_lexing = true;
 }
 
 void enter_context() {

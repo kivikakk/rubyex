@@ -14,7 +14,7 @@
 %s could_be_starting_block_args
 %s block_args
 
-%x dbstr sstr interpolate_begin backtickstr
+%x dbstr sstr regex interpolate_begin backtickstr
 
 %{
   std::string string_buf;
@@ -66,9 +66,25 @@
     } else if (backtick_lit_rs) {
       backtick_lit_rs = false;
       string_buf = ""; BEGIN(backtickstr);
+    } else if (regex_lexing) {
+      regex_lexing = false;
+      string_buf = "";
+      doing_symbol = false;
+      yy_push_state(regex);
     }
 
 #[^\n]*		{ }
+
+
+<regex>\/		{
+		  yy_pop_state();
+		  yylval.regex_literal = new StringLiteralExpr(string_buf);
+		  return REGEX;
+		}
+
+<regex>[^\\/]+	{ string_buf += yytext; }
+<regex>\\\/	{ string_buf += '/'; }
+<regex>\\[^/]	{ string_buf += yytext[1]; }
 
 \"			{
 		  string_buf = "";

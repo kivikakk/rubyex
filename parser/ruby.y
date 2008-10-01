@@ -31,6 +31,7 @@
 %token <floating_literal> FLOATING_LITERAL
 %token <boolean_literal> BOOLEAN_LITERAL
 %token <nil_literal> NIL_LITERAL
+%token <regex_literal> REGEX
 %token <yield> YIELD
 
 %type <expr> line expr compiled_expr expr_nob
@@ -87,7 +88,7 @@
 %left '[' ']'
 
 // Collected these by seeing what things are allocated with `new' in ruby.l and finding the symbols they return.
-%destructor { delete $$; } IDENTIFIER FUNCTION_CALL INTEGER_LITERAL STRING_LITERAL BACKTICK_LITERAL FLOATING_LITERAL BOOLEAN_LITERAL NIL_LITERAL SYMBOL INDEX_CALL /*
+%destructor { delete $$; } IDENTIFIER FUNCTION_CALL INTEGER_LITERAL STRING_LITERAL REGEX BACKTICK_LITERAL FLOATING_LITERAL BOOLEAN_LITERAL NIL_LITERAL SYMBOL INDEX_CALL /*
     */ expr funccall exprlist funcdeflist funcdeflistentity deflist idlist hashlist block funcdef conditional if_otherwise while_loop sub_line interpolated_string /*
     */ interpolated_backtick_string begin_section opt_rescue opt_rescue_else opt_rescue_ensure classdef moduledef
 
@@ -112,6 +113,7 @@ expr:		expr_nob				{ $$ = $1; }
 	      | '(' expr ')'				{ $$ = $2; }
 ;
 
+  /* no brackets */
 expr_nob:      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | YIELD exprlist				{ $$ = new YieldExpr($2); }
 	      | YIELD '(' opt_exprlist ')'		{ $$ = new YieldExpr($3); }
@@ -151,6 +153,7 @@ expr_nob:      	YIELD					{ $$ = new YieldExpr(NULL); }
 	      | expr '-' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("-"), new ExprList($3), NULL); }
 	      | expr '*' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("*"), new ExprList($3), NULL); }
 	      | expr '/' expr				{ $$ = new FuncCallExpr($1, new IdentifierExpr("/"), new ExprList($3), NULL); }
+	      | '/' { begin_regex_lexing(); } REGEX	{ $$ = new FuncCallExpr(new IdentifierExpr("Regex"), new IdentifierExpr("new"), new ExprList($3), NULL); }
 	      | '-' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("-@"), NULL, NULL); }
 	      | '~' expr %prec NEG			{ $$ = new FuncCallExpr($2, new IdentifierExpr("~"), NULL, NULL); }
 	      | '!' expr %prec NEG			{ $$ = new FalsityExpr($2); }

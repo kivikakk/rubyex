@@ -22,7 +22,7 @@ typedef union {
   IdListExpr *idlist;
   BlockExpr *block;
 
-  StringLiteralExpr *string_literal;
+  StringLiteralExpr *string_literal, *regex_literal;
   IntegerLiteralExpr *integer_literal;
   FloatingLiteralExpr *floating_literal;
   BooleanLiteralExpr *boolean_literal;
@@ -51,12 +51,15 @@ typedef union {
 extern int context_depths, context_lines;
 extern bool string_lit_rs;
 extern bool backtick_lit_rs;
+extern bool regex_lexing;
 
 void restart_string_literal();
 void restart_backtick_literal();
 void enter_context(); void enter_context_line();
 void exit_context(); void exit_context_line();
 bool in_context();
+
+void begin_regex_lexing();
 
 // in ruby.l
 void destroy_current_buffer();
