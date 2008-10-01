@@ -2,6 +2,7 @@
 #include <sstream>
 
 RubyValue regexp_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue regexp_match(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue regexp_inspect(linked_ptr<Binding> &, RubyValue);
 
 void RubyRegexpEI::init(RubyEnvironment &_e)
@@ -9,6 +10,7 @@ void RubyRegexpEI::init(RubyEnvironment &_e)
   RubyClass *rb_cRegexp = _e.gc.track<RubyClass>(new RubyClass(_e, "Regexp"));
 
   rb_cRegexp->add_method("initialize", RubyMethod::Create(regexp_initialize, 1));
+  rb_cRegexp->add_method("match", RubyMethod::Create(regexp_match, 1));
   rb_cRegexp->add_method("inspect", RubyMethod::Create(regexp_inspect));
 
   _e.set_global_by_name("Regexp", rb_cRegexp);
@@ -19,6 +21,17 @@ RubyValue regexp_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std:
   RubyRegexp *exp = _self.get_special<RubyRegexp>();
   exp->initialize(_b, _args[0].get_string());
   return _b->environment.NIL;
+}
+
+RubyValue regexp_match(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  RubyRegexp *exp = _self.get_special<RubyRegexp>();
+  const std::string &str = _args[0].get_string();
+
+  int result = onig_match(	exp->reg, (UChar *)str.c_str(), (UChar *)str.c_str() + str.size(),
+				(UChar *)str.c_str(), NULL /* XXX: MatchData */, 0);
+  if (result == ONIG_MISMATCH)
+    return _b->environment.NIL;
+  return _b->environment.TRUE;	/* XXX CONTINUE here! */
 }
 
 RubyValue regexp_inspect(linked_ptr<Binding> &_b, RubyValue _self) {
