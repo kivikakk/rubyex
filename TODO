@@ -1,6 +1,5 @@
 Game plan:
- * IO
- * regexps -- oniguruma
+ * finish regexps (interpol in r.e. literal)
  * attr_*
  * *_eval
  * MRI compatibility layer
