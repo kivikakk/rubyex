@@ -5,6 +5,9 @@ RubyValue regexp_initialize(linked_ptr<Binding> &, RubyValue, const std::vector<
 RubyValue regexp_match(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
 RubyValue regexp_inspect(linked_ptr<Binding> &, RubyValue);
 
+RubyValue match_data_index_op(linked_ptr<Binding> &, RubyValue, const std::vector<RubyValue> &);
+RubyValue match_data_captures(linked_ptr<Binding> &, RubyValue);
+
 void RubyRegexpEI::init(RubyEnvironment &_e)
 {
   RubyClass *rb_cRegexp = _e.gc.track<RubyClass>(new RubyClass(_e, "Regexp"));
@@ -15,6 +18,14 @@ void RubyRegexpEI::init(RubyEnvironment &_e)
 
   _e.set_global_by_name("Regexp", rb_cRegexp);
   _e.Regexp = rb_cRegexp;
+
+  RubyClass *rb_cMatchData = _e.gc.track<RubyClass>(new RubyClass(_e, "MatchData"));
+
+  rb_cMatchData->add_method("[]", RubyMethod::Create(match_data_index_op, 1));
+  rb_cMatchData->add_method("captures", RubyMethod::Create(match_data_captures));
+
+  _e.set_global_by_name("MatchData", rb_cMatchData);
+  _e.MatchData = rb_cMatchData;
 }
 
 RubyValue regexp_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
@@ -26,12 +37,25 @@ RubyValue regexp_initialize(linked_ptr<Binding> &_b, RubyValue _self, const std:
 RubyValue regexp_match(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
   RubyRegexp *exp = _self.get_special<RubyRegexp>();
   const std::string &str = _args[0].get_string();
+  OnigRegion *mr = onig_region_new();
 
   int result = onig_match(	exp->reg, (UChar *)str.c_str(), (UChar *)str.c_str() + str.size(),
-				(UChar *)str.c_str(), NULL /* XXX: MatchData */, 0);
+				(UChar *)str.c_str(), mr, 0);
   if (result == ONIG_MISMATCH)
     return _b->environment.NIL;
-  return _b->environment.TRUE;	/* XXX CONTINUE here! */
+
+  // .. I probably need to use this: onig_capture_tree_traverse
+
+  // Are these two arrays?!
+  std::cout << "allocated: " << mr->allocated << "; num_regs: " << mr->num_regs << std::endl;
+  std::cout << "region start; " << mr->beg << " (=" << *mr->beg << ")" << std::endl;
+  std::cout << "region end; " << mr->end << " (=" << *mr->end << ")" << std::endl;
+
+  onig_region_free(mr, 1);
+
+  RubyObject *md = _b->environment.MatchData->new_instance(_b->environment);
+  // TODO CONTINUE here!
+  return O2V(md);
 }
 
 RubyValue regexp_inspect(linked_ptr<Binding> &_b, RubyValue _self) {
@@ -47,6 +71,14 @@ RubyValue regexp_inspect(linked_ptr<Binding> &_b, RubyValue _self) {
       oss << phrase[i];
   oss << '/';
   return _b->environment.get_string(oss.str());
+}
+
+RubyValue match_data_index_op(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args) {
+  return _b->environment.NIL;
+}
+
+RubyValue match_data_captures(linked_ptr<Binding> &_b, RubyValue _self) {
+  return _b->environment.NIL;
 }
 
 RubyRegexp::RubyRegexp(RubyEnvironment &_e): RubyObject(_e.Regexp)
