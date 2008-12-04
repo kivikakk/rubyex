@@ -26,5 +26,20 @@ class RubyRegexp : public RubyObject
     std::string phrase;
 };
 
+typedef struct ruby_match_region {
+  std::string data;
+  int beg, end;
+} ruby_match_region_t;
+
+class RubyMatchData : public RubyObject
+{
+  public:
+    RubyMatchData(RubyEnvironment &);
+
+    void add_region(const std::string &, int, int);
+
+    std::vector<ruby_match_region_t> regions;
+};
+
 #endif
 

@@ -2,7 +2,8 @@
 
 Dir["test_*.rb"].each do |test|
   test_name = test[5...-3]
-  print "`#{test_name}':\t"
+  print (s = "`#{test_name}':")
+  print " " * (30 - s.length)
   mri_output = `ruby #{test} 2>/dev/null`
   rx_output = `../ruby/ruby #{test} 2>/dev/null`
   puts mri_output == rx_output ? "success" : "failure!"

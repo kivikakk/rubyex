@@ -73,6 +73,8 @@ RubyObject *RubyClass::new_instance(RubyEnvironment &_e)
     return _e.gc.track(new RubyIO(_e));
   else if (has_ancestor(_e.Regexp))
     return _e.gc.track(new RubyRegexp(_e));
+  else if (has_ancestor(_e.MatchData))
+    return _e.gc.track(new RubyMatchData(_e));
   else
     return _e.gc.track(new RubyObject(this));
 } 
