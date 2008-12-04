@@ -6,10 +6,22 @@
 
 // may be platform specific
 #include <arpa/inet.h>
+#ifndef HTONL
 #define HTONL(i) htonl(i)
+#endif
+
+#ifndef NTOHL
 #define NTOHL(i) ntohl(i)
+#endif
+
+#ifndef HTONS
 #define HTONS(i) htons(i)
+#endif
+
+#ifndef NTOHS
 #define NTOHS(i) ntohs(i)
+#endif
+
 typedef unsigned char uint8;
 typedef unsigned long uint32;
 typedef long int32;

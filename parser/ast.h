@@ -7,6 +7,7 @@
 #include <map>
 #include "pretty.h"
 #include "emitter.h"
+#include "os.h"
 
 class Expr : public PrettyPrint, public Emitter
 {
