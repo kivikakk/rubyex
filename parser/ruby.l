@@ -14,10 +14,10 @@
 %s could_be_starting_block_args
 %s block_args
 
-%x dbstr sstr regex interpolate_begin backtickstr
+%x dbstr sstr regex interpolate_begin backtickstr here_document
 
 %{
-  std::string string_buf;
+  std::string string_buf, here_doc;
   bool doing_symbol = false;
 
   typedef struct {
@@ -285,6 +285,17 @@ end			{
 \|\|		{ return LOGICAL_OR; }
 \*\*		{ return EXP; }
 
+\<\<[a-zA-Z_0-9]+$	{ yy_push_state(here_document); here_doc = yytext + 2; string_buf = ""; }
+<here_document>^.+$		{
+			  if (yytext == here_doc) {
+			    yy_pop_state();
+			    yylval.string_literal = new StringLiteralExpr(string_buf);
+			    return STRING_LITERAL;
+			  } else {
+			    string_buf += yytext;
+			    string_buf += '\n';
+			  }
+			}
 
 		/* There's gotta be a more succint way to do these. */
 
