@@ -19,6 +19,7 @@
 %{
   std::string string_buf, here_doc;
   bool doing_symbol = false;
+  bool hyphen_here = false;
 
   typedef struct {
     const char *identifier;
@@ -285,9 +286,15 @@ end			{
 \|\|		{ return LOGICAL_OR; }
 \*\*		{ return EXP; }
 
-\<\<[a-zA-Z_0-9]+$	{ yy_push_state(here_document); here_doc = yytext + 2; string_buf = ""; }
+\<\<[a-zA-Z_0-9]+$	{ yy_push_state(here_document); here_doc = yytext + 2; string_buf = ""; hyphen_here = false; }
+\<\<-[a-zA-Z_0-9]+$	{ yy_push_state(here_document); here_doc = yytext + 3; string_buf = ""; hyphen_here = true; }
 <here_document>^.+$		{
-			  if (yytext == here_doc) {
+			  const char *yytext_check = yytext;
+			  if (hyphen_here) 
+			    while (*yytext_check == ' ' || *yytext_check == '\t')
+			      ++yytext_check;
+
+			  if (yytext_check == here_doc) {
 			    yy_pop_state();
 			    yylval.string_literal = new StringLiteralExpr(string_buf);
 			    return STRING_LITERAL;
