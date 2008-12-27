@@ -48,8 +48,8 @@ RubyValue regexp_match(linked_ptr<Binding> &_b, RubyValue _self, const std::vect
   const std::string &str = _args[0].get_string();
   OnigRegion *mr = onig_region_new();
 
-  int result = onig_match(	exp->reg, (UChar *)str.c_str(), (UChar *)str.c_str() + str.size(),
-				(UChar *)str.c_str(), mr, 0);
+  int result = onig_search(	exp->reg, (UChar *)str.c_str(), (UChar *)str.c_str() + str.size(),
+				(UChar *)str.c_str(), (UChar *)str.c_str() + str.size(), mr, 0);
   if (result == ONIG_MISMATCH)
     return _b->environment.NIL;
 
