@@ -44,13 +44,13 @@ void Emitter::emit_uint8(std::ostream &o, uint8 i)
 
 void Emitter::emit_uint32(std::ostream &o, uint32 i)
 {
-  uint32 conv = HTONL(i);
+  uint32 conv = htonl(i);
   o.write((char *)&conv, sizeof(uint32));
 }
 
 void Emitter::emit_int32(std::ostream &o, int32 i)
 {
-  uint32 conv = HTONL((uint32)i);
+  uint32 conv = htonl((uint32)i);
   o.write((char *)&conv, sizeof(uint32));
 }
 

@@ -133,7 +133,7 @@ RubyValue string_capitalize(linked_ptr<Binding> &_b, RubyValue _self)
 
 RubyValue string_index(linked_ptr<Binding> &_b, RubyValue _self, const std::vector<RubyValue> &_args)
 {
-  unsigned int i = _self.get_string().find(_args[0].get_string());
+  auto i = _self.get_string().find(_args[0].get_string());
   if (i == std::string::npos)
     return _b->environment.NIL;
   return F2V(i);
